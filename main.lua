@@ -254,7 +254,9 @@ function FoxnameUI:CreateWindow(cfg)
 
     local main = mk("Frame", {
         Parent = gui, Size = cfg.Size or UDim2.fromOffset(680, 460), Position = UDim2.fromScale(0.5, 0.5),
-        AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,`n        ClipsDescendants = true,`n    })
+        AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,
+        ClipsDescendants = true,
+    })
     mk("UICorner", {Parent = main, CornerRadius = UDim.new(0, 14)})
     mk("UIStroke", {Parent = main, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
 
@@ -291,7 +293,9 @@ function FoxnameUI:CreateWindow(cfg)
 
     local tabButtons = mk("Frame", {
         Parent = main, Size = UDim2.new(0, 168, 1, -46), Position = UDim2.new(0, 0, 0, 46),
-        BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,`n        ClipsDescendants = true,`n    })
+        BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
+        ClipsDescendants = true,
+    })
     local btnList = mk("UIListLayout", {Parent = tabButtons, Padding = UDim.new(0, 7)})
     btnList.SortOrder = Enum.SortOrder.LayoutOrder
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
@@ -403,6 +407,7 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
+
 
 
 
