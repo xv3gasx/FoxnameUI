@@ -103,6 +103,18 @@ end
 local function CreateElements(theme)
     local Elements = {}
     local activeKeybindCapture = nil
+    local function addDesc(parent, text, top, iconOffset)
+        if type(text) ~= "string" or text == "" then return 0 end
+        local y = top or 34
+        local d = mk("TextLabel", {
+            Parent = parent, BackgroundTransparency = 1,
+            Position = UDim2.new(0, iconOffset or 0, 0, y),
+            Size = UDim2.new(1, -(iconOffset or 0), 0, 14),
+            TextXAlignment = Enum.TextXAlignment.Left, Text = text,
+            TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 11,
+        })
+        return d.AbsoluteSize.Y > 0 and 16 or 16
+    end
 
     function Elements:Section(parent, cfg)
         local label = mk("TextLabel", {
@@ -129,9 +141,10 @@ local function CreateElements(theme)
     end
 
     function Elements:Button(parent, cfg)
+        local extra = (cfg.Description and cfg.Description ~= "") and 16 or 0
         local b = mk("TextButton", {
             Parent = parent,
-            Size = UDim2.new(1, 0, 0, 34),
+            Size = UDim2.new(1, 0, 0, 34 + extra),
             BackgroundColor3 = theme.Surface2,
             BorderSizePixel = 0,
             Text = "",
@@ -154,6 +167,7 @@ local function CreateElements(theme)
         })
 
         attachIcon(b, cfg.Icon, theme.Text)
+        addDesc(b, cfg.Description, 20, 10)
 
         b.MouseEnter:Connect(function()
             tween(b, 0.12, {BackgroundColor3 = theme.Surface3})
@@ -170,9 +184,10 @@ local function CreateElements(theme)
     end
 
     function Elements:Toggle(parent, cfg)
+        local extra = (cfg.Description and cfg.Description ~= "") and 16 or 0
         local state = cfg.Value == true
         local btn = mk("TextButton", {
-            Parent = parent, Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = theme.Surface2,
+            Parent = parent, Size = UDim2.new(1, 0, 0, 36 + extra), BackgroundColor3 = theme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
@@ -184,9 +199,10 @@ local function CreateElements(theme)
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         attachIcon(btn, cfg.Icon, theme.Text)
+        addDesc(btn, cfg.Description, 21, 12)
 
         local rail = mk("Frame", {
-            Parent = btn, Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -42, 0.5, -9), BorderSizePixel = 0,
+            Parent = btn, Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -42, 0, 9), BorderSizePixel = 0,
             BackgroundColor3 = state and theme.Accent or theme.Border,
         })
         mk("UICorner", {Parent = rail, CornerRadius = UDim.new(1, 0)})
@@ -220,7 +236,8 @@ local function CreateElements(theme)
     end
 
     function Elements:Input(parent, cfg)
-        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 56), BackgroundTransparency = 1})
+        local extra = (cfg.Description and cfg.Description ~= "") and 16 or 0
+        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 56 + extra), BackgroundTransparency = 1})
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
@@ -230,9 +247,10 @@ local function CreateElements(theme)
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, 1, 30) end
+        addDesc(holder, cfg.Description, 18, hasIcon and 30 or 0)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 0, 0, 24), Size = UDim2.new(1, 0, 0, 30),
+            Parent = holder, Position = UDim2.new(0, 0, 0, 24 + extra), Size = UDim2.new(1, 0, 0, 30),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -252,7 +270,8 @@ local function CreateElements(theme)
         local max = cfg.Max or 100
         local value = cfg.Default or min
 
-        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 58), BackgroundTransparency = 1})
+        local extra = (cfg.Description and cfg.Description ~= "") and 16 or 0
+        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 58 + extra), BackgroundTransparency = 1})
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
@@ -265,9 +284,10 @@ local function CreateElements(theme)
         if hasIcon then
             attachIcon(holder, cfg.Icon, theme.Text, 1, 30)
         end
+        addDesc(holder, cfg.Description, 18, hasIcon and 30 or 0)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 0, 0, 32), Size = UDim2.new(1, 0, 0, 16),
+            Parent = holder, Position = UDim2.new(0, 0, 0, 32 + extra), Size = UDim2.new(1, 0, 0, 16),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
             ZIndex = 1,
         })
@@ -520,10 +540,21 @@ function FoxnameUI:Notify(cfg)
         Text = cfg.Content or "...", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Theme.MutedText,
         TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true,
     })
+    local progressBg = mk("Frame", {
+        Parent = card, Position = UDim2.new(0, 10, 1, -8), Size = UDim2.new(1, -20, 0, 3),
+        BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0,
+    })
+    mk("UICorner", {Parent = progressBg, CornerRadius = UDim.new(1, 0)})
+    local progress = mk("Frame", {
+        Parent = progressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Theme.Accent, BorderSizePixel = 0,
+    })
+    mk("UICorner", {Parent = progress, CornerRadius = UDim.new(1, 0)})
     tween(card, 0.2, {Position = UDim2.new(1, 0, 1, 0)})
-    task.delay(cfg.Duration or 3, function()
-        tween(card, 0.2, {Position = UDim2.new(1, 320, 1, 0)})
-        task.wait(0.22)
+    local duration = cfg.Duration or 3
+    tween(progress, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear)
+    task.delay(duration, function()
+        tween(card, 0.18, {Position = UDim2.new(1, 320, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quad)
+        task.wait(0.2)
         if card and card.Parent then card:Destroy() end
     end)
 end
@@ -533,8 +564,11 @@ function FoxnameUI:CreateWindow(cfg)
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
     local gui = mk("ScreenGui", {Name = "FoxnameUI", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
 
+    local defaultSize = cfg.DefaultSize or cfg.Size or UDim2.fromOffset(680, 460)
+    local minSize = cfg.MinSize or UDim2.fromOffset(520, 340)
+    local maxSize = cfg.MaxSize or UDim2.fromOffset(980, 700)
     local main = mk("Frame", {
-        Parent = gui, Size = cfg.Size or UDim2.fromOffset(680, 460), Position = UDim2.fromScale(0.5, 0.5),
+        Parent = gui, Size = defaultSize, Position = UDim2.fromScale(0.5, 0.5),
         AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,
         ClipsDescendants = true,
     })
@@ -572,8 +606,13 @@ function FoxnameUI:CreateWindow(cfg)
     local openCfg = cfg.OpenButton or {}
     local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
     local openVisible = not (openCfg.OnlyMobile == true and not isMobile)
+    local openDefault = openCfg.DefaultSize or UDim2.fromOffset(44, 44)
+    local openMin = openCfg.MinSize or UDim2.fromOffset(36, 30)
+    local openMax = openCfg.MaxSize or UDim2.fromOffset(140, 60)
+    local openW = math.clamp(openDefault.X.Offset, openMin.X.Offset, openMax.X.Offset)
+    local openH = math.clamp(openDefault.Y.Offset, openMin.Y.Offset, openMax.Y.Offset)
     local openBtn = mk("TextButton", {
-        Parent = gui, Size = UDim2.fromOffset(44, 44), Position = UDim2.new(0, 20, 0.5, -22),
+        Parent = gui, Size = UDim2.fromOffset(openW, openH), Position = UDim2.new(0, 20, 0.5, -22),
         BackgroundColor3 = Theme.Accent, Text = "=", TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold, TextSize = 18, Visible = false, BorderSizePixel = 0, AutoButtonColor = false,
     })
@@ -582,16 +621,19 @@ function FoxnameUI:CreateWindow(cfg)
     local shape = tostring(openCfg.Shape or "Circle")
     local corner = mk("UICorner", {Parent = openBtn, CornerRadius = UDim.new(1, 0)})
     if shape == "Pill" then
-        openBtn.Size = openCfg.Size or UDim2.fromOffset(86, 34)
+        local s = openCfg.Size or UDim2.fromOffset(86, 34)
+        openBtn.Size = UDim2.fromOffset(math.clamp(s.X.Offset, openMin.X.Offset, openMax.X.Offset), math.clamp(s.Y.Offset, openMin.Y.Offset, openMax.Y.Offset))
         corner.CornerRadius = UDim.new(0, 999)
     elseif shape == "Square" then
-        openBtn.Size = openCfg.Size or UDim2.fromOffset(40, 40)
+        local s = openCfg.Size or UDim2.fromOffset(40, 40)
+        openBtn.Size = UDim2.fromOffset(math.clamp(s.X.Offset, openMin.X.Offset, openMax.X.Offset), math.clamp(s.Y.Offset, openMin.Y.Offset, openMax.Y.Offset))
         corner.CornerRadius = UDim.new(0, 10)
     else
-        openBtn.Size = openCfg.Size or UDim2.fromOffset(44, 44)
+        local s = openCfg.Size or UDim2.fromOffset(44, 44)
+        openBtn.Size = UDim2.fromOffset(math.clamp(s.X.Offset, openMin.X.Offset, openMax.X.Offset), math.clamp(s.Y.Offset, openMin.Y.Offset, openMax.Y.Offset))
         corner.CornerRadius = UDim.new(1, 0)
     end
-    local savedSize = cfg.Size or UDim2.fromOffset(680, 460)
+    local savedSize = defaultSize
     local savedPos = main.Position
 
     local tabButtons = mk("Frame", {
@@ -607,6 +649,12 @@ function FoxnameUI:CreateWindow(cfg)
     local contentArea = mk("Frame", {
         Parent = main, Position = UDim2.new(0, 168, 0, 46), Size = UDim2.new(1, -168, 1, -46), BackgroundTransparency = 1,
     })
+    local resizeHandle = mk("Frame", {
+        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -4, 1, -4),
+        Size = UDim2.fromOffset(14, 14), BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0,
+    })
+    mk("UICorner", {Parent = resizeHandle, CornerRadius = UDim.new(0, 4)})
+    mk("UIStroke", {Parent = resizeHandle, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
 
     local dragging = false
     local dragStart, startPos
@@ -624,6 +672,28 @@ function FoxnameUI:CreateWindow(cfg)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragStart
             main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    local resizing, resizeStart, resizeStartSize = false, nil, nil
+    resizeHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            resizing = true
+            resizeStart = input.Position
+            resizeStartSize = main.Size
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            resizing = false
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - resizeStart
+            local w = math.clamp(resizeStartSize.X.Offset + delta.X, minSize.X.Offset, maxSize.X.Offset)
+            local h = math.clamp(resizeStartSize.Y.Offset + delta.Y, minSize.Y.Offset, maxSize.Y.Offset)
+            main.Size = UDim2.fromOffset(w, h)
+            savedSize = main.Size
         end
     end)
 
