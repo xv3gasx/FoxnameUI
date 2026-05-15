@@ -94,7 +94,7 @@ local function attachIcon(target, iconName, color, iconPosY, labelX)
     local label = target:FindFirstChild("FxLabel")
     if label and label:IsA("TextLabel") then
         label.Position = UDim2.new(0, labelX or 32, 0, 0)
-        label.Size = UDim2.new(1, -42, 1, 0)
+        label.Size = UDim2.new(1, -42, label.Size.Y.Scale, label.Size.Y.Offset)
     end
     return icon ~= nil
 end
@@ -206,6 +206,7 @@ local function CreateElements(theme)
             Size = UDim2.new(1, hasIcon and -30 or 0, 0, 18), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+            ZIndex = 3,
         })
         if hasIcon then
             attachIcon(holder, cfg.Icon, theme.Text, 1, 30)
@@ -214,16 +215,19 @@ local function CreateElements(theme)
         local bar = mk("Frame", {
             Parent = holder, Position = UDim2.new(0, 0, 0, 32), Size = UDim2.new(1, 0, 0, 16),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
+            ZIndex = 1,
         })
         mk("UICorner", {Parent = bar, CornerRadius = UDim.new(0, 8)})
         local fill = mk("Frame", {
             Parent = bar, Size = UDim2.new((value - min) / math.max(max - min, 1), 0, 1, 0),
             BackgroundColor3 = theme.Accent, BorderSizePixel = 0,
+            ZIndex = 2,
         })
         mk("UICorner", {Parent = fill, CornerRadius = UDim.new(0, 8)})
         local knob = mk("Frame", {
             Parent = bar, Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(fill.Size.X.Scale, -6, 0.5, -6),
             BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0,
+            ZIndex = 3,
         })
         mk("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
 
