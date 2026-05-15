@@ -620,14 +620,15 @@ function FoxnameUI:CreateWindow(cfg)
     closeBtn.MouseButton1Click:Connect(function()
         local overlay = mk("Frame", {
             Parent = gui, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-            BackgroundTransparency = 0.45, BorderSizePixel = 0, ZIndex = 1000,
+            BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1000,
         })
         local confirm = mk("Frame", {
             Parent = overlay, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-            Size = UDim2.fromOffset(280, 0), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ZIndex = 1001,
+            Size = UDim2.fromOffset(320, 150), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ZIndex = 1001,
         })
         mk("UICorner", {Parent = confirm, CornerRadius = UDim.new(0, 12)})
         mk("UIStroke", {Parent = confirm, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+        local confirmScale = mk("UIScale", {Parent = confirm, Scale = 0.85})
         mk("TextLabel", {
             Parent = confirm, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 12), Size = UDim2.new(1, -28, 0, 24),
             Text = "Are you sure?", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1002,
@@ -649,15 +650,18 @@ function FoxnameUI:CreateWindow(cfg)
             TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1002,
         })
         mk("UICorner", {Parent = no, CornerRadius = UDim.new(0, 8)})
-        tween(confirm, 0.18, {Size = UDim2.fromOffset(320, 150)}, Enum.EasingStyle.Back)
+        tween(overlay, 0.14, {BackgroundTransparency = 0.45}, Enum.EasingStyle.Quad)
+        tween(confirmScale, 0.18, {Scale = 1}, Enum.EasingStyle.Back)
 
         no.MouseButton1Click:Connect(function()
-            tween(confirm, 0.14, {Size = UDim2.fromOffset(280, 0)}, Enum.EasingStyle.Quad)
-            task.wait(0.14)
+            tween(confirmScale, 0.12, {Scale = 0.9}, Enum.EasingStyle.Quad)
+            tween(overlay, 0.12, {BackgroundTransparency = 1}, Enum.EasingStyle.Quad)
+            task.wait(0.12)
             overlay:Destroy()
         end)
         yes.MouseButton1Click:Connect(function()
-            tween(confirm, 0.1, {Size = UDim2.fromOffset(280, 0)}, Enum.EasingStyle.Quad)
+            tween(confirmScale, 0.1, {Scale = 0.9}, Enum.EasingStyle.Quad)
+            tween(overlay, 0.1, {BackgroundTransparency = 1}, Enum.EasingStyle.Quad)
             tween(main, 0.14, {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 0.2})
             task.wait(0.14)
             gui:Destroy()
