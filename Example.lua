@@ -1,16 +1,30 @@
-﻿local FoxnameUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua"))()
+﻿local url = "https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua?v=" .. tostring(os.time())
+local src = game:HttpGet(url)
+
+-- BOM temizle
+src = src:gsub("^\239\187\191", "")
+
+local fn, err = loadstring(src)
+if not fn then
+    error("Compile error: " .. tostring(err))
+end
+
+local FoxnameUI = fn()
+if not FoxnameUI then
+    error("FoxnameUI nil dondu")
+end
+
 
 print("Theme:", FoxnameUI.Theme and FoxnameUI.Theme.Name)
+print("Icon provider:", FoxnameUI.IconProvider ~= nil)
 
 local Window = FoxnameUI:CreateWindow({
     Title = "Foxname Hub",
+    Icon = "app-window",
     Size = UDim2.fromOffset(700, 470),
 })
 
--- Function 1: Tab()
 local Main = Window:Tab("Main", "app-window-mac")
-
--- Function 2: Toggle()
 Main:Toggle({
     Title = "Auto Farm",
     Icon = "radar",
@@ -20,7 +34,6 @@ Main:Toggle({
     end,
 })
 
--- Function 3: Slider()
 Main:Slider({
     Title = "WalkSpeed",
     Icon = "sliders-horizontal",
@@ -32,7 +45,6 @@ Main:Slider({
     end,
 })
 
--- Function 4: Button()
 Main:Button({
     Title = "Rejoin",
     Icon = "rocket",
@@ -52,33 +64,26 @@ Visual:Toggle({
 })
 
 local Settings = Window:Tab("Settings", "settings")
-
--- Function 5: Hide()
 Settings:Button({
     Title = "Hide Window",
-    Icon = "app-window",
+    Icon = "panel-left-close",
     Callback = function()
         Window:Hide()
-        print("Window hidden")
     end,
 })
 
--- Function 6: Show()
 Settings:Button({
     Title = "Show Window",
-    Icon = "sparkles",
+    Icon = "panel-left-open",
     Callback = function()
         Window:Show()
-        print("Window shown")
     end,
 })
 
--- Function 7: Destroy()
 Settings:Button({
     Title = "Destroy UI",
     Icon = "x",
     Callback = function()
         Window:Destroy()
-        print("Window destroyed")
     end,
 })

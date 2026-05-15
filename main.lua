@@ -2,6 +2,7 @@
 
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
 
 local Theme = {
     Name = "Foxname Ember",
@@ -18,38 +19,6 @@ local Theme = {
     Danger = Color3.fromRGB(240, 90, 90),
 }
 
-local Icons = {
-    close = "X",
-    hide = "-",
-    menu = "=",
-    bolt = "*",
-    eye = "o",
-    gear = "#",
-}
-
-local LucideMap = {
-    ["app-window-mac"] = "W",
-    ["app-window"] = "W",
-    ["settings"] = "S",
-    ["radar"] = "R",
-    ["zap"] = "Z",
-    ["eye"] = "E",
-    ["home"] = "H",
-    ["user"] = "U",
-    ["terminal"] = "T",
-    ["shield"] = "D",
-    ["gamepad-2"] = "G",
-    ["sword"] = "K",
-    ["crosshair"] = "C",
-    ["sliders-horizontal"] = "L",
-    ["mouse-pointer-click"] = "M",
-    ["sparkles"] = "P",
-    ["rocket"] = "R",
-    ["activity"] = "A",
-    ["circle"] = "O",
-    ["x"] = "X",
-}
-
 local function mk(class, props)
     local i = Instance.new(class)
     for k, v in pairs(props or {}) do
@@ -59,18 +28,30 @@ local function mk(class, props)
 end
 
 local function tween(obj, t, props, style, dir)
-    if typeof(obj) ~= "Instance" then
-        return nil
-    end
+    if typeof(obj) ~= "Instance" then return nil end
     local ti = TweenInfo.new(t or 0.18, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out)
     local ok, tw = pcall(function()
         return TweenService:Create(obj, ti, props)
     end)
-    if ok and tw then
-        tw:Play()
-        return tw
-    end
+    if ok and tw then tw:Play(); return tw end
     return nil
+end
+
+-- WindUI-like icon provider (lucide names)
+local IconsProvider = nil
+local ICONS_URL = "https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"
+
+do
+    local ok, mod = pcall(function()
+        local src = game.HttpGetAsync and game:HttpGetAsync(ICONS_URL) or HttpService:GetAsync(ICONS_URL)
+        src = src:gsub("^\239\187\191", "")
+        local fn = loadstring(src)
+        return fn and fn()
+    end)
+    if ok and mod then
+        IconsProvider = mod
+        pcall(function() IconsProvider.SetIconsType("lucide") end)
+    end
 end
 
 local function normalizeLucideName(icon)
@@ -81,22 +62,41 @@ local function normalizeLucideName(icon)
     return icon
 end
 
-local function resolveIcon(icon)
-    if icon == nil then return nil end
-    if type(icon) ~= "string" then return icon end
-    local key = normalizeLucideName(icon)
+local function getIconSprite(iconName)
+    if not IconsProvider then return nil end
+    local key = normalizeLucideName(iconName)
     if not key or key == "" then return nil end
-    if LucideMap[key] then return LucideMap[key] end
-    local first = key:match("([a-z])")
-    return first and string.upper(first) or "?"
+    local ok, iconData = pcall(function()
+        return IconsProvider.Icon2(key, "lucide")
+    end)
+    if ok and iconData and type(iconData) == "table" and iconData[1] and iconData[2] then
+        return iconData[1], iconData[2]
+    end
+    return nil
 end
 
-local function iconTitle(icon, title)
-    local resolved = resolveIcon(icon)
-    if resolved and resolved ~= "" then
-        return string.format("%s  %s", resolved, title or "")
+local function attachIcon(target, iconName, color)
+    local img, meta = getIconSprite(iconName)
+    if not img then return false end
+
+    local icon = mk("ImageLabel", {
+        Parent = target,
+        Name = "FxIcon",
+        BackgroundTransparency = 1,
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0, 10, 0.5, -8),
+        Image = img,
+        ImageRectSize = meta.ImageRectSize,
+        ImageRectOffset = meta.ImageRectPosition,
+        ImageColor3 = color or Theme.Text,
+    })
+
+    local label = target:FindFirstChild("FxLabel")
+    if label and label:IsA("TextLabel") then
+        label.Position = UDim2.new(0, 32, 0, 0)
+        label.Size = UDim2.new(1, -42, 1, 0)
     end
-    return title or ""
+    return icon ~= nil
 end
 
 local function CreateElements(theme)
@@ -108,14 +108,27 @@ local function CreateElements(theme)
             Size = UDim2.new(1, 0, 0, 34),
             BackgroundColor3 = theme.Surface2,
             BorderSizePixel = 0,
-            Text = iconTitle(cfg.Icon, cfg.Title or "Button"),
-            TextColor3 = theme.Text,
-            Font = Enum.Font.GothamSemibold,
-            TextSize = 13,
+            Text = "",
             AutoButtonColor = false,
         })
         mk("UICorner", {Parent = b, CornerRadius = UDim.new(0, 10)})
         local stroke = mk("UIStroke", {Parent = b, Color = theme.Border, Thickness = 1, Transparency = 0.35})
+
+        local label = mk("TextLabel", {
+            Parent = b,
+            Name = "FxLabel",
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, -20, 1, 0),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Text = cfg.Title or "Button",
+            TextColor3 = theme.Text,
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 13,
+        })
+
+        attachIcon(b, cfg.Icon, theme.Text)
+
         b.MouseEnter:Connect(function()
             tween(b, 0.12, {BackgroundColor3 = theme.Surface3})
             tween(stroke, 0.12, {Transparency = 0.05})
@@ -133,42 +146,31 @@ local function CreateElements(theme)
     function Elements:Toggle(parent, cfg)
         local state = cfg.Value == true
         local btn = mk("TextButton", {
-            Parent = parent,
-            Size = UDim2.new(1, 0, 0, 36),
-            BackgroundColor3 = theme.Surface2,
-            BorderSizePixel = 0,
-            Text = "",
-            AutoButtonColor = false,
+            Parent = parent, Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = theme.Surface2,
+            BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
+
         mk("TextLabel", {
-            Parent = btn,
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, -52, 1, 0),
-            Position = UDim2.new(0, 12, 0, 0),
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Text = iconTitle(cfg.Icon, cfg.Title or "Toggle"),
-            TextColor3 = theme.Text,
-            Font = Enum.Font.GothamSemibold,
-            TextSize = 13,
+            Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Size = UDim2.new(1, -52, 1, 0),
+            Position = UDim2.new(0, 12, 0, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
+        attachIcon(btn, cfg.Icon, theme.Text)
+
         local rail = mk("Frame", {
-            Parent = btn,
-            Size = UDim2.new(0, 34, 0, 18),
-            Position = UDim2.new(1, -42, 0.5, -9),
-            BorderSizePixel = 0,
+            Parent = btn, Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -42, 0.5, -9), BorderSizePixel = 0,
             BackgroundColor3 = state and theme.Accent or theme.Border,
         })
         mk("UICorner", {Parent = rail, CornerRadius = UDim.new(1, 0)})
         local knob = mk("Frame", {
-            Parent = rail,
-            Size = UDim2.new(0, 14, 0, 14),
+            Parent = rail, Size = UDim2.new(0, 14, 0, 14),
             Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
-            BorderSizePixel = 0,
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         })
         mk("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
+
         local function sync(animated)
             local kPos = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
             local rCol = state and theme.Accent or theme.Border
@@ -180,11 +182,13 @@ local function CreateElements(theme)
                 rail.BackgroundColor3 = rCol
             end
         end
+
         btn.MouseButton1Click:Connect(function()
             state = not state
             sync(true)
             if cfg.Callback then cfg.Callback(state) end
         end)
+
         sync(false)
         return {SetValue = function(v) state = v == true; sync(true) end}
     end
@@ -193,38 +197,28 @@ local function CreateElements(theme)
         local min = cfg.Min or 0
         local max = cfg.Max or 100
         local value = cfg.Default or min
+
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 52), BackgroundTransparency = 1})
         local label = mk("TextLabel", {
-            Parent = holder,
-            Size = UDim2.new(1, 0, 0, 18),
-            BackgroundTransparency = 1,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Text = string.format("%s: %s", iconTitle(cfg.Icon, cfg.Title or "Slider"), tostring(value)),
-            TextColor3 = theme.Text,
-            Font = Enum.Font.GothamSemibold,
-            TextSize = 13,
+            Parent = holder, Name = "FxLabel", Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1,
+            TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
+            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
+        attachIcon(holder, cfg.Icon, theme.Text)
+
         local bar = mk("Frame", {
-            Parent = holder,
-            Position = UDim2.new(0, 0, 0, 26),
-            Size = UDim2.new(1, 0, 0, 16),
-            BackgroundColor3 = theme.Surface2,
-            BorderSizePixel = 0,
+            Parent = holder, Position = UDim2.new(0, 0, 0, 26), Size = UDim2.new(1, 0, 0, 16),
+            BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
         })
         mk("UICorner", {Parent = bar, CornerRadius = UDim.new(0, 8)})
         local fill = mk("Frame", {
-            Parent = bar,
-            Size = UDim2.new((value - min) / math.max(max - min, 1), 0, 1, 0),
-            BackgroundColor3 = theme.Accent,
-            BorderSizePixel = 0,
+            Parent = bar, Size = UDim2.new((value - min) / math.max(max - min, 1), 0, 1, 0),
+            BackgroundColor3 = theme.Accent, BorderSizePixel = 0,
         })
         mk("UICorner", {Parent = fill, CornerRadius = UDim.new(0, 8)})
         local knob = mk("Frame", {
-            Parent = bar,
-            Size = UDim2.new(0, 12, 0, 12),
-            Position = UDim2.new(fill.Size.X.Scale, -6, 0.5, -6),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            BorderSizePixel = 0,
+            Parent = bar, Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(fill.Size.X.Scale, -6, 0.5, -6),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0,
         })
         mk("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
 
@@ -234,27 +228,19 @@ local function CreateElements(theme)
             value = math.floor(min + (max - min) * p + 0.5)
             fill.Size = UDim2.new(p, 0, 1, 0)
             knob.Position = UDim2.new(p, -6, 0.5, -6)
-            label.Text = string.format("%s: %s", iconTitle(cfg.Icon, cfg.Title or "Slider"), tostring(value))
+            label.Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value))
             if cfg.Callback then cfg.Callback(value) end
         end
 
         bar.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                setFromX(i.Position.X)
-            end
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; setFromX(i.Position.X) end
         end)
         bar.InputEnded:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
         end)
         UIS.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-                setFromX(i.Position.X)
-            end
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then setFromX(i.Position.X) end
         end)
-
         return holder
     end
 
@@ -263,17 +249,12 @@ end
 
 function FoxnameUI:CreateWindow(cfg)
     cfg = cfg or {}
-
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
     local gui = mk("ScreenGui", {Name = "FoxnameUI", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
 
     local main = mk("Frame", {
-        Parent = gui,
-        Size = cfg.Size or UDim2.fromOffset(680, 460),
-        Position = UDim2.fromScale(0.5, 0.5),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundColor3 = Theme.Background,
-        BorderSizePixel = 0,
+        Parent = gui, Size = cfg.Size or UDim2.fromOffset(680, 460), Position = UDim2.fromScale(0.5, 0.5),
+        AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,
     })
     mk("UICorner", {Parent = main, CornerRadius = UDim.new(0, 14)})
     mk("UIStroke", {Parent = main, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
@@ -281,35 +262,30 @@ function FoxnameUI:CreateWindow(cfg)
     local top = mk("Frame", {Parent = main, Size = UDim2.new(1, 0, 0, 46), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0})
     mk("UICorner", {Parent = top, CornerRadius = UDim.new(0, 14)})
 
-    mk("TextLabel", {
-        Parent = top,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 14, 0, 0),
-        Size = UDim2.new(1, -120, 1, 0),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Text = iconTitle(Icons.bolt, cfg.Title or "Foxname UI"),
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.GothamBold,
-        TextSize = 14,
+    local titleLabel = mk("TextLabel", {
+        Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 0),
+        Size = UDim2.new(1, -120, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
+        TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 14,
     })
+    attachIcon(top, (cfg.Icon or "zap"), Theme.Text)
 
     local hideBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -66, 0.5, -12),
-        BackgroundColor3 = Theme.Surface2, Text = Icons.hide, TextColor3 = Theme.Text,
+        BackgroundColor3 = Theme.Surface2, Text = "-", TextColor3 = Theme.Text,
         Font = Enum.Font.GothamBold, TextSize = 16, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = hideBtn, CornerRadius = UDim.new(0, 8)})
 
     local closeBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -34, 0.5, -12),
-        BackgroundColor3 = Theme.Danger, Text = Icons.close, TextColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundColor3 = Theme.Danger, Text = "X", TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold, TextSize = 14, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
 
     local openBtn = mk("TextButton", {
         Parent = gui, Size = UDim2.fromOffset(44, 44), Position = UDim2.new(0, 20, 0.5, -22),
-        BackgroundColor3 = Theme.Accent, Text = Icons.menu, TextColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundColor3 = Theme.Accent, Text = "=", TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold, TextSize = 18, Visible = false, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = openBtn, CornerRadius = UDim.new(1, 0)})
@@ -384,35 +360,28 @@ function FoxnameUI:CreateWindow(cfg)
     local windowApi = {}
     function windowApi:Tab(name, icon)
         local btn = mk("TextButton", {
-            Parent = tabButtons,
-            Size = UDim2.new(1, 0, 0, 32),
-            BackgroundColor3 = Theme.Surface2,
-            BorderSizePixel = 0,
-            Text = iconTitle(icon, name),
-            TextColor3 = Theme.Text,
-            Font = Enum.Font.GothamSemibold,
-            TextSize = 13,
-            AutoButtonColor = false,
+            Parent = tabButtons, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
+            BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamSemibold,
+            TextSize = 13, AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 9)})
+        mk("TextLabel", {
+            Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            Text = name, TextColor3 = Theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+        })
+        attachIcon(btn, icon, Theme.Text)
 
         local container = mk("ScrollingFrame", {
-            Parent = contentArea,
-            Size = UDim2.new(1, 0, 1, 0),
-            CanvasSize = UDim2.new(0, 0, 0, 0),
-            ScrollBarThickness = 4,
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            Visible = false,
+            Parent = contentArea, Size = UDim2.new(1, 0, 1, 0), CanvasSize = UDim2.new(0, 0, 0, 0),
+            ScrollBarThickness = 4, BackgroundTransparency = 1, BorderSizePixel = 0, Visible = false,
         })
         local layout = mk("UIListLayout", {Parent = container, Padding = UDim.new(0, 8)})
         layout.SortOrder = Enum.SortOrder.LayoutOrder
         mk("UIPadding", {
             Parent = container,
-            PaddingTop = UDim.new(0, 10),
-            PaddingLeft = UDim.new(0, 10),
-            PaddingRight = UDim.new(0, 10),
-            PaddingBottom = UDim.new(0, 10),
+            PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10),
+            PaddingRight = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10),
         })
         layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 14)
@@ -437,6 +406,5 @@ function FoxnameUI:CreateWindow(cfg)
 end
 
 FoxnameUI.Theme = Theme
-FoxnameUI.Icons = Icons
-FoxnameUI.LucideMap = LucideMap
+FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
