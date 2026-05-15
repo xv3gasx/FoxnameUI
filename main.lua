@@ -566,6 +566,7 @@ function FoxnameUI:CreateWindow(cfg)
         BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
         ClipsDescendants = true,
     })
+    mk("UICorner", {Parent = tabButtons, CornerRadius = UDim.new(0, 14)})
     local btnList = mk("UIListLayout", {Parent = tabButtons, Padding = UDim.new(0, 7)})
     btnList.SortOrder = Enum.SortOrder.LayoutOrder
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
@@ -596,18 +597,24 @@ function FoxnameUI:CreateWindow(cfg)
     hideBtn.MouseButton1Click:Connect(function()
         savedSize = main.Size
         savedPos = main.Position
-        tween(main, 0.18, {Size = UDim2.fromOffset(220, 0), BackgroundTransparency = 0.1}, Enum.EasingStyle.Quad)
-        task.wait(0.18)
+        local targetPos = UDim2.new(openBtn.Position.X.Scale, openBtn.Position.X.Offset + 22, openBtn.Position.Y.Scale, openBtn.Position.Y.Offset + 22)
+        tween(main, 0.22, {
+            Size = UDim2.fromOffset(44, 44),
+            Position = targetPos,
+            BackgroundTransparency = 0.15
+        }, Enum.EasingStyle.Quad)
+        task.wait(0.22)
         main.Visible = false
         openBtn.Visible = true
     end)
 
     openBtn.MouseButton1Click:Connect(function()
-        main.Size = UDim2.fromOffset(220, 0)
-        main.Position = savedPos
+        main.Size = UDim2.fromOffset(44, 44)
+        main.Position = UDim2.new(openBtn.Position.X.Scale, openBtn.Position.X.Offset + 22, openBtn.Position.Y.Scale, openBtn.Position.Y.Offset + 22)
+        main.BackgroundTransparency = 0.15
         main.Visible = true
         openBtn.Visible = false
-        tween(main, 0.2, {Size = savedSize, BackgroundTransparency = 0}, Enum.EasingStyle.Back)
+        tween(main, 0.25, {Size = savedSize, Position = savedPos, BackgroundTransparency = 0}, Enum.EasingStyle.Back)
     end)
 
     closeBtn.MouseButton1Click:Connect(function()
@@ -617,7 +624,7 @@ function FoxnameUI:CreateWindow(cfg)
         })
         local confirm = mk("Frame", {
             Parent = overlay, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-            Size = UDim2.fromOffset(320, 150), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ZIndex = 1001,
+            Size = UDim2.fromOffset(280, 0), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ZIndex = 1001,
         })
         mk("UICorner", {Parent = confirm, CornerRadius = UDim.new(0, 12)})
         mk("UIStroke", {Parent = confirm, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
@@ -642,11 +649,15 @@ function FoxnameUI:CreateWindow(cfg)
             TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1002,
         })
         mk("UICorner", {Parent = no, CornerRadius = UDim.new(0, 8)})
+        tween(confirm, 0.18, {Size = UDim2.fromOffset(320, 150)}, Enum.EasingStyle.Back)
 
         no.MouseButton1Click:Connect(function()
+            tween(confirm, 0.14, {Size = UDim2.fromOffset(280, 0)}, Enum.EasingStyle.Quad)
+            task.wait(0.14)
             overlay:Destroy()
         end)
         yes.MouseButton1Click:Connect(function()
+            tween(confirm, 0.1, {Size = UDim2.fromOffset(280, 0)}, Enum.EasingStyle.Quad)
             tween(main, 0.14, {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 0.2})
             task.wait(0.14)
             gui:Destroy()

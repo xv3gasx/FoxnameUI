@@ -114,6 +114,7 @@ Visual:Dropdown({
 })
 
 local Settings = Window:Tab("Settings", "settings")
+local uiVisible = true
 Settings:Section({ Title = "Window Controls" })
 
 Settings:Keybind({
@@ -125,13 +126,11 @@ Settings:Keybind({
     end,
     Pressed = function()
         if not Window then return end
-        _G.FoxnameVisible = not (_G.FoxnameVisible == false)
-        if _G.FoxnameVisible then
-            Window:Hide()
-            _G.FoxnameVisible = false
-        else
+        uiVisible = not uiVisible
+        if uiVisible then
             Window:Show()
-            _G.FoxnameVisible = true
+        else
+            Window:Hide()
         end
     end,
 })
@@ -171,4 +170,5 @@ Settings:Button({
         Window:Destroy()
     end,
 })
+
 
