@@ -161,8 +161,8 @@ local function CreateElements(theme)
             Parent = b,
             Name = "FxLabel",
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 10, 0, 0),
-            Size = UDim2.new(1, -20, 0, hasDesc and 20 or 34),
+            Position = UDim2.new(0, cfg.Icon and 34 or 10, 0, hasDesc and 6 or 0),
+            Size = UDim2.new(1, -(cfg.Icon and 38 or 14), 0, hasDesc and 16 or 34),
             TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = hasDesc and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
             Text = cfg.Title or "Button",
@@ -170,11 +170,16 @@ local function CreateElements(theme)
             Font = Enum.Font.GothamSemibold,
             TextSize = 13,
         })
-
-        if cfg.Icon then
-            attachIcon(b, cfg.Icon, theme.Text, 9, 34)
+        if cfg.Icon then attachIcon(b, cfg.Icon, theme.Text, hasDesc and 8 or 9, 34) end
+        if hasDesc then
+            mk("TextLabel", {
+                Parent = b, BackgroundTransparency = 1,
+                Position = UDim2.new(0, cfg.Icon and 34 or 10, 0, 28),
+                Size = UDim2.new(1, -(cfg.Icon and 38 or 14), 0, 14),
+                TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
+                Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 11,
+            })
         end
-        addDesc(b, cfg.Description, 30, (cfg.Icon and 34 or 10))
 
         b.MouseEnter:Connect(function()
             tween(b, 0.12, {BackgroundColor3 = theme.Surface3})
@@ -202,15 +207,21 @@ local function CreateElements(theme)
 
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, 12, 0, 0),
-            Size = UDim2.new(1, -52, 0, hasDesc and 20 or 36), TextXAlignment = Enum.TextXAlignment.Left,
+            Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, hasDesc and 6 or 0),
+            Size = UDim2.new(1, -52 - (cfg.Icon and 22 or 0), 0, hasDesc and 16 or 36), TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = hasDesc and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        if cfg.Icon then
-            attachIcon(btn, cfg.Icon, theme.Text, 10, 34)
+        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 8 or 10, 34) end
+        if hasDesc then
+            mk("TextLabel", {
+                Parent = btn, BackgroundTransparency = 1,
+                Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, 29),
+                Size = UDim2.new(1, -52 - (cfg.Icon and 22 or 0), 0, 14),
+                TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
+                Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 11,
+            })
         end
-        addDesc(btn, cfg.Description, 31, (cfg.Icon and 34 or 12))
 
         local rail = mk("Frame", {
             Parent = btn, Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -42, 0.5, -9), BorderSizePixel = 0,
