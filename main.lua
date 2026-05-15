@@ -558,6 +558,8 @@ function FoxnameUI:CreateWindow(cfg)
         Font = Enum.Font.GothamBold, TextSize = 18, Visible = false, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = openBtn, CornerRadius = UDim.new(1, 0)})
+    local savedSize = cfg.Size or UDim2.fromOffset(680, 460)
+    local savedPos = main.Position
 
     local tabButtons = mk("Frame", {
         Parent = main, Size = UDim2.new(0, 168, 1, -46), Position = UDim2.new(0, 0, 0, 46),
@@ -592,20 +594,63 @@ function FoxnameUI:CreateWindow(cfg)
     end)
 
     hideBtn.MouseButton1Click:Connect(function()
+        savedSize = main.Size
+        savedPos = main.Position
+        tween(main, 0.18, {Size = UDim2.fromOffset(220, 0), BackgroundTransparency = 0.1}, Enum.EasingStyle.Quad)
+        task.wait(0.18)
         main.Visible = false
         openBtn.Visible = true
     end)
 
     openBtn.MouseButton1Click:Connect(function()
-        main.Size = cfg.Size or UDim2.fromOffset(680, 460)
+        main.Size = UDim2.fromOffset(220, 0)
+        main.Position = savedPos
         main.Visible = true
         openBtn.Visible = false
+        tween(main, 0.2, {Size = savedSize, BackgroundTransparency = 0}, Enum.EasingStyle.Back)
     end)
 
     closeBtn.MouseButton1Click:Connect(function()
-        tween(main, 0.14, {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 0.2})
-        task.wait(0.14)
-        gui:Destroy()
+        local overlay = mk("Frame", {
+            Parent = gui, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+            BackgroundTransparency = 0.45, BorderSizePixel = 0, ZIndex = 1000,
+        })
+        local confirm = mk("Frame", {
+            Parent = overlay, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(320, 150), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ZIndex = 1001,
+        })
+        mk("UICorner", {Parent = confirm, CornerRadius = UDim.new(0, 12)})
+        mk("UIStroke", {Parent = confirm, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+        mk("TextLabel", {
+            Parent = confirm, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 12), Size = UDim2.new(1, -28, 0, 24),
+            Text = "Are you sure?", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1002,
+        })
+        mk("TextLabel", {
+            Parent = confirm, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 42), Size = UDim2.new(1, -28, 0, 34),
+            Text = "This will destroy the UI and close all tabs.", TextWrapped = true,
+            TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1002,
+        })
+        local yes = mk("TextButton", {
+            Parent = confirm, Position = UDim2.new(0, 14, 1, -44), Size = UDim2.new(0.5, -20, 0, 30),
+            BackgroundColor3 = Theme.Danger, BorderSizePixel = 0, Text = "Yes, Destroy",
+            TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1002,
+        })
+        mk("UICorner", {Parent = yes, CornerRadius = UDim.new(0, 8)})
+        local no = mk("TextButton", {
+            Parent = confirm, Position = UDim2.new(0.5, 6, 1, -44), Size = UDim2.new(0.5, -20, 0, 30),
+            BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, Text = "Cancel",
+            TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1002,
+        })
+        mk("UICorner", {Parent = no, CornerRadius = UDim.new(0, 8)})
+
+        no.MouseButton1Click:Connect(function()
+            overlay:Destroy()
+        end)
+        yes.MouseButton1Click:Connect(function()
+            tween(main, 0.14, {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 0.2})
+            task.wait(0.14)
+            gui:Destroy()
+        end)
     end)
 
     local elements = CreateElements(Theme)
@@ -670,8 +715,8 @@ function FoxnameUI:CreateWindow(cfg)
         return tab
     end
 
-    function windowApi:Hide() main.Visible = false; openBtn.Visible = true end
-    function windowApi:Show() main.Visible = true; openBtn.Visible = false end
+    function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = true end
+    function windowApi:Show() main.Position = savedPos; main.Size = savedSize; main.Visible = true; openBtn.Visible = false end
     function windowApi:Destroy() gui:Destroy() end
 
     return windowApi
