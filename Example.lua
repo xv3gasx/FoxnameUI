@@ -1,11 +1,23 @@
 ﻿-- Do Not Edit This Section!!!
 local url = "https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua?v=" .. tostring(os.time())
-local src = game:HttpGet(url):gsub("^\239\187\191", "")
-local FoxnameUI = assert(loadstring(src))()
+local src = game:HttpGet(url)
+src = src:gsub("^\239\187\191", "")
 
-print("FoxnameUI loaded")
-print("Theme:", FoxnameUI.Theme and FoxnameUI.Theme.Name or "N/A")
-print("Icon provider ready:", FoxnameUI.IconProvider ~= nil)
+local fn, err = loadstring(src)
+if not fn then
+    error("Compile error: " .. tostring(err))
+end
+
+local FoxnameUI = fn()
+if not FoxnameUI then
+    error("FoxnameUI nil dondu")
+end
+
+FoxnameUI:Notify({
+    Title = "Foxname UI",
+    Content = "Library loaded successfully",
+    Duration = 2,
+})
 
 local Window = FoxnameUI:CreateWindow({
     Title = "Foxname Hub",
@@ -14,6 +26,8 @@ local Window = FoxnameUI:CreateWindow({
 })
 
 local Main = Window:Tab("Main", "app-window-mac")
+Main:Section({ Title = "Main Features" })
+
 Main:Toggle({
     Title = "Auto Farm",
     Icon = "radar",
@@ -34,6 +48,25 @@ Main:Slider({
     end,
 })
 
+Main:Input({
+    Title = "Player Name",
+    Icon = "user",
+    Placeholder = "Type player...",
+    Callback = function(text, enter)
+        print("Input:", text, "Enter:", enter)
+    end,
+})
+
+Main:Dropdown({
+    Title = "Farm Mode",
+    Icon = "list",
+    Values = {"Normal", "Fast", "Safe"},
+    Default = "Normal",
+    Callback = function(v)
+        print("Farm Mode:", v)
+    end,
+})
+
 Main:Button({
     Title = "Rejoin",
     Icon = "rocket",
@@ -42,7 +75,10 @@ Main:Button({
     end,
 })
 
+Main:Divider()
+
 local Visual = Window:Tab("Visual", "eye")
+Visual:Section({ Title = "ESP" })
 Visual:Toggle({
     Title = "ESP",
     Icon = "crosshair",
@@ -63,7 +99,39 @@ Visual:Slider({
     end,
 })
 
+Visual:Dropdown({
+    Title = "ESP Targets",
+    Icon = "filter",
+    Values = {"Players", "NPC", "Items"},
+    Multi = true,
+    Default = {"Players"},
+    Callback = function(map)
+        print("ESP Targets changed")
+        for k, val in pairs(map) do
+            if val then print(" -", k) end
+        end
+    end,
+})
+
 local Settings = Window:Tab("Settings", "settings")
+Settings:Section({ Title = "Window Controls" })
+
+Settings:Keybind({
+    Title = "Toggle Key",
+    Icon = "keyboard",
+    Default = "RightShift",
+    Callback = function(newKey)
+        print("New keybind:", newKey)
+    end,
+    Pressed = function()
+        if Window then
+            Window:Hide()
+            task.wait(0.15)
+            Window:Show()
+        end
+    end,
+})
+
 Settings:Button({
     Title = "Hide Window",
     Icon = "panel-left-close",
@@ -77,6 +145,18 @@ Settings:Button({
     Icon = "panel-left-open",
     Callback = function()
         Window:Show()
+    end,
+})
+
+Settings:Button({
+    Title = "Test Notify",
+    Icon = "bell",
+    Callback = function()
+        FoxnameUI:Notify({
+            Title = "Test",
+            Content = "This is a test notification",
+            Duration = 3,
+        })
     end,
 })
 

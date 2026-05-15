@@ -101,6 +101,31 @@ end
 
 local function CreateElements(theme)
     local Elements = {}
+    local activeKeybindCapture = nil
+
+    function Elements:Section(parent, cfg)
+        local label = mk("TextLabel", {
+            Parent = parent,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 22),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Text = cfg.Title or "Section",
+            TextColor3 = theme.MutedText,
+            Font = Enum.Font.GothamBold,
+            TextSize = 12,
+        })
+        return label
+    end
+
+    function Elements:Divider(parent)
+        local line = mk("Frame", {
+            Parent = parent,
+            Size = UDim2.new(1, 0, 0, 1),
+            BackgroundColor3 = theme.Border,
+            BorderSizePixel = 0,
+        })
+        return line
+    end
 
     function Elements:Button(parent, cfg)
         local b = mk("TextButton", {
@@ -193,6 +218,34 @@ local function CreateElements(theme)
         return {SetValue = function(v) state = v == true; sync(true) end}
     end
 
+    function Elements:Input(parent, cfg)
+        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 56), BackgroundTransparency = 1})
+        local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
+        mk("TextLabel", {
+            Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
+            Position = UDim2.new(0, hasIcon and 30 or 0, 0, 0),
+            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 18),
+            TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
+            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+        })
+        if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, 1, 30) end
+
+        local box = mk("TextBox", {
+            Parent = holder, Position = UDim2.new(0, 0, 0, 24), Size = UDim2.new(1, 0, 0, 30),
+            BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
+            PlaceholderText = cfg.Placeholder or "Type here...",
+            Text = cfg.Default or "", ClearTextOnFocus = false,
+            TextColor3 = theme.Text, PlaceholderColor3 = theme.MutedText,
+            Font = Enum.Font.Gotham, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left,
+        })
+        mk("UICorner", {Parent = box, CornerRadius = UDim.new(0, 9)})
+        mk("UIPadding", {Parent = box, PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
+        box.FocusLost:Connect(function(enterPressed)
+            if cfg.Callback then cfg.Callback(box.Text, enterPressed) end
+        end)
+        return {SetValue = function(v) box.Text = tostring(v or "") end, Object = box}
+    end
+
     function Elements:Slider(parent, cfg)
         local min = cfg.Min or 0
         local max = cfg.Max or 100
@@ -253,7 +306,153 @@ local function CreateElements(theme)
         return holder
     end
 
+    function Elements:Dropdown(parent, cfg)
+        local values = cfg.Values or {}
+        local multi = cfg.Multi == true
+        local selected = multi and {} or (cfg.Default or values[1] or "")
+
+        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1})
+        local btn = mk("TextButton", {
+            Parent = holder, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
+            Text = "", AutoButtonColor = false,
+        })
+        mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
+        mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
+        local label = mk("TextLabel", {
+            Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+        })
+        attachIcon(btn, cfg.Icon, theme.Text)
+
+        local index = 1
+        local function updateLabel()
+            if multi then
+                local count = 0
+                local first = nil
+                for k, v in pairs(selected) do
+                    if v then count = count + 1; first = first or k end
+                end
+                if count == 0 then
+                    label.Text = string.format("%s: None", cfg.Title or "Dropdown")
+                elseif count == 1 then
+                    label.Text = string.format("%s: %s", cfg.Title or "Dropdown", first)
+                else
+                    label.Text = string.format("%s: %d selected", cfg.Title or "Dropdown", count)
+                end
+            else
+                label.Text = string.format("%s: %s", cfg.Title or "Dropdown", tostring(selected))
+            end
+        end
+
+        if multi and type(cfg.Default) == "table" then
+            for _, v in ipairs(cfg.Default) do selected[v] = true end
+        elseif not multi then
+            for i, v in ipairs(values) do
+                if v == selected then index = i break end
+            end
+        end
+        updateLabel()
+
+        btn.MouseButton1Click:Connect(function()
+            if #values == 0 then return end
+            if multi then
+                local current = values[index]
+                selected[current] = not selected[current]
+                if cfg.Callback then cfg.Callback(selected) end
+                index = (index % #values) + 1
+            else
+                index = (index % #values) + 1
+                selected = values[index]
+                if cfg.Callback then cfg.Callback(selected) end
+            end
+            updateLabel()
+        end)
+
+        return {
+            Refresh = function(newValues)
+                values = newValues or {}
+                index = 1
+                updateLabel()
+            end
+        }
+    end
+
+    function Elements:Keybind(parent, cfg)
+        local key = tostring(cfg.Default or "G")
+        local waiting = false
+
+        local btn = mk("TextButton", {
+            Parent = parent, Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = theme.Surface2,
+            BorderSizePixel = 0, Text = "", AutoButtonColor = false,
+        })
+        mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
+        mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
+        local label = mk("TextLabel", {
+            Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+        })
+        attachIcon(btn, cfg.Icon, theme.Text)
+
+        local function syncText()
+            label.Text = string.format("%s: [%s]", cfg.Title or "Keybind", waiting and "..." or key)
+        end
+        syncText()
+
+        btn.MouseButton1Click:Connect(function()
+            waiting = true
+            activeKeybindCapture = true
+            syncText()
+        end)
+
+        UIS.InputBegan:Connect(function(input, gp)
+            if gp then return end
+            if waiting and input.UserInputType == Enum.UserInputType.Keyboard then
+                key = input.KeyCode.Name
+                waiting = false
+                activeKeybindCapture = nil
+                syncText()
+                if cfg.Callback then cfg.Callback(key) end
+                return
+            end
+            if not waiting and not activeKeybindCapture and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode.Name == key then
+                if cfg.Pressed then cfg.Pressed() end
+            end
+        end)
+        return btn
+    end
+
     return Elements
+end
+
+function FoxnameUI:Notify(cfg)
+    cfg = cfg or {}
+    local parent = (gethui and gethui()) or game:GetService("CoreGui")
+    local gui = mk("ScreenGui", {Name = "FoxnameNotify", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
+    local card = mk("Frame", {
+        Parent = gui, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 16),
+        Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
+    })
+    mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
+    mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+    mk("TextLabel", {
+        Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 8), Size = UDim2.new(1, -24, 0, 20),
+        Text = cfg.Title or "Notification", Font = Enum.Font.GothamBold, TextSize = 13, TextColor3 = Theme.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+    mk("TextLabel", {
+        Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 30), Size = UDim2.new(1, -24, 0, 32),
+        Text = cfg.Content or "...", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Theme.MutedText,
+        TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true,
+    })
+    card.Position = UDim2.new(1, 320, 0, 16)
+    tween(card, 0.2, {Position = UDim2.new(1, -16, 0, 16)})
+    task.delay(cfg.Duration or 3, function()
+        tween(card, 0.2, {Position = UDim2.new(1, 320, 0, 16)})
+        task.wait(0.22)
+        gui:Destroy()
+    end)
 end
 
 function FoxnameUI:CreateWindow(cfg)
@@ -399,6 +598,11 @@ function FoxnameUI:CreateWindow(cfg)
         function tab:Button(c) return elements:Button(container, c) end
         function tab:Toggle(c) return elements:Toggle(container, c) end
         function tab:Slider(c) return elements:Slider(container, c) end
+        function tab:Input(c) return elements:Input(container, c) end
+        function tab:Dropdown(c) return elements:Dropdown(container, c) end
+        function tab:Keybind(c) return elements:Keybind(container, c) end
+        function tab:Section(c) return elements:Section(container, c or {}) end
+        function tab:Divider() return elements:Divider(container) end
 
         btn.MouseButton1Click:Connect(function() show(tab) end)
         table.insert(tabs, tab)
