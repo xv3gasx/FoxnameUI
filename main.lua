@@ -94,7 +94,7 @@ local function attachIcon(target, iconName, color, iconPosY, labelX)
 
     local label = target:FindFirstChild("FxLabel")
     if label and label:IsA("TextLabel") then
-        label.Position = UDim2.new(0, labelX or 32, 0, 0)
+        label.Position = UDim2.new(0, labelX or 32, label.Position.Y.Scale, label.Position.Y.Offset)
         label.Size = UDim2.new(1, -42, label.Size.Y.Scale, label.Size.Y.Offset)
     end
     return icon ~= nil
