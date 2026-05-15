@@ -547,9 +547,13 @@ function FoxnameUI:CreateWindow(cfg)
     local titleLabel = mk("TextLabel", {
         Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 0),
         Size = UDim2.new(1, -120, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
-        TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 14,
+        TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
     })
-    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 14, 34)
+    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 10, 38)
+    local topIcon = top:FindFirstChild("FxIcon")
+    if topIcon and topIcon:IsA("ImageLabel") then
+        topIcon.Size = UDim2.new(0, 20, 0, 20)
+    end
 
     local hideBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -66, 0.5, -12),
