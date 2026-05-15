@@ -22,12 +22,17 @@ FoxnameUI:Notify({
 local Window = FoxnameUI:CreateWindow({
     Title = "Foxname Hub",
     Icon = "app-window",
-    Size = UDim2.fromOffset(700, 470),
+    DefaultSize = UDim2.fromOffset(700, 470),
+    MinSize = UDim2.fromOffset(560, 360),
+    MaxSize = UDim2.fromOffset(1100, 760),
     OpenButton = {
         Title = "Fox",
         Shape = "Pill", -- Circle | Pill | Square
         OnlyMobile = false,
         Draggable = true,
+        DefaultSize = UDim2.fromOffset(86, 34),
+        MinSize = UDim2.fromOffset(60, 30),
+        MaxSize = UDim2.fromOffset(140, 56),
     }
 })
 
@@ -69,7 +74,6 @@ Main:Input({
 Main:Dropdown({
     Title = "Farm Mode",
     Icon = "list",
-    Description = "Choose your farming strategy.",
     Values = {"Normal", "Fast", "Safe"},
     Default = "Normal",
     Callback = function(v)
@@ -90,6 +94,7 @@ Main:Divider()
 
 local Visual = Window:Tab("Visual", "eye")
 Visual:Section({ Title = "ESP" })
+
 Visual:Toggle({
     Title = "ESP",
     Icon = "crosshair",
@@ -115,7 +120,6 @@ Visual:Slider({
 Visual:Dropdown({
     Title = "ESP Targets",
     Icon = "filter",
-    Description = "Select which groups to highlight.",
     Values = {"Players", "NPC", "Items"},
     Multi = true,
     Default = {"Players"},
@@ -134,13 +138,11 @@ Settings:Section({ Title = "Window Controls" })
 Settings:Keybind({
     Title = "Toggle Key",
     Icon = "keyboard",
-    Description = "Press this key to hide/show UI.",
     Default = "RightControl",
     Callback = function(newKey)
         print("New keybind:", newKey)
     end,
     Pressed = function()
-        if not Window then return end
         uiVisible = not uiVisible
         if uiVisible then
             Window:Show()
@@ -156,6 +158,7 @@ Settings:Button({
     Description = "Hide the main window.",
     Callback = function()
         Window:Hide()
+        uiVisible = false
     end,
 })
 
@@ -165,6 +168,7 @@ Settings:Button({
     Description = "Show the main window again.",
     Callback = function()
         Window:Show()
+        uiVisible = true
     end,
 })
 
@@ -189,5 +193,3 @@ Settings:Button({
         Window:Destroy()
     end,
 })
-
-

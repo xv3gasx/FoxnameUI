@@ -164,7 +164,7 @@ local function CreateElements(theme)
             Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 0, hasDesc and 20 or 34),
             TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = Enum.TextYAlignment.Top,
+            TextYAlignment = hasDesc and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
             Text = cfg.Title or "Button",
             TextColor3 = theme.Text,
             Font = Enum.Font.GothamSemibold,
@@ -204,7 +204,7 @@ local function CreateElements(theme)
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
             Position = UDim2.new(0, 12, 0, 0),
             Size = UDim2.new(1, -52, 0, hasDesc and 20 or 36), TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = Enum.TextYAlignment.Top,
+            TextYAlignment = hasDesc and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         if cfg.Icon then
@@ -256,7 +256,7 @@ local function CreateElements(theme)
             Position = UDim2.new(0, hasIcon and 34 or 0, 0, 0),
             Size = UDim2.new(1, hasIcon and -30 or 0, 0, 20),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
-            TextYAlignment = Enum.TextYAlignment.Top,
+            TextYAlignment = hasDesc and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, 2, 34) end
@@ -292,7 +292,7 @@ local function CreateElements(theme)
             Position = UDim2.new(0, hasIcon and 34 or 0, 0, 0),
             Size = UDim2.new(1, hasIcon and -30 or 0, 0, 20), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
-            TextYAlignment = Enum.TextYAlignment.Top,
+            TextYAlignment = hasDesc and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
             ZIndex = 3,
         })
