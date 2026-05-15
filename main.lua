@@ -18,6 +18,7 @@ local Theme = {
     Success = Color3.fromRGB(80, 210, 120),
     Danger = Color3.fromRGB(240, 90, 90),
 }
+local NotifyHost = nil
 
 local function mk(class, props)
     local i = Instance.new(class)
@@ -489,10 +490,22 @@ end
 function FoxnameUI:Notify(cfg)
     cfg = cfg or {}
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
-    local gui = mk("ScreenGui", {Name = "FoxnameNotify", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
+    local gui = NotifyHost
+    if not gui or not gui.Parent then
+        gui = mk("ScreenGui", {Name = "FoxnameNotify", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
+        NotifyHost = gui
+        local stack = mk("Frame", {
+            Parent = gui, Name = "Stack", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -16, 1, -16),
+            Size = UDim2.new(0, 300, 1, -32), BackgroundTransparency = 1,
+        })
+        local layout = mk("UIListLayout", {Parent = stack, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
+        layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    end
+    local stack = gui:FindFirstChild("Stack")
     local card = mk("Frame", {
-        Parent = gui, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 16),
+        Parent = stack, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 320, 1, 0),
         Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
+        LayoutOrder = os.clock() * 1000,
     })
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
@@ -506,12 +519,11 @@ function FoxnameUI:Notify(cfg)
         Text = cfg.Content or "...", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Theme.MutedText,
         TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true,
     })
-    card.Position = UDim2.new(1, 320, 0, 16)
-    tween(card, 0.2, {Position = UDim2.new(1, -16, 0, 16)})
+    tween(card, 0.2, {Position = UDim2.new(1, 0, 1, 0)})
     task.delay(cfg.Duration or 3, function()
-        tween(card, 0.2, {Position = UDim2.new(1, 320, 0, 16)})
+        tween(card, 0.2, {Position = UDim2.new(1, 320, 1, 0)})
         task.wait(0.22)
-        gui:Destroy()
+        if card and card.Parent then card:Destroy() end
     end)
 end
 
@@ -552,17 +564,33 @@ function FoxnameUI:CreateWindow(cfg)
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
 
+    local openCfg = cfg.OpenButton or {}
+    local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
+    local openVisible = not (openCfg.OnlyMobile == true and not isMobile)
     local openBtn = mk("TextButton", {
         Parent = gui, Size = UDim2.fromOffset(44, 44), Position = UDim2.new(0, 20, 0.5, -22),
         BackgroundColor3 = Theme.Accent, Text = "=", TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold, TextSize = 18, Visible = false, BorderSizePixel = 0, AutoButtonColor = false,
     })
-    mk("UICorner", {Parent = openBtn, CornerRadius = UDim.new(1, 0)})
+    openBtn.Text = openCfg.Title or "Open"
+    openBtn.Visible = false and openVisible
+    local shape = tostring(openCfg.Shape or "Circle")
+    local corner = mk("UICorner", {Parent = openBtn, CornerRadius = UDim.new(1, 0)})
+    if shape == "Pill" then
+        openBtn.Size = openCfg.Size or UDim2.fromOffset(86, 34)
+        corner.CornerRadius = UDim.new(0, 999)
+    elseif shape == "Square" then
+        openBtn.Size = openCfg.Size or UDim2.fromOffset(40, 40)
+        corner.CornerRadius = UDim.new(0, 10)
+    else
+        openBtn.Size = openCfg.Size or UDim2.fromOffset(44, 44)
+        corner.CornerRadius = UDim.new(1, 0)
+    end
     local savedSize = cfg.Size or UDim2.fromOffset(680, 460)
     local savedPos = main.Position
 
     local tabButtons = mk("Frame", {
-        Parent = main, Size = UDim2.new(0, 168, 1, -46), Position = UDim2.new(0, 0, 0, 46),
+        Parent = main, Size = UDim2.new(0, 168, 1, -42), Position = UDim2.new(0, 0, 0, 42),
         BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
         ClipsDescendants = true,
     })
@@ -605,7 +633,7 @@ function FoxnameUI:CreateWindow(cfg)
         }, Enum.EasingStyle.Quad)
         task.wait(0.22)
         main.Visible = false
-        openBtn.Visible = true
+        openBtn.Visible = openVisible
     end)
 
     openBtn.MouseButton1Click:Connect(function()
@@ -616,6 +644,25 @@ function FoxnameUI:CreateWindow(cfg)
         openBtn.Visible = false
         tween(main, 0.25, {Size = savedSize, Position = savedPos, BackgroundTransparency = 0}, Enum.EasingStyle.Back)
     end)
+    if openCfg.Draggable ~= false then
+        local oDrag, oStart, oPos = false, nil, nil
+        openBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                oDrag = true; oStart = input.Position; oPos = openBtn.Position
+            end
+        end)
+        UIS.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                oDrag = false
+            end
+        end)
+        UIS.InputChanged:Connect(function(input)
+            if oDrag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local d = input.Position - oStart
+                openBtn.Position = UDim2.new(oPos.X.Scale, oPos.X.Offset + d.X, oPos.Y.Scale, oPos.Y.Offset + d.Y)
+            end
+        end)
+    end
 
     closeBtn.MouseButton1Click:Connect(function()
         local overlay = mk("Frame", {
@@ -730,7 +777,7 @@ function FoxnameUI:CreateWindow(cfg)
         return tab
     end
 
-    function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = true end
+    function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = openVisible end
     function windowApi:Show() main.Position = savedPos; main.Size = savedSize; main.Visible = true; openBtn.Visible = false end
     function windowApi:Destroy() gui:Destroy() end
 

@@ -23,6 +23,12 @@ local Window = FoxnameUI:CreateWindow({
     Title = "Foxname Hub",
     Icon = "app-window",
     Size = UDim2.fromOffset(700, 470),
+    OpenButton = {
+        Title = "Fox",
+        Shape = "Pill", -- Circle | Pill | Square
+        OnlyMobile = false,
+        Draggable = true,
+    }
 })
 
 local Main = Window:Tab("Main", "app-window-mac")
