@@ -279,18 +279,19 @@ local function CreateElements(theme)
         })
         mk("UICorner", {Parent = fill, CornerRadius = UDim.new(0, 8)})
         local knob = mk("Frame", {
-            Parent = bar, Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(fill.Size.X.Scale, -6, 0.5, -6),
+            Parent = bar, Size = UDim2.new(0, 16, 0, 16), Position = UDim2.new(fill.Size.X.Scale, -8, 0.5, -8),
             BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0,
             ZIndex = 3,
         })
         mk("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
+        mk("UIStroke", {Parent = knob, Color = Color3.fromRGB(18, 20, 28), Thickness = 1.2, Transparency = 0.15})
 
         local dragging = false
         local function setFromX(x)
             local p = math.clamp((x - bar.AbsolutePosition.X) / math.max(bar.AbsoluteSize.X, 1), 0, 1)
             value = math.floor(min + (max - min) * p + 0.5)
             fill.Size = UDim2.new(p, 0, 1, 0)
-            knob.Position = UDim2.new(p, -6, 0.5, -6)
+            knob.Position = UDim2.new(p, -8, 0.5, -8)
             label.Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value))
             if cfg.Callback then cfg.Callback(value) end
         end
@@ -548,7 +549,7 @@ function FoxnameUI:CreateWindow(cfg)
         Size = UDim2.new(1, -120, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
         TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 14,
     })
-    attachIcon(top, (cfg.Icon or "zap"), Theme.Text)
+    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 14, 34)
 
     local hideBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -66, 0.5, -12),
@@ -625,24 +626,21 @@ function FoxnameUI:CreateWindow(cfg)
     hideBtn.MouseButton1Click:Connect(function()
         savedSize = main.Size
         savedPos = main.Position
-        local targetPos = UDim2.new(openBtn.Position.X.Scale, openBtn.Position.X.Offset + 22, openBtn.Position.Y.Scale, openBtn.Position.Y.Offset + 22)
-        tween(main, 0.22, {
-            Size = UDim2.fromOffset(44, 44),
-            Position = targetPos,
-            BackgroundTransparency = 0.15
-        }, Enum.EasingStyle.Quad)
-        task.wait(0.22)
+        local miniSize = UDim2.fromOffset(math.max(220, savedSize.X.Offset - 120), math.max(160, savedSize.Y.Offset - 120))
+        tween(main, 0.18, {Size = miniSize, BackgroundTransparency = 0.1}, Enum.EasingStyle.Quad)
+        task.wait(0.18)
         main.Visible = false
         openBtn.Visible = openVisible
     end)
 
     openBtn.MouseButton1Click:Connect(function()
-        main.Size = UDim2.fromOffset(44, 44)
-        main.Position = UDim2.new(openBtn.Position.X.Scale, openBtn.Position.X.Offset + 22, openBtn.Position.Y.Scale, openBtn.Position.Y.Offset + 22)
+        local miniSize = UDim2.fromOffset(math.max(220, savedSize.X.Offset - 120), math.max(160, savedSize.Y.Offset - 120))
+        main.Size = miniSize
+        main.Position = savedPos
         main.BackgroundTransparency = 0.15
         main.Visible = true
         openBtn.Visible = false
-        tween(main, 0.25, {Size = savedSize, Position = savedPos, BackgroundTransparency = 0}, Enum.EasingStyle.Back)
+        tween(main, 0.22, {Size = savedSize, Position = savedPos, BackgroundTransparency = 0}, Enum.EasingStyle.Back)
     end)
     if openCfg.Draggable ~= false then
         local oDrag, oStart, oPos = false, nil, nil
