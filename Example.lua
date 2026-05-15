@@ -1,12 +1,19 @@
-﻿local url = "https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua?v=" .. tostring(os.time())
+﻿-- Do Not Edit This Section!!!
+local url = "https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua?v=" .. tostring(os.time())
 local src = game:HttpGet(url)
+
+-- BOM temizle
 src = src:gsub("^\239\187\191", "")
 
-local compile, compileErr = loadstring(src)
-assert(compile, "FoxnameUI compile error: " .. tostring(compileErr))
+local fn, err = loadstring(src)
+if not fn then
+    error("Compile error: " .. tostring(err))
+end
 
-local FoxnameUI = compile()
-assert(FoxnameUI, "FoxnameUI returned nil")
+local FoxnameUI = fn()
+if not FoxnameUI then
+    error("FoxnameUI nil dondu")
+end
 
 print("FoxnameUI loaded")
 print("Theme:", FoxnameUI.Theme and FoxnameUI.Theme.Name or "N/A")

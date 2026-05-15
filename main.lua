@@ -199,12 +199,17 @@ local function CreateElements(theme)
         local value = cfg.Default or min
 
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 58), BackgroundTransparency = 1})
+        local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
         local label = mk("TextLabel", {
-            Parent = holder, Name = "FxLabel", Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1,
+            Parent = holder, Name = "FxLabel",
+            Position = UDim2.new(0, hasIcon and 30 or 0, 0, 0),
+            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 18), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        attachIcon(holder, cfg.Icon, theme.Text, 1, 30)
+        if hasIcon then
+            attachIcon(holder, cfg.Icon, theme.Text, 1, 30)
+        end
 
         local bar = mk("Frame", {
             Parent = holder, Position = UDim2.new(0, 0, 0, 32), Size = UDim2.new(1, 0, 0, 16),
