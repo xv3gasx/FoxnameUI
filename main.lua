@@ -106,15 +106,18 @@ local function CreateElements(theme)
     local function addDesc(parent, text, top, iconOffset)
         if type(text) ~= "string" or text == "" then return 0 end
         local y = top or 28
-        local d = mk("TextLabel", {
+        mk("TextLabel", {
             Parent = parent, BackgroundTransparency = 1,
-            Position = UDim2.new(0, iconOffset or 0, 0, y),
-            Size = UDim2.new(1, -(iconOffset or 0) - 8, 0, 16),
-            TextXAlignment = Enum.TextXAlignment.Left, Text = text,
+            Position = UDim2.new(0, iconOffset or 10, 0, y),
+            Size = UDim2.new(1, -(iconOffset or 10) - 8, 0, 14),
+            TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Top,
-            TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 11,
+            Text = text,
+            TextColor3 = theme.MutedText,
+            Font = Enum.Font.Gotham,
+            TextSize = 11,
         })
-        return d.AbsoluteSize.Y > 0 and 16 or 16
+        return 16
     end
 
     function Elements:Section(parent, cfg)
@@ -158,8 +161,8 @@ local function CreateElements(theme)
             Parent = b,
             Name = "FxLabel",
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 10, 0, hasDesc and 8 or 0),
-            Size = UDim2.new(1, -20, 0, hasDesc and 16 or 34),
+            Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, -20, 0, hasDesc and 20 or 34),
             TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Top,
             Text = cfg.Title or "Button",
@@ -169,7 +172,7 @@ local function CreateElements(theme)
         })
 
         if cfg.Icon then
-            attachIcon(b, cfg.Icon, theme.Text, hasDesc and 8 or 9, 34)
+            attachIcon(b, cfg.Icon, theme.Text, 9, 34)
         end
         addDesc(b, cfg.Description, 30, (cfg.Icon and 34 or 10))
 
@@ -199,13 +202,13 @@ local function CreateElements(theme)
 
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, 12, 0, hasDesc and 8 or 0),
-            Size = UDim2.new(1, -52, 0, hasDesc and 16 or 36), TextXAlignment = Enum.TextXAlignment.Left,
+            Position = UDim2.new(0, 12, 0, 0),
+            Size = UDim2.new(1, -52, 0, hasDesc and 20 or 36), TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Top,
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         if cfg.Icon then
-            attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 8 or 10, 34)
+            attachIcon(btn, cfg.Icon, theme.Text, 10, 34)
         end
         addDesc(btn, cfg.Description, 31, (cfg.Icon and 34 or 12))
 
@@ -250,14 +253,14 @@ local function CreateElements(theme)
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, hasIcon and 34 or 0, 0, hasDesc and 8 or 0),
-            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 16),
+            Position = UDim2.new(0, hasIcon and 34 or 0, 0, 0),
+            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 20),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
             TextYAlignment = Enum.TextYAlignment.Top,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 8 or 1, 34) end
-        addDesc(holder, cfg.Description, 31, hasIcon and 34 or 0)
+        if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, 2, 34) end
+        addDesc(holder, cfg.Description, 24, hasIcon and 34 or 0)
 
         local box = mk("TextBox", {
             Parent = holder, Position = UDim2.new(0, 0, 0, 24 + extra), Size = UDim2.new(1, 0, 0, 30),
@@ -286,17 +289,17 @@ local function CreateElements(theme)
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
-            Position = UDim2.new(0, hasIcon and 34 or 0, 0, hasDesc and 8 or 0),
-            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 16), BackgroundTransparency = 1,
+            Position = UDim2.new(0, hasIcon and 34 or 0, 0, 0),
+            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 20), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextYAlignment = Enum.TextYAlignment.Top,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
             ZIndex = 3,
         })
         if hasIcon then
-            attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 8 or 1, 34)
+            attachIcon(holder, cfg.Icon, theme.Text, 2, 34)
         end
-        addDesc(holder, cfg.Description, 31, hasIcon and 34 or 0)
+        addDesc(holder, cfg.Description, 24, hasIcon and 34 or 0)
 
         local bar = mk("Frame", {
             Parent = holder, Position = UDim2.new(0, 0, 0, 32 + extra), Size = UDim2.new(1, 0, 0, 16),
@@ -876,6 +879,7 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
+
 
 
 
