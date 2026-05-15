@@ -119,15 +119,19 @@ Settings:Section({ Title = "Window Controls" })
 Settings:Keybind({
     Title = "Toggle Key",
     Icon = "keyboard",
-    Default = "RightShift",
+    Default = "RightControl",
     Callback = function(newKey)
         print("New keybind:", newKey)
     end,
     Pressed = function()
-        if Window then
+        if not Window then return end
+        _G.FoxnameVisible = not (_G.FoxnameVisible == false)
+        if _G.FoxnameVisible then
             Window:Hide()
-            task.wait(0.15)
+            _G.FoxnameVisible = false
+        else
             Window:Show()
+            _G.FoxnameVisible = true
         end
     end,
 })
@@ -167,3 +171,4 @@ Settings:Button({
         Window:Destroy()
     end,
 })
+

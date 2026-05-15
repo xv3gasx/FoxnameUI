@@ -310,10 +310,18 @@ local function CreateElements(theme)
         local values = cfg.Values or {}
         local multi = cfg.Multi == true
         local selected = multi and {} or (cfg.Default or values[1] or "")
+        local rowHeight = 30
+        local headerHeight = 36
+        local expanded = false
 
-        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1})
+        local holder = mk("Frame", {
+            Parent = parent,
+            Size = UDim2.new(1, 0, 0, headerHeight),
+            BackgroundTransparency = 1,
+            ClipsDescendants = true,
+        })
         local btn = mk("TextButton", {
-            Parent = holder, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
+            Parent = holder, Size = UDim2.new(1, 0, 0, headerHeight), BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
             Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
@@ -325,7 +333,22 @@ local function CreateElements(theme)
         })
         attachIcon(btn, cfg.Icon, theme.Text)
 
-        local index = 1
+        local arrow = mk("TextLabel", {
+            Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 1, 0), Position = UDim2.new(1, -26, 0, 0),
+            Text = "v", Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = theme.MutedText,
+        })
+
+        local panel = mk("Frame", {
+            Parent = holder, Position = UDim2.new(0, 0, 0, headerHeight + 6), Size = UDim2.new(1, 0, 0, 0),
+            BackgroundColor3 = theme.Surface2, BorderSizePixel = 0, ClipsDescendants = true,
+        })
+        mk("UICorner", {Parent = panel, CornerRadius = UDim.new(0, 10)})
+        mk("UIStroke", {Parent = panel, Color = theme.Border, Thickness = 1, Transparency = 0.25})
+        mk("UIListLayout", {Parent = panel, Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder})
+        mk("UIPadding", {Parent = panel, PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6), PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6)})
+
+        local optionButtons = {}
+
         local function updateLabel()
             if multi then
                 local count = 0
@@ -345,39 +368,76 @@ local function CreateElements(theme)
             end
         end
 
-        if multi and type(cfg.Default) == "table" then
-            for _, v in ipairs(cfg.Default) do selected[v] = true end
-        elseif not multi then
-            for i, v in ipairs(values) do
-                if v == selected then index = i break end
+        local function applyExpandState(animated)
+            local count = #values
+            local panelHeight = expanded and (count * rowHeight + math.max(count - 1, 0) * 4 + 12) or 0
+            local holderHeight = headerHeight + (expanded and (6 + panelHeight) or 0)
+            if animated then
+                tween(panel, 0.16, {Size = UDim2.new(1, 0, 0, panelHeight)})
+                tween(holder, 0.16, {Size = UDim2.new(1, 0, 0, holderHeight)})
+            else
+                panel.Size = UDim2.new(1, 0, 0, panelHeight)
+                holder.Size = UDim2.new(1, 0, 0, holderHeight)
+            end
+            arrow.Text = expanded and "^" or "v"
+        end
+
+        local function rebuildOptions()
+            for _, b in ipairs(optionButtons) do
+                if b and b.Parent then b:Destroy() end
+            end
+            optionButtons = {}
+
+            for _, v in ipairs(values) do
+                local opt = mk("TextButton", {
+                    Parent = panel, Size = UDim2.new(1, 0, 0, rowHeight), BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
+                    Text = tostring(v), TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13, AutoButtonColor = false,
+                })
+                mk("UICorner", {Parent = opt, CornerRadius = UDim.new(0, 8)})
+                table.insert(optionButtons, opt)
+
+                opt.MouseButton1Click:Connect(function()
+                    if multi then
+                        selected[v] = not selected[v]
+                        if cfg.Callback then cfg.Callback(selected) end
+                    else
+                        selected = v
+                        if cfg.Callback then cfg.Callback(selected) end
+                        expanded = false
+                    end
+                    updateLabel()
+                    applyExpandState(true)
+                end)
             end
         end
+
+        if multi and type(cfg.Default) == "table" then
+            for _, v in ipairs(cfg.Default) do selected[v] = true end
+        end
+
         updateLabel()
+        rebuildOptions()
+        applyExpandState(false)
 
         btn.MouseButton1Click:Connect(function()
             if #values == 0 then return end
-            if multi then
-                local current = values[index]
-                selected[current] = not selected[current]
-                if cfg.Callback then cfg.Callback(selected) end
-                index = (index % #values) + 1
-            else
-                index = (index % #values) + 1
-                selected = values[index]
-                if cfg.Callback then cfg.Callback(selected) end
-            end
-            updateLabel()
+            expanded = not expanded
+            applyExpandState(true)
         end)
 
         return {
             Refresh = function(newValues)
                 values = newValues or {}
-                index = 1
+                if not multi then
+                    selected = values[1] or ""
+                end
+                rebuildOptions()
                 updateLabel()
+                expanded = false
+                applyExpandState(false)
             end
         }
     end
-
     function Elements:Keybind(parent, cfg)
         local key = tostring(cfg.Default or "G")
         local waiting = false
@@ -620,6 +680,7 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
+
 
 
 
