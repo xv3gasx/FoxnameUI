@@ -75,7 +75,7 @@ local function getIconSprite(iconName)
     return nil
 end
 
-local function attachIcon(target, iconName, color)
+local function attachIcon(target, iconName, color, iconPosY, labelX)
     local img, meta = getIconSprite(iconName)
     if not img then return false end
 
@@ -84,7 +84,7 @@ local function attachIcon(target, iconName, color)
         Name = "FxIcon",
         BackgroundTransparency = 1,
         Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new(0, 10, 0.5, -8),
+        Position = UDim2.new(0, 10, 0, iconPosY or 10),
         Image = img,
         ImageRectSize = meta.ImageRectSize,
         ImageRectOffset = meta.ImageRectPosition,
@@ -93,7 +93,7 @@ local function attachIcon(target, iconName, color)
 
     local label = target:FindFirstChild("FxLabel")
     if label and label:IsA("TextLabel") then
-        label.Position = UDim2.new(0, 32, 0, 0)
+        label.Position = UDim2.new(0, labelX or 32, 0, 0)
         label.Size = UDim2.new(1, -42, 1, 0)
     end
     return icon ~= nil
@@ -198,16 +198,16 @@ local function CreateElements(theme)
         local max = cfg.Max or 100
         local value = cfg.Default or min
 
-        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 52), BackgroundTransparency = 1})
+        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, 58), BackgroundTransparency = 1})
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel", Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        attachIcon(holder, cfg.Icon, theme.Text)
+        attachIcon(holder, cfg.Icon, theme.Text, 1, 30)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 0, 0, 26), Size = UDim2.new(1, 0, 0, 16),
+            Parent = holder, Position = UDim2.new(0, 0, 0, 32), Size = UDim2.new(1, 0, 0, 16),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
         })
         mk("UICorner", {Parent = bar, CornerRadius = UDim.new(0, 8)})
@@ -254,8 +254,7 @@ function FoxnameUI:CreateWindow(cfg)
 
     local main = mk("Frame", {
         Parent = gui, Size = cfg.Size or UDim2.fromOffset(680, 460), Position = UDim2.fromScale(0.5, 0.5),
-        AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,
-    })
+        AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,`n        ClipsDescendants = true,`n    })
     mk("UICorner", {Parent = main, CornerRadius = UDim.new(0, 14)})
     mk("UIStroke", {Parent = main, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
 
@@ -292,8 +291,7 @@ function FoxnameUI:CreateWindow(cfg)
 
     local tabButtons = mk("Frame", {
         Parent = main, Size = UDim2.new(0, 168, 1, -46), Position = UDim2.new(0, 0, 0, 46),
-        BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
-    })
+        BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,`n        ClipsDescendants = true,`n    })
     local btnList = mk("UIListLayout", {Parent = tabButtons, Padding = UDim.new(0, 7)})
     btnList.SortOrder = Enum.SortOrder.LayoutOrder
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
@@ -322,16 +320,13 @@ function FoxnameUI:CreateWindow(cfg)
     end)
 
     hideBtn.MouseButton1Click:Connect(function()
-        tween(main, 0.18, {Size = UDim2.fromOffset(main.AbsoluteSize.X, 0), BackgroundTransparency = 0.15})
-        task.wait(0.18)
         main.Visible = false
         openBtn.Visible = true
     end)
 
     openBtn.MouseButton1Click:Connect(function()
+        main.Size = cfg.Size or UDim2.fromOffset(680, 460)
         main.Visible = true
-        main.Size = UDim2.fromOffset(cfg.Size and cfg.Size.X.Offset or 680, 0)
-        tween(main, 0.18, {Size = cfg.Size or UDim2.fromOffset(680, 460), BackgroundTransparency = 0})
         openBtn.Visible = false
     end)
 
@@ -408,3 +403,6 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
+
+
+

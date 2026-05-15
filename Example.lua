@@ -1,22 +1,16 @@
 ﻿local url = "https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua?v=" .. tostring(os.time())
 local src = game:HttpGet(url)
-
--- BOM temizle
 src = src:gsub("^\239\187\191", "")
 
-local fn, err = loadstring(src)
-if not fn then
-    error("Compile error: " .. tostring(err))
-end
+local compile, compileErr = loadstring(src)
+assert(compile, "FoxnameUI compile error: " .. tostring(compileErr))
 
-local FoxnameUI = fn()
-if not FoxnameUI then
-    error("FoxnameUI nil dondu")
-end
+local FoxnameUI = compile()
+assert(FoxnameUI, "FoxnameUI returned nil")
 
-
-print("Theme:", FoxnameUI.Theme and FoxnameUI.Theme.Name)
-print("Icon provider:", FoxnameUI.IconProvider ~= nil)
+print("FoxnameUI loaded")
+print("Theme:", FoxnameUI.Theme and FoxnameUI.Theme.Name or "N/A")
+print("Icon provider ready:", FoxnameUI.IconProvider ~= nil)
 
 local Window = FoxnameUI:CreateWindow({
     Title = "Foxname Hub",
@@ -41,7 +35,7 @@ Main:Slider({
     Max = 120,
     Default = 24,
     Callback = function(v)
-        print("Speed:", v)
+        print("WalkSpeed:", v)
     end,
 })
 
@@ -60,6 +54,17 @@ Visual:Toggle({
     Value = true,
     Callback = function(v)
         print("ESP:", v)
+    end,
+})
+
+Visual:Slider({
+    Title = "ESP Distance",
+    Icon = "ruler",
+    Min = 50,
+    Max = 3000,
+    Default = 700,
+    Callback = function(v)
+        print("ESP Distance:", v)
     end,
 })
 
