@@ -550,12 +550,12 @@ function FoxnameUI:Notify(cfg)
     })
     mk("UICorner", {Parent = progress, CornerRadius = UDim.new(1, 0)})
     -- Entry: right -> left
-    tween(card, 0.22, {Position = UDim2.new(1, 0, 1, 0)}, Enum.EasingStyle.Quad)
+    tween(card, 0.55, {Position = UDim2.new(1, 0, 1, 0)}, Enum.EasingStyle.Quart)
     local duration = cfg.Duration or 3
     tween(progress, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear)
     task.delay(duration, function()
         -- Exit: left -> right
-        tween(card, 0.2, {Position = UDim2.new(1, 360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quad)
+        tween(card, 0.55, {Position = UDim2.new(1, 360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quart)
         task.wait(0.2)
         if card and card.Parent then card:Destroy() end
     end)
