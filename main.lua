@@ -157,8 +157,8 @@ local function CreateElements(theme)
             Parent = b,
             Name = "FxLabel",
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 10, 0, 0),
-            Size = UDim2.new(1, -20, 1, 0),
+            Position = UDim2.new(0, 10, 0, extra > 0 and 3 or 0),
+            Size = UDim2.new(1, -20, 0, extra > 0 and 16 or 34),
             TextXAlignment = Enum.TextXAlignment.Left,
             Text = cfg.Title or "Button",
             TextColor3 = theme.Text,
@@ -195,7 +195,8 @@ local function CreateElements(theme)
 
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Size = UDim2.new(1, -52, 1, 0),
-            Position = UDim2.new(0, 12, 0, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            Position = UDim2.new(0, 12, 0, extra > 0 and 3 or 0),
+            Size = UDim2.new(1, -52, 0, extra > 0 and 16 or 36), TextXAlignment = Enum.TextXAlignment.Left,
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         attachIcon(btn, cfg.Icon, theme.Text)
@@ -241,8 +242,8 @@ local function CreateElements(theme)
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, hasIcon and 30 or 0, 0, 0),
-            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 18),
+            Position = UDim2.new(0, hasIcon and 30 or 0, 0, extra > 0 and 2 or 0),
+            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 16),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
@@ -275,8 +276,8 @@ local function CreateElements(theme)
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
-            Position = UDim2.new(0, hasIcon and 30 or 0, 0, 0),
-            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 18), BackgroundTransparency = 1,
+            Position = UDim2.new(0, hasIcon and 30 or 0, 0, extra > 0 and 2 or 0),
+            Size = UDim2.new(1, hasIcon and -30 or 0, 0, 16), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
             ZIndex = 3,
