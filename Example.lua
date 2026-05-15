@@ -37,6 +37,7 @@ Main:Section({ Title = "Main Features" })
 Main:Toggle({
     Title = "Auto Farm",
     Icon = "radar",
+    Description = "Automatically farms while enabled.",
     Value = false,
     Callback = function(v)
         print("Auto Farm:", v)
@@ -46,6 +47,7 @@ Main:Toggle({
 Main:Slider({
     Title = "WalkSpeed",
     Icon = "sliders-horizontal",
+    Description = "Adjust your movement speed.",
     Min = 16,
     Max = 120,
     Default = 24,
@@ -57,6 +59,7 @@ Main:Slider({
 Main:Input({
     Title = "Player Name",
     Icon = "user",
+    Description = "Enter a target player name.",
     Placeholder = "Type player...",
     Callback = function(text, enter)
         print("Input:", text, "Enter:", enter)
@@ -66,6 +69,7 @@ Main:Input({
 Main:Dropdown({
     Title = "Farm Mode",
     Icon = "list",
+    Description = "Choose your farming strategy.",
     Values = {"Normal", "Fast", "Safe"},
     Default = "Normal",
     Callback = function(v)
@@ -76,6 +80,7 @@ Main:Dropdown({
 Main:Button({
     Title = "Rejoin",
     Icon = "rocket",
+    Description = "Reconnect to the current server.",
     Callback = function()
         print("Rejoin clicked")
     end,
@@ -88,6 +93,7 @@ Visual:Section({ Title = "ESP" })
 Visual:Toggle({
     Title = "ESP",
     Icon = "crosshair",
+    Description = "Show highlighted targets.",
     Value = true,
     Callback = function(v)
         print("ESP:", v)
@@ -97,6 +103,7 @@ Visual:Toggle({
 Visual:Slider({
     Title = "ESP Distance",
     Icon = "ruler",
+    Description = "Maximum distance for ESP rendering.",
     Min = 50,
     Max = 3000,
     Default = 700,
@@ -108,6 +115,7 @@ Visual:Slider({
 Visual:Dropdown({
     Title = "ESP Targets",
     Icon = "filter",
+    Description = "Select which groups to highlight.",
     Values = {"Players", "NPC", "Items"},
     Multi = true,
     Default = {"Players"},
@@ -126,6 +134,7 @@ Settings:Section({ Title = "Window Controls" })
 Settings:Keybind({
     Title = "Toggle Key",
     Icon = "keyboard",
+    Description = "Press this key to hide/show UI.",
     Default = "RightControl",
     Callback = function(newKey)
         print("New keybind:", newKey)
@@ -144,6 +153,7 @@ Settings:Keybind({
 Settings:Button({
     Title = "Hide Window",
     Icon = "panel-left-close",
+    Description = "Hide the main window.",
     Callback = function()
         Window:Hide()
     end,
@@ -152,6 +162,7 @@ Settings:Button({
 Settings:Button({
     Title = "Show Window",
     Icon = "panel-left-open",
+    Description = "Show the main window again.",
     Callback = function()
         Window:Show()
     end,
@@ -160,6 +171,7 @@ Settings:Button({
 Settings:Button({
     Title = "Test Notify",
     Icon = "bell",
+    Description = "Send a demo notification.",
     Callback = function()
         FoxnameUI:Notify({
             Title = "Test",
@@ -172,6 +184,7 @@ Settings:Button({
 Settings:Button({
     Title = "Destroy UI",
     Icon = "x",
+    Description = "Close and remove the UI.",
     Callback = function()
         Window:Destroy()
     end,

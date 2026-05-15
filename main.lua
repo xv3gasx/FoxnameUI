@@ -109,7 +109,7 @@ local function CreateElements(theme)
         local d = mk("TextLabel", {
             Parent = parent, BackgroundTransparency = 1,
             Position = UDim2.new(0, iconOffset or 0, 0, y),
-            Size = UDim2.new(1, -(iconOffset or 0), 0, 14),
+            Size = UDim2.new(1, -(iconOffset or 0) - 8, 0, 14),
             TextXAlignment = Enum.TextXAlignment.Left, Text = text,
             TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 11,
         })
@@ -167,7 +167,7 @@ local function CreateElements(theme)
         })
 
         attachIcon(b, cfg.Icon, theme.Text)
-        addDesc(b, cfg.Description, 20, 10)
+        addDesc(b, cfg.Description, 20, (cfg.Icon and 34 or 10))
 
         b.MouseEnter:Connect(function()
             tween(b, 0.12, {BackgroundColor3 = theme.Surface3})
@@ -199,7 +199,7 @@ local function CreateElements(theme)
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         attachIcon(btn, cfg.Icon, theme.Text)
-        addDesc(btn, cfg.Description, 21, 12)
+        addDesc(btn, cfg.Description, 21, (cfg.Icon and 34 or 12))
 
         local rail = mk("Frame", {
             Parent = btn, Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -42, 0, 9), BorderSizePixel = 0,
@@ -247,7 +247,7 @@ local function CreateElements(theme)
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
         if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, 1, 30) end
-        addDesc(holder, cfg.Description, 18, hasIcon and 30 or 0)
+        addDesc(holder, cfg.Description, 18, hasIcon and 34 or 0)
 
         local box = mk("TextBox", {
             Parent = holder, Position = UDim2.new(0, 0, 0, 24 + extra), Size = UDim2.new(1, 0, 0, 30),
@@ -284,7 +284,7 @@ local function CreateElements(theme)
         if hasIcon then
             attachIcon(holder, cfg.Icon, theme.Text, 1, 30)
         end
-        addDesc(holder, cfg.Description, 18, hasIcon and 30 or 0)
+        addDesc(holder, cfg.Description, 18, hasIcon and 34 or 0)
 
         local bar = mk("Frame", {
             Parent = holder, Position = UDim2.new(0, 0, 0, 32 + extra), Size = UDim2.new(1, 0, 0, 16),
@@ -523,10 +523,13 @@ function FoxnameUI:Notify(cfg)
         layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
     end
     local stack = gui:FindFirstChild("Stack")
+    local wrap = mk("Frame", {
+        Parent = stack, BackgroundTransparency = 1, BorderSizePixel = 0,
+        Size = UDim2.fromOffset(280, 70), LayoutOrder = os.clock() * 1000,
+    })
     local card = mk("Frame", {
-        Parent = stack, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 360, 1, 0),
+        Parent = wrap, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 360, 1, 0),
         Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
-        LayoutOrder = os.clock() * 1000,
     })
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
@@ -550,14 +553,14 @@ function FoxnameUI:Notify(cfg)
     })
     mk("UICorner", {Parent = progress, CornerRadius = UDim.new(1, 0)})
     -- Entry: right -> left
-    tween(card, 0.55, {Position = UDim2.new(1, 0, 1, 0)}, Enum.EasingStyle.Quart)
+    tween(card, 0.48, {Position = UDim2.new(1, 0, 1, 0)}, Enum.EasingStyle.Quart)
     local duration = cfg.Duration or 3
     tween(progress, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear)
     task.delay(duration, function()
         -- Exit: left -> right
-        tween(card, 0.55, {Position = UDim2.new(1, 360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quart)
-        task.wait(0.2)
-        if card and card.Parent then card:Destroy() end
+        tween(card, 0.48, {Position = UDim2.new(1, 360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quart)
+        task.wait(0.5)
+        if wrap and wrap.Parent then wrap:Destroy() end
     end)
 end
 
