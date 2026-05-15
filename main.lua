@@ -524,7 +524,7 @@ function FoxnameUI:Notify(cfg)
     end
     local stack = gui:FindFirstChild("Stack")
     local card = mk("Frame", {
-        Parent = stack, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 320, 1, 0),
+        Parent = stack, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 360, 1, 0),
         Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
         LayoutOrder = os.clock() * 1000,
     })
@@ -549,11 +549,13 @@ function FoxnameUI:Notify(cfg)
         Parent = progressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Theme.Accent, BorderSizePixel = 0,
     })
     mk("UICorner", {Parent = progress, CornerRadius = UDim.new(1, 0)})
-    tween(card, 0.2, {Position = UDim2.new(1, 0, 1, 0)})
+    -- Entry: right -> left
+    tween(card, 0.22, {Position = UDim2.new(1, 0, 1, 0)}, Enum.EasingStyle.Quad)
     local duration = cfg.Duration or 3
     tween(progress, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear)
     task.delay(duration, function()
-        tween(card, 0.18, {Position = UDim2.new(1, 320, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quad)
+        -- Exit: left -> right
+        tween(card, 0.2, {Position = UDim2.new(1, 360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quad)
         task.wait(0.2)
         if card and card.Parent then card:Destroy() end
     end)
