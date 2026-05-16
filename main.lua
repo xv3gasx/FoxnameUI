@@ -157,7 +157,7 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = b, CornerRadius = UDim.new(0, 10)})
         local stroke = mk("UIStroke", {Parent = b, Color = theme.Border, Thickness = 1, Transparency = 0.35})
 
-        local titleY = hasDesc and 10 or 0
+        local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 18 or cardH
         local label = mk("TextLabel", {
             Parent = b,
@@ -208,7 +208,7 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
 
-        local titleY = hasDesc and 10 or 0
+        local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 18 or cardH
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
@@ -268,7 +268,7 @@ local function CreateElements(theme)
         local cardH = hasDesc and 76 or 56
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundTransparency = 1})
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
-        local titleY = hasDesc and 10 or 0
+        local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 18 or 20
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
@@ -307,7 +307,7 @@ local function CreateElements(theme)
         local cardH = hasDesc and 78 or 58
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundTransparency = 1})
         local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
-        local titleY = hasDesc and 10 or 0
+        local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 18 or 20
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
