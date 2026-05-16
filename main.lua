@@ -196,26 +196,29 @@ local function CreateElements(theme)
 
     function Elements:Toggle(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
+        local cardH = hasDesc and 58 or 36
         local state = cfg.Value == true
         local btn = mk("TextButton", {
-            Parent = parent, Size = UDim2.new(1, 0, 0, hasDesc and 54 or 36), BackgroundColor3 = theme.Surface2,
+            Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundColor3 = theme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
 
+        local titleY = hasDesc and 8 or 0
+        local titleH = hasDesc and 18 or cardH
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, hasDesc and 6 or 0),
-            Size = UDim2.new(1, -52 - (cfg.Icon and 22 or 0), 0, hasDesc and 16 or 36), TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = hasDesc and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
+            Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, titleY),
+            Size = UDim2.new(1, -52 - (cfg.Icon and 22 or 0), 0, titleH), TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 8 or 10, 34) end
+        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 9 or 10, 34) end
         if hasDesc then
             mk("TextLabel", {
                 Parent = btn, BackgroundTransparency = 1,
-                Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, 29),
+                Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, 34),
                 Size = UDim2.new(1, -52 - (cfg.Icon and 22 or 0), 0, 14),
                 TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
                 Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 11,
