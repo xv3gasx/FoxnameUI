@@ -648,23 +648,23 @@ function FoxnameUI:CreateWindow(cfg)
 
     local hideBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -66, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.88, Text = "-", TextColor3 = Theme.Text,
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.95, Text = "-", TextColor3 = Theme.Text,
         Font = Enum.Font.GothamBold, TextSize = 16, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = hideBtn, CornerRadius = UDim.new(0, 8)})
 
     local closeBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -34, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.88, Text = "X", TextColor3 = Color3.fromRGB(255, 110, 120),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.95, Text = "X", TextColor3 = Color3.fromRGB(255, 110, 120),
         Font = Enum.Font.GothamBold, TextSize = 14, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
     local function styleHeaderBtnHover(btn, textColor)
         btn.MouseEnter:Connect(function()
-            tween(btn, 0.12, {BackgroundTransparency = 0.78, TextColor3 = textColor})
+            tween(btn, 0.12, {BackgroundTransparency = 0.82, TextColor3 = textColor})
         end)
         btn.MouseLeave:Connect(function()
-            tween(btn, 0.12, {BackgroundTransparency = 0.88, TextColor3 = textColor})
+            tween(btn, 0.12, {BackgroundTransparency = 0.95, TextColor3 = textColor})
         end)
     end
     styleHeaderBtnHover(hideBtn, Theme.Text)
@@ -730,6 +730,12 @@ function FoxnameUI:CreateWindow(cfg)
     })
     mk("UICorner", {Parent = resizeH, CornerRadius = UDim.new(1, 0)})
     mk("UICorner", {Parent = resizeV, CornerRadius = UDim.new(1, 0)})
+    local dragBar = mk("Frame", {
+        Parent = main, Name = "DragBar", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6),
+        Size = UDim2.fromOffset(90, 5), BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, ZIndex = 20,
+    })
+    mk("UICorner", {Parent = dragBar, CornerRadius = UDim.new(1, 0)})
+    mk("UIStroke", {Parent = dragBar, Color = Theme.Border, Thickness = 1, Transparency = 0.35})
 
     local dragging = false
     local dragStart, startPos
@@ -747,6 +753,13 @@ function FoxnameUI:CreateWindow(cfg)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragStart
             main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    dragBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
         end
     end)
     local resizing, resizeStart, resizeStartSize = false, nil, nil
