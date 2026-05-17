@@ -145,7 +145,7 @@ local function CreateElements(theme)
 
     function Elements:Button(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 54 or 36
+        local cardH = hasDesc and 66 or 40
         local b = mk("TextButton", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, cardH),
@@ -157,27 +157,27 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = b, CornerRadius = UDim.new(0, 10)})
         local stroke = mk("UIStroke", {Parent = b, Color = theme.Border, Thickness = 1, Transparency = 0.35})
 
-        local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 16 or cardH
+        local titleY = hasDesc and 10 or 0
+        local titleH = hasDesc and 20 or cardH
         local label = mk("TextLabel", {
             Parent = b,
             Name = "FxLabel",
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, cfg.Icon and 34 or 10, 0, titleY),
-            Size = UDim2.new(1, -(cfg.Icon and 38 or 14), 0, titleH),
+            Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, titleY),
+            Size = UDim2.new(1, -(cfg.Icon and 42 or 16), 0, titleH),
             TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
             Text = cfg.Title or "Button",
             TextColor3 = theme.Text,
             Font = Enum.Font.GothamBold,
-            TextSize = 32/2,
+            TextSize = 30/2,
         })
         -- Element-level icons disabled by design.
         if hasDesc then
             mk("TextLabel", {
                 Parent = b, BackgroundTransparency = 1,
-                Position = UDim2.new(0, 10, 0, 30),
-                Size = UDim2.new(1, -14, 0, 14),
+                Position = UDim2.new(0, 12, 0, 34),
+                Size = UDim2.new(1, -16, 0, 16),
                 TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
                 Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 24/2,
             })
