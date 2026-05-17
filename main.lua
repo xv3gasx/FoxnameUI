@@ -1,4 +1,4 @@
-﻿local FoxnameUI = {}
+local FoxnameUI = {}
 
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
@@ -915,9 +915,3 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
-
-
-
-
-
-
