@@ -633,12 +633,13 @@ function FoxnameUI:CreateWindow(cfg)
         Size = UDim2.new(1, -120, 0, 28), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
         TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
     })
-    mk("TextLabel", {
+    local authorText = mk("TextLabel", {
         Parent = top, BackgroundTransparency = 1, Position = UDim2.new(0, 38, 0, 30),
         Size = UDim2.new(1, -130, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Top, Text = tostring(cfg.Author or "Unknown"),
+        TextYAlignment = Enum.TextYAlignment.Top, Text = tostring(cfg.Author or ""),
         TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
     })
+    authorText.Visible = (type(cfg.Author) == "string" and cfg.Author ~= "")
     attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 6, 38)
     local topIcon = top:FindFirstChild("FxIcon")
     if topIcon and topIcon:IsA("ImageLabel") then
@@ -915,3 +916,9 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
+
+
+
+
+
+
