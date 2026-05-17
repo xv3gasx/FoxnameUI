@@ -84,7 +84,7 @@ local function attachIcon(target, iconName, color, iconPosY, labelX)
         Parent = target,
         Name = "FxIcon",
         BackgroundTransparency = 1,
-        Size = UDim2.new(0, 16, 0, 16),
+        Size = UDim2.new(0, 18, 0, 18),
         Position = UDim2.new(0, 10, 0, iconPosY or 10),
         Image = img,
         ImageRectSize = meta.ImageRectSize,
@@ -170,9 +170,9 @@ local function CreateElements(theme)
             Text = cfg.Title or "Button",
             TextColor3 = theme.Text,
             Font = Enum.Font.GothamSemibold,
-            TextSize = 13,
+            TextSize = 15,
         })
-        if cfg.Icon then attachIcon(b, cfg.Icon, theme.Text, hasDesc and 9 or 9, 34) end
+        if cfg.Icon then attachIcon(b, cfg.Icon, theme.Text, hasDesc and 11 or 8, 36) end
         if hasDesc then
             mk("TextLabel", {
                 Parent = b, BackgroundTransparency = 1,
@@ -215,9 +215,9 @@ local function CreateElements(theme)
             Position = UDim2.new(0, cfg.Icon and 34 or 12, 0, titleY),
             Size = UDim2.new(1, -52 - (cfg.Icon and 22 or 0), 0, titleH), TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
-            Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+            Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
         })
-        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 9 or 10, 34) end
+        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 11 or 9, 36) end
         if hasDesc then
             mk("TextLabel", {
                 Parent = btn, BackgroundTransparency = 1,
@@ -276,9 +276,9 @@ local function CreateElements(theme)
             Size = UDim2.new(1, hasIcon and -30 or 0, 0, titleH),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
             TextYAlignment = Enum.TextYAlignment.Center,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
         })
-        if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 9 or 2, 34) end
+        if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 11 or 3, 36) end
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local box = mk("TextBox", {
@@ -315,11 +315,11 @@ local function CreateElements(theme)
             Size = UDim2.new(1, hasIcon and -30 or 0, 0, titleH), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextYAlignment = Enum.TextYAlignment.Center,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
             ZIndex = 3,
         })
         if hasIcon then
-            attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 9 or 2, 34)
+            attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 11 or 3, 36)
         end
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
