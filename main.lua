@@ -857,16 +857,16 @@ function FoxnameUI:CreateWindow(cfg)
     function windowApi:Tab(name, icon)
         local btn = mk("TextButton", {
             Parent = tabButtons, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
-            BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamSemibold,
+            BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold,
             TextSize = 13, AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 9)})
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            Text = name, TextColor3 = Theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+            Text = name, TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
         })
-        attachIcon(btn, icon, Theme.Text)
+        attachIcon(btn, icon, Theme.Text, 5, 36)
 
         local container = mk("ScrollingFrame", {
             Parent = contentArea, Size = UDim2.new(1, 0, 1, 0), CanvasSize = UDim2.new(0, 0, 0, 0),
