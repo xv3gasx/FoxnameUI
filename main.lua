@@ -707,11 +707,11 @@ function FoxnameUI:CreateWindow(cfg)
         Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
     })
     local resizeHandle = mk("Frame", {
-        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -4, 1, -4),
-        Size = UDim2.fromOffset(14, 14), BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0,
+        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6),
+        Size = UDim2.fromOffset(90, 5), BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, ZIndex = 20,
     })
-    mk("UICorner", {Parent = resizeHandle, CornerRadius = UDim.new(0, 4)})
-    mk("UIStroke", {Parent = resizeHandle, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+    mk("UICorner", {Parent = resizeHandle, CornerRadius = UDim.new(1, 0)})
+    mk("UIStroke", {Parent = resizeHandle, Color = Theme.Border, Thickness = 1, Transparency = 0.35})
 
     local dragging = false
     local dragStart, startPos
