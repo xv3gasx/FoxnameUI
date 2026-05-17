@@ -145,7 +145,7 @@ local function CreateElements(theme)
 
     function Elements:Button(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 64 or 40
+        local cardH = hasDesc and 54 or 36
         local b = mk("TextButton", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, cardH),
@@ -158,7 +158,7 @@ local function CreateElements(theme)
         local stroke = mk("UIStroke", {Parent = b, Color = theme.Border, Thickness = 1, Transparency = 0.35})
 
         local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 24 or cardH
+        local titleH = hasDesc and 16 or cardH
         local label = mk("TextLabel", {
             Parent = b,
             Name = "FxLabel",
@@ -172,12 +172,12 @@ local function CreateElements(theme)
             Font = Enum.Font.GothamBold,
             TextSize = 32/2,
         })
-        if cfg.Icon then attachIcon(b, cfg.Icon, theme.Text, hasDesc and 12 or 9, 40) end
+        -- Element-level icons disabled by design.
         if hasDesc then
             mk("TextLabel", {
                 Parent = b, BackgroundTransparency = 1,
-                Position = UDim2.new(0, cfg.Icon and 40 or 10, 0, 38),
-                Size = UDim2.new(1, -(cfg.Icon and 38 or 14), 0, 14),
+                Position = UDim2.new(0, 10, 0, 30),
+                Size = UDim2.new(1, -14, 0, 14),
                 TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
                 Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 24/2,
             })
@@ -199,7 +199,7 @@ local function CreateElements(theme)
 
     function Elements:Toggle(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 64 or 40
+        local cardH = hasDesc and 54 or 36
         local state = cfg.Value == true
         local btn = mk("TextButton", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundColor3 = theme.Surface2,
@@ -209,20 +209,20 @@ local function CreateElements(theme)
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
 
         local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 24 or cardH
+        local titleH = hasDesc and 16 or cardH
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, cfg.Icon and 40 or 12, 0, titleY),
-            Size = UDim2.new(1, -52 - (cfg.Icon and 28 or 0), 0, titleH), TextXAlignment = Enum.TextXAlignment.Left,
+            Position = UDim2.new(0, 12, 0, titleY),
+            Size = UDim2.new(1, -52, 0, titleH), TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 32/2,
         })
-        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 12 or 9, 40) end
+        -- Element-level icons disabled by design.
         if hasDesc then
             mk("TextLabel", {
                 Parent = btn, BackgroundTransparency = 1,
-                Position = UDim2.new(0, cfg.Icon and 40 or 12, 0, 38),
-                Size = UDim2.new(1, -52 - (cfg.Icon and 28 or 0), 0, 14),
+                Position = UDim2.new(0, 12, 0, 30),
+                Size = UDim2.new(1, -52, 0, 14),
                 TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
                 Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 24/2,
             })
@@ -265,11 +265,11 @@ local function CreateElements(theme)
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local extra = hasDesc and 20 or 0
-        local cardH = hasDesc and 76 or 56
+        local cardH = hasDesc and 66 or 52
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundTransparency = 1})
-        local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
+        local hasIcon = false
         local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 18 or 20
+        local titleH = hasDesc and 16 or 20
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
             Position = UDim2.new(0, hasIcon and 34 or 0, 0, titleY),
@@ -278,7 +278,7 @@ local function CreateElements(theme)
             TextYAlignment = Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
         })
-        if hasIcon then attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 11 or 3, 36) end
+        -- Element-level icons disabled by design.
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local box = mk("TextBox", {
@@ -304,11 +304,11 @@ local function CreateElements(theme)
 
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local extra = hasDesc and 20 or 0
-        local cardH = hasDesc and 78 or 58
+        local cardH = hasDesc and 68 or 56
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundTransparency = 1})
-        local hasIcon = cfg.Icon ~= nil and cfg.Icon ~= ""
+        local hasIcon = false
         local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 18 or 20
+        local titleH = hasDesc and 16 or 20
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
             Position = UDim2.new(0, hasIcon and 34 or 0, 0, titleY),
@@ -318,9 +318,7 @@ local function CreateElements(theme)
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
             ZIndex = 3,
         })
-        if hasIcon then
-            attachIcon(holder, cfg.Icon, theme.Text, hasDesc and 11 or 3, 36)
-        end
+        -- Element-level icons disabled by design.
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local bar = mk("Frame", {
@@ -391,7 +389,7 @@ local function CreateElements(theme)
             TextYAlignment = Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        attachIcon(btn, cfg.Icon, theme.Text, 8, 34)
+        -- Element-level icons disabled by design.
 
         local arrow = mk("TextLabel", {
             Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 1, 0), Position = UDim2.new(1, -26, 0, 0),
@@ -513,7 +511,7 @@ local function CreateElements(theme)
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        attachIcon(btn, cfg.Icon, theme.Text)
+        -- Element-level icons disabled by design.
 
         local function syncText()
             label.Text = string.format("%s: [%s]", cfg.Title or "Keybind", waiting and "..." or key)
