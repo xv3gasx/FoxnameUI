@@ -264,8 +264,7 @@ local function CreateElements(theme)
 
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local extra = hasDesc and 20 or 0
-        local cardH = hasDesc and 92 or 58
+        local cardH = hasDesc and 74 or 58
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -277,8 +276,8 @@ local function CreateElements(theme)
         local titleH = hasDesc and 16 or 20
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, hasIcon and 34 or 0, 0, titleY),
-            Size = UDim2.new(1, hasIcon and -30 or 0, 0, titleH),
+            Position = UDim2.new(0, hasIcon and 34 or 10, 0, titleY),
+            Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
             TextYAlignment = Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
@@ -287,8 +286,8 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 0, 0, hasDesc and 56 or 26), Size = UDim2.new(1, 0, 0, 30),
-            BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
+            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 44 or 26), Size = UDim2.new(1, -20, 0, 24),
+            BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
             TextColor3 = theme.Text, PlaceholderColor3 = theme.MutedText,
@@ -310,7 +309,12 @@ local function CreateElements(theme)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local extra = hasDesc and 20 or 0
         local cardH = hasDesc and 74 or 60
-        local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundTransparency = 1})
+        local holder = mk("Frame", {
+            Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
+            BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
+        })
+        mk("UICorner", {Parent = holder, CornerRadius = UDim.new(0, 10)})
+        mk("UIStroke", {Parent = holder, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local hasIcon = false
         local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 16 or 20
@@ -373,8 +377,7 @@ local function CreateElements(theme)
         local multi = cfg.Multi == true
         local selected = multi and {} or (cfg.Default or values[1] or "")
         local rowHeight = 30
-        local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local headerHeight = hasDesc and 56 or 36
+        local headerHeight = 36
         local expanded = false
 
         local holder = mk("Frame", {
@@ -391,25 +394,10 @@ local function CreateElements(theme)
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local label = mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
-            Size = UDim2.new(1, -36, 0, hasDesc and 30 or headerHeight), TextXAlignment = Enum.TextXAlignment.Left,
-            Position = UDim2.new(0, 10, 0, hasDesc and 4 or 0),
-            TextYAlignment = hasDesc and Enum.TextYAlignment.Bottom or Enum.TextYAlignment.Center,
+            Size = UDim2.new(1, -36, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        if hasDesc then
-            mk("TextLabel", {
-                Parent = btn,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 10, 0, 30),
-                Size = UDim2.new(1, -36, 0, 20),
-                Text = cfg.Description,
-                TextColor3 = theme.MutedText,
-                Font = Enum.Font.Gotham,
-                TextSize = 12,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                TextYAlignment = Enum.TextYAlignment.Top,
-            })
-        end
         -- Element-level icons disabled by design.
 
         local arrow = mk("TextLabel", {
