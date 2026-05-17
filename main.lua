@@ -620,7 +620,7 @@ function FoxnameUI:CreateWindow(cfg)
     local main = mk("Frame", {
         Parent = gui, Size = defaultSize, Position = UDim2.fromScale(0.5, 0.5),
         AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,
-        ClipsDescendants = true,
+        ClipsDescendants = false,
     })
     mk("UICorner", {Parent = main, CornerRadius = UDim.new(0, 14)})
     mk("UIStroke", {Parent = main, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
@@ -648,23 +648,23 @@ function FoxnameUI:CreateWindow(cfg)
 
     local hideBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -66, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.95, Text = "-", TextColor3 = Theme.Text,
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "-", TextColor3 = Theme.Text,
         Font = Enum.Font.GothamBold, TextSize = 16, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = hideBtn, CornerRadius = UDim.new(0, 8)})
 
     local closeBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -34, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.95, Text = "X", TextColor3 = Color3.fromRGB(255, 110, 120),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "X", TextColor3 = Color3.fromRGB(255, 110, 120),
         Font = Enum.Font.GothamBold, TextSize = 14, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
     local function styleHeaderBtnHover(btn, textColor)
         btn.MouseEnter:Connect(function()
-            tween(btn, 0.12, {BackgroundTransparency = 0.82, TextColor3 = textColor})
+            tween(btn, 0.12, {BackgroundTransparency = 1, TextColor3 = textColor})
         end)
         btn.MouseLeave:Connect(function()
-            tween(btn, 0.12, {BackgroundTransparency = 0.95, TextColor3 = textColor})
+            tween(btn, 0.12, {BackgroundTransparency = 1, TextColor3 = textColor})
         end)
     end
     styleHeaderBtnHover(hideBtn, Theme.Text)
