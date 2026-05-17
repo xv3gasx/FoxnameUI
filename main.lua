@@ -280,7 +280,7 @@ local function CreateElements(theme)
             Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
             TextYAlignment = Enum.TextYAlignment.Center,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 15,
         })
         -- Element-level icons disabled by design.
         addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
@@ -323,7 +323,7 @@ local function CreateElements(theme)
             Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextYAlignment = Enum.TextYAlignment.Center,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 15,
             ZIndex = 3,
         })
         -- Element-level icons disabled by design.
@@ -395,7 +395,7 @@ local function CreateElements(theme)
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -36, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
         })
         -- Element-level icons disabled by design.
 
@@ -518,7 +518,7 @@ local function CreateElements(theme)
         local label = mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
         })
         -- Element-level icons disabled by design.
 
