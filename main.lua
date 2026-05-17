@@ -309,7 +309,7 @@ local function CreateElements(theme)
 
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local extra = hasDesc and 20 or 0
-        local cardH = hasDesc and 68 or 56
+        local cardH = hasDesc and 74 or 60
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundTransparency = 1})
         local hasIcon = false
         local titleY = hasDesc and 12 or 0
@@ -327,7 +327,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, 32 + extra), Size = UDim2.new(1, -20, 0, 16),
+            Parent = holder, Position = UDim2.new(0, 10, 0, 34 + extra), Size = UDim2.new(1, -20, 0, 16),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             ZIndex = 1,
         })
