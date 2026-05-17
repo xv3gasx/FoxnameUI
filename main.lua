@@ -283,7 +283,7 @@ local function CreateElements(theme)
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 16)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
 
         local box = mk("TextBox", {
             Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 22),
@@ -327,7 +327,7 @@ local function CreateElements(theme)
             ZIndex = 3,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 16)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
 
         local bar = mk("Frame", {
             Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 14),
