@@ -265,7 +265,7 @@ local function CreateElements(theme)
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local extra = hasDesc and 20 or 0
-        local cardH = hasDesc and 82 or 56
+        local cardH = hasDesc and 92 or 58
         local holder = mk("Frame", {Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundTransparency = 1})
         local hasIcon = false
         local titleY = hasDesc and 12 or 0
@@ -282,7 +282,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 0, 0, hasDesc and 50 or 24), Size = UDim2.new(1, 0, 0, 30),
+            Parent = holder, Position = UDim2.new(0, 0, 0, hasDesc and 56 or 26), Size = UDim2.new(1, 0, 0, 30),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
