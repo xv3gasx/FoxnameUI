@@ -717,19 +717,14 @@ function FoxnameUI:CreateWindow(cfg)
         Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
     })
     local resizeHandle = mk("Frame", {
-        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 4, 1, 4),
+        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 2, 1, 2),
         Size = UDim2.fromOffset(22, 22), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 20,
     })
-    local resizeH = mk("Frame", {
-        Parent = resizeHandle, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -1, 1, -1),
-        Size = UDim2.fromOffset(13, 3), BackgroundColor3 = Theme.Border, BorderSizePixel = 0, ZIndex = 21,
+    mk("TextLabel", {
+        Parent = resizeHandle, BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1),
+        Text = ")", TextColor3 = Theme.Border, Font = Enum.Font.GothamBold, TextSize = 26,
+        TextXAlignment = Enum.TextXAlignment.Right, TextYAlignment = Enum.TextYAlignment.Bottom, ZIndex = 21,
     })
-    local resizeV = mk("Frame", {
-        Parent = resizeHandle, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -1, 1, -1),
-        Size = UDim2.fromOffset(3, 13), BackgroundColor3 = Theme.Border, BorderSizePixel = 0, ZIndex = 21,
-    })
-    mk("UICorner", {Parent = resizeH, CornerRadius = UDim.new(1, 0)})
-    mk("UICorner", {Parent = resizeV, CornerRadius = UDim.new(1, 0)})
     local dragBar = mk("Frame", {
         Parent = main, Name = "DragBar", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6),
         Size = UDim2.fromOffset(90, 5), BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, ZIndex = 20,
