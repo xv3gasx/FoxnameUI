@@ -157,7 +157,7 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = b, CornerRadius = UDim.new(0, 10)})
         local stroke = mk("UIStroke", {Parent = b, Color = theme.Border, Thickness = 1, Transparency = 0.35})
 
-        local titleY = hasDesc and 10 or 0
+        local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 24 or cardH
         local label = mk("TextLabel", {
             Parent = b,
@@ -172,7 +172,7 @@ local function CreateElements(theme)
             Font = Enum.Font.GothamBold,
             TextSize = 32/2,
         })
-        if cfg.Icon then attachIcon(b, cfg.Icon, theme.Text, hasDesc and 10 or 9, 40) end
+        if cfg.Icon then attachIcon(b, cfg.Icon, theme.Text, hasDesc and 12 or 9, 40) end
         if hasDesc then
             mk("TextLabel", {
                 Parent = b, BackgroundTransparency = 1,
@@ -208,7 +208,7 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
 
-        local titleY = hasDesc and 10 or 0
+        local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 24 or cardH
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
@@ -217,7 +217,7 @@ local function CreateElements(theme)
             TextYAlignment = Enum.TextYAlignment.Center,
             Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 32/2,
         })
-        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 10 or 9, 40) end
+        if cfg.Icon then attachIcon(btn, cfg.Icon, theme.Text, hasDesc and 12 or 9, 40) end
         if hasDesc then
             mk("TextLabel", {
                 Parent = btn, BackgroundTransparency = 1,
@@ -388,9 +388,10 @@ local function CreateElements(theme)
         local label = mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
-        attachIcon(btn, cfg.Icon, theme.Text)
+        attachIcon(btn, cfg.Icon, theme.Text, 8, 34)
 
         local arrow = mk("TextLabel", {
             Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 1, 0), Position = UDim2.new(1, -26, 0, 0),
