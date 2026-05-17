@@ -652,6 +652,11 @@ function FoxnameUI:CreateWindow(cfg)
         Font = Enum.Font.GothamBold, TextSize = 16, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = hideBtn, CornerRadius = UDim.new(0, 8)})
+    local hideHover = mk("Frame", {
+        Parent = hideBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = hideBtn.ZIndex - 1,
+    })
+    mk("UICorner", {Parent = hideHover, CornerRadius = UDim.new(0, 8)})
 
     local closeBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -34, 0.5, -12),
@@ -659,16 +664,33 @@ function FoxnameUI:CreateWindow(cfg)
         Font = Enum.Font.GothamBold, TextSize = 14, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
+    local closeHover = mk("Frame", {
+        Parent = closeBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = closeBtn.ZIndex - 1,
+    })
+    mk("UICorner", {Parent = closeHover, CornerRadius = UDim.new(0, 8)})
     local function styleHeaderBtnHover(btn, textColor)
+        local hoverLayer = btn:FindFirstChildOfClass("Frame")
         btn.MouseEnter:Connect(function()
-            tween(btn, 0.12, {BackgroundTransparency = 1, TextColor3 = textColor})
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.78}) end
+            tween(btn, 0.12, {TextColor3 = textColor})
         end)
         btn.MouseLeave:Connect(function()
-            tween(btn, 0.12, {BackgroundTransparency = 1, TextColor3 = textColor})
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.92}) end
+            tween(btn, 0.12, {TextColor3 = textColor})
         end)
     end
     styleHeaderBtnHover(hideBtn, Theme.Text)
     styleHeaderBtnHover(closeBtn, Color3.fromRGB(255, 110, 120))
+    top:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+        local h = top.AbsoluteSize.Y
+        local bh = math.clamp(math.floor(h * 0.42), 22, 26)
+        local bw = math.clamp(math.floor(h * 0.48), 26, 32)
+        hideBtn.Size = UDim2.fromOffset(bw, bh)
+        closeBtn.Size = UDim2.fromOffset(bw, bh)
+        hideBtn.Position = UDim2.new(1, -(bw * 2 + 10), 0.5, -math.floor(bh / 2))
+        closeBtn.Position = UDim2.new(1, -(bw + 4), 0.5, -math.floor(bh / 2))
+    end)
 
     local openCfg = cfg.OpenButton or {}
     local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
@@ -717,14 +739,15 @@ function FoxnameUI:CreateWindow(cfg)
         Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
     })
     local resizeHandle = mk("Frame", {
-        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 6, 1, 8),
+        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 8, 1, 8),
         Size = UDim2.fromOffset(28, 28), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 60,
     })
-    mk("TextLabel", {
+    local resizeGlyph = mk("TextLabel", {
         Parent = resizeHandle, BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1),
         Text = ")", TextColor3 = Theme.Border, Font = Enum.Font.GothamBold, TextSize = 30,
-        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Bottom, ZIndex = 61,
+        TextXAlignment = Enum.TextXAlignment.Right, TextYAlignment = Enum.TextYAlignment.Bottom, ZIndex = 61,
     })
+    resizeGlyph.Rotation = 22
     local dragBar = mk("Frame", {
         Parent = main, Name = "DragBar", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6),
         Size = UDim2.fromOffset(90, 5), BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, ZIndex = 20,
