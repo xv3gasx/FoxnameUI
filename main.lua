@@ -717,13 +717,13 @@ function FoxnameUI:CreateWindow(cfg)
         Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
     })
     local resizeHandle = mk("Frame", {
-        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 8, 1, 8),
+        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 6, 1, 8),
         Size = UDim2.fromOffset(28, 28), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 60,
     })
     mk("TextLabel", {
         Parent = resizeHandle, BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1),
         Text = ")", TextColor3 = Theme.Border, Font = Enum.Font.GothamBold, TextSize = 30,
-        TextXAlignment = Enum.TextXAlignment.Right, TextYAlignment = Enum.TextYAlignment.Bottom, ZIndex = 61,
+        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Bottom, ZIndex = 61,
     })
     local dragBar = mk("Frame", {
         Parent = main, Name = "DragBar", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6),
