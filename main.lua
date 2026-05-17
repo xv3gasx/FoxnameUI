@@ -264,7 +264,7 @@ local function CreateElements(theme)
 
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 70 or 58
+        local cardH = hasDesc and 68 or 52
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -272,8 +272,8 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = holder, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = holder, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local hasIcon = false
-        local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 16 or 20
+        local titleY = hasDesc and 8 or 6
+        local titleH = 18
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
             Position = UDim2.new(0, hasIcon and 34 or 10, 0, titleY),
@@ -283,10 +283,10 @@ local function CreateElements(theme)
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 48 or 26), Size = UDim2.new(1, -20, 0, 20),
+            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -20, 0, 20),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -307,8 +307,7 @@ local function CreateElements(theme)
         local value = cfg.Default or min
 
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local extra = hasDesc and 16 or 0
-        local cardH = hasDesc and 66 or 56
+        local cardH = hasDesc and 64 or 50
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -316,8 +315,8 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = holder, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = holder, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local hasIcon = false
-        local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 16 or 20
+        local titleY = hasDesc and 8 or 6
+        local titleH = 18
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
             Position = UDim2.new(0, hasIcon and 34 or 10, 0, titleY),
@@ -328,10 +327,10 @@ local function CreateElements(theme)
             ZIndex = 3,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, 32 + extra), Size = UDim2.new(1, -20, 0, 16),
+            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -20, 0, 14),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             ZIndex = 1,
         })
