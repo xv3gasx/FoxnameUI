@@ -707,7 +707,7 @@ function FoxnameUI:CreateWindow(cfg)
         Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
     })
     local resizeHandle = mk("Frame", {
-        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -8, 1, -8),
+        Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 6, 1, 6),
         Size = UDim2.fromOffset(26, 26), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 20,
     })
     local resizeH = mk("Frame", {
