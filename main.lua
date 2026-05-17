@@ -636,7 +636,7 @@ function FoxnameUI:CreateWindow(cfg)
     mk("TextLabel", {
         Parent = top, BackgroundTransparency = 1, Position = UDim2.new(0, 38, 0, 30),
         Size = UDim2.new(1, -130, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Top, Text = "Author: " .. tostring(cfg.Author or "Unknown"),
+        TextYAlignment = Enum.TextYAlignment.Top, Text = tostring(cfg.Author or "Unknown"),
         TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
     })
     attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 6, 38)
