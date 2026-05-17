@@ -629,18 +629,18 @@ function FoxnameUI:CreateWindow(cfg)
     mk("UICorner", {Parent = top, CornerRadius = UDim.new(0, 14)})
 
     local titleLabel = mk("TextLabel", {
-        Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 8),
+        Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 12),
         Size = UDim2.new(1, -120, 0, 24), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
         TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
     })
     local authorText = mk("TextLabel", {
-        Parent = top, BackgroundTransparency = 1, Position = UDim2.new(0, 38, 0, 33),
+        Parent = top, BackgroundTransparency = 1, Position = UDim2.new(0, 38, 0, 37),
         Size = UDim2.new(1, -130, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Top, Text = tostring(cfg.Author or ""),
         TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
     })
     authorText.Visible = (type(cfg.Author) == "string" and cfg.Author ~= "")
-    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 10, 38)
+    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 14, 38)
     local topIcon = top:FindFirstChild("FxIcon")
     if topIcon and topIcon:IsA("ImageLabel") then
         topIcon.Size = UDim2.new(0, 20, 0, 20)
