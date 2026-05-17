@@ -276,14 +276,14 @@ local function CreateElements(theme)
         local titleH = 18
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, hasIcon and 34 or 10, 0, titleY),
+            Position = UDim2.new(0, hasIcon and 34 or 8, 0, titleY),
             Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
             TextYAlignment = Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local box = mk("TextBox", {
             Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 22),
@@ -319,7 +319,7 @@ local function CreateElements(theme)
         local titleH = 18
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
-            Position = UDim2.new(0, hasIcon and 34 or 10, 0, titleY),
+            Position = UDim2.new(0, hasIcon and 34 or 8, 0, titleY),
             Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextYAlignment = Enum.TextYAlignment.Center,
@@ -327,7 +327,7 @@ local function CreateElements(theme)
             ZIndex = 3,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local bar = mk("Frame", {
             Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 14),
