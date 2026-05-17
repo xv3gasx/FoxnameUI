@@ -625,15 +625,21 @@ function FoxnameUI:CreateWindow(cfg)
     mk("UICorner", {Parent = main, CornerRadius = UDim.new(0, 14)})
     mk("UIStroke", {Parent = main, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
 
-    local top = mk("Frame", {Parent = main, Size = UDim2.new(1, 0, 0, 46), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0})
+    local top = mk("Frame", {Parent = main, Size = UDim2.new(1, 0, 0, 58), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0})
     mk("UICorner", {Parent = top, CornerRadius = UDim.new(0, 14)})
 
     local titleLabel = mk("TextLabel", {
-        Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 0),
-        Size = UDim2.new(1, -120, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
+        Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 2),
+        Size = UDim2.new(1, -120, 0, 28), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
         TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
     })
-    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 10, 38)
+    mk("TextLabel", {
+        Parent = top, BackgroundTransparency = 1, Position = UDim2.new(0, 38, 0, 30),
+        Size = UDim2.new(1, -130, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top, Text = "Author: " .. tostring(cfg.Author or "Unknown"),
+        TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
+    })
+    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 6, 38)
     local topIcon = top:FindFirstChild("FxIcon")
     if topIcon and topIcon:IsA("ImageLabel") then
         topIcon.Size = UDim2.new(0, 20, 0, 20)
@@ -687,7 +693,7 @@ function FoxnameUI:CreateWindow(cfg)
     local savedPos = main.Position
 
     local tabButtons = mk("Frame", {
-        Parent = main, Size = UDim2.new(0, 168, 1, -42), Position = UDim2.new(0, 0, 0, 42),
+        Parent = main, Size = UDim2.new(0, 168, 1, -58), Position = UDim2.new(0, 0, 0, 58),
         BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
         ClipsDescendants = true,
     })
@@ -697,7 +703,7 @@ function FoxnameUI:CreateWindow(cfg)
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
 
     local contentArea = mk("Frame", {
-        Parent = main, Position = UDim2.new(0, 168, 0, 46), Size = UDim2.new(1, -168, 1, -46), BackgroundTransparency = 1,
+        Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
     })
     local resizeHandle = mk("Frame", {
         Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -4, 1, -4),

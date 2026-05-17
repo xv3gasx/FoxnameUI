@@ -21,6 +21,7 @@ FoxnameUI:Notify({
 
 local Window = FoxnameUI:CreateWindow({
     Title = "Foxname Hub",
+    Author = "discord.gg/foxname",
     Icon = "app-window",
     DefaultSize = UDim2.fromOffset(700, 470),
     MinSize = UDim2.fromOffset(560, 360),
