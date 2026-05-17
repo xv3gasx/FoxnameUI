@@ -264,7 +264,7 @@ local function CreateElements(theme)
 
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 74 or 58
+        local cardH = hasDesc and 70 or 58
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -286,7 +286,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 44 or 26), Size = UDim2.new(1, -20, 0, 24),
+            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 48 or 26), Size = UDim2.new(1, -20, 0, 20),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -307,8 +307,8 @@ local function CreateElements(theme)
         local value = cfg.Default or min
 
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local extra = hasDesc and 20 or 0
-        local cardH = hasDesc and 74 or 60
+        local extra = hasDesc and 16 or 0
+        local cardH = hasDesc and 66 or 56
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -320,8 +320,8 @@ local function CreateElements(theme)
         local titleH = hasDesc and 16 or 20
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
-            Position = UDim2.new(0, hasIcon and 34 or 0, 0, titleY),
-            Size = UDim2.new(1, hasIcon and -30 or 0, 0, titleH), BackgroundTransparency = 1,
+            Position = UDim2.new(0, hasIcon and 34 or 10, 0, titleY),
+            Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextYAlignment = Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
@@ -331,7 +331,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 33, hasIcon and 34 or 0)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, 34 + extra), Size = UDim2.new(1, -20, 0, 16),
+            Parent = holder, Position = UDim2.new(0, 10, 0, 32 + extra), Size = UDim2.new(1, -20, 0, 16),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             ZIndex = 1,
         })
