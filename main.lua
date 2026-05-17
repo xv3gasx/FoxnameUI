@@ -368,7 +368,8 @@ local function CreateElements(theme)
         local multi = cfg.Multi == true
         local selected = multi and {} or (cfg.Default or values[1] or "")
         local rowHeight = 30
-        local headerHeight = 36
+        local hasDesc = (cfg.Description and cfg.Description ~= "")
+        local headerHeight = hasDesc and 56 or 36
         local expanded = false
 
         local holder = mk("Frame", {
@@ -385,15 +386,31 @@ local function CreateElements(theme)
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local label = mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
-            Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = Enum.TextYAlignment.Center,
+            Size = UDim2.new(1, -36, 0, hasDesc and 30 or headerHeight), TextXAlignment = Enum.TextXAlignment.Left,
+            Position = UDim2.new(0, 10, 0, hasDesc and 4 or 0),
+            TextYAlignment = hasDesc and Enum.TextYAlignment.Bottom or Enum.TextYAlignment.Center,
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13,
         })
+        if hasDesc then
+            mk("TextLabel", {
+                Parent = btn,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 10, 0, 30),
+                Size = UDim2.new(1, -36, 0, 20),
+                Text = cfg.Description,
+                TextColor3 = theme.MutedText,
+                Font = Enum.Font.Gotham,
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Top,
+            })
+        end
         -- Element-level icons disabled by design.
 
         local arrow = mk("TextLabel", {
             Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 1, 0), Position = UDim2.new(1, -26, 0, 0),
             Text = "v", Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = theme.MutedText,
+            TextYAlignment = Enum.TextYAlignment.Center,
         })
 
         local panel = mk("Frame", {
