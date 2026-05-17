@@ -114,7 +114,7 @@ local function CreateElements(theme)
             Text = text,
             TextColor3 = theme.MutedText,
             Font = Enum.Font.Gotham,
-            TextSize = 11,
+            TextSize = 12,
         })
         return 16
     end
@@ -283,10 +283,10 @@ local function CreateElements(theme)
             TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 16)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -20, 0, 20),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 22),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -327,10 +327,10 @@ local function CreateElements(theme)
             ZIndex = 3,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 10)
+        addDesc(holder, cfg.Description, 28, hasIcon and 34 or 16)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -20, 0, 14),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 14),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             ZIndex = 1,
         })
