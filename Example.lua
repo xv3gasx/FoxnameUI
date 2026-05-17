@@ -1,5 +1,10 @@
 ﻿-- Do Not Edit This Section!!!
-local _cb = table.concat({`r`n    tostring(os.time()),`r`n    tostring(math.floor((tick and tick() or os.clock()) * 1000)),`r`n    tostring(math.random(100000, 999999))`r`n}, "-")`r`nlocal url = "https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua?v=" .. _cb .. "&t=" .. _cb .. "&nocache=" .. _cb
+local _cb = table.concat({
+    tostring(os.time()),
+    tostring(math.floor((tick and tick() or os.clock()) * 1000)),
+    tostring(math.random(100000, 999999))
+}, "-")
+local url = "https://raw.githubusercontent.com/xv3gasx/FoxnameUI/main/main.lua?v=" .. _cb .. "&t=" .. _cb .. "&nocache=" .. _cb
 local src = game:HttpGet(url)
 src = src:gsub("^\239\187\191", "")
 
