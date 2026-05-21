@@ -47,6 +47,11 @@ local MiscSection = Window:Section({
 
 local Main = MiscSection:Tab({ Title = "Main", Icon = "app-window-mac", Locked = false })
 Main:Section({ Title = "Main Features" })
+Main:Paragraph({
+    Title = "Welcome",
+    Content = "New demo elements added: Paragraph, Space, Colorpicker and Dialog.",
+})
+Main:Space({ Height = 4 })
 
 Main:Toggle({
     Title = "Auto Farm",
@@ -136,6 +141,15 @@ local Settings = MiscSection:Tab({ Title = "Settings", Icon = "settings", Locked
 local uiVisible = true
 Settings:Section({ Title = "Window Controls" })
 
+Settings:Colorpicker({
+    Title = "Accent Preview",
+    Description = "Type hex color and press enter.",
+    Default = Color3.fromRGB(255, 120, 40),
+    Callback = function(c)
+        print("Picked color:", c)
+    end,
+})
+
 Settings:Keybind({
     Title = "Toggle Key",
     Default = "RightControl",
@@ -186,7 +200,15 @@ Settings:Button({
     Title = "Destroy UI",
     Description = "Close and remove the UI.",
     Callback = function()
-        Window:Destroy()
+        Window:Dialog({
+            Title = "Destroy UI",
+            Content = "Are you sure you want to destroy the UI?",
+            ConfirmText = "Yes, Destroy",
+            CancelText = "Cancel",
+            OnConfirm = function()
+                Window:Destroy()
+            end,
+        })
     end,
 })
 
