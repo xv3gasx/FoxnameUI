@@ -20,6 +20,18 @@ local Theme = {
 }
 local NotifyHost = nil
 
+local function copyTable(t)
+    local out = {}
+    for k, v in pairs(t or {}) do
+        if type(v) == "table" then
+            out[k] = copyTable(v)
+        else
+            out[k] = v
+        end
+    end
+    return out
+end
+
 local function mk(class, props)
     local i = Instance.new(class)
     for k, v in pairs(props or {}) do
@@ -183,7 +195,7 @@ local function CreateElements(theme)
 
     function Elements:Colorpicker(parent, cfg)
         cfg = cfg or {}
-        local h = 66
+        local h = 140
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, h),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -192,6 +204,7 @@ local function CreateElements(theme)
         mk("UIStroke", {Parent = holder, Color = theme.Border, Thickness = 1, Transparency = 0.25})
 
         local current = cfg.Default or Color3.fromRGB(255, 120, 40)
+        local hue, sat, val = Color3.toHSV(current)
         local function colorToHex(c)
             local r = math.floor(c.R * 255 + 0.5)
             local g = math.floor(c.G * 255 + 0.5)
@@ -222,14 +235,79 @@ local function CreateElements(theme)
         end
 
         local preview = mk("Frame", {
-            Parent = holder, Position = UDim2.new(1, -42, 0, 12), Size = UDim2.new(0, 26, 0, 26),
+            Parent = holder, Position = UDim2.new(1, -42, 0, 10), Size = UDim2.new(0, 26, 0, 26),
             BackgroundColor3 = current, BorderSizePixel = 0,
         })
         mk("UICorner", {Parent = preview, CornerRadius = UDim.new(0, 7)})
         mk("UIStroke", {Parent = preview, Color = theme.Border, Thickness = 1, Transparency = 0.2})
 
+        local sv = mk("Frame", {
+            Parent = holder, Position = UDim2.new(0, 10, 0, 42), Size = UDim2.new(1, -52, 0, 60),
+            BackgroundColor3 = Color3.fromHSV(hue, 1, 1), BorderSizePixel = 0,
+        })
+        mk("UICorner", {Parent = sv, CornerRadius = UDim.new(0, 7)})
+        local svWhite = mk("UIGradient", {
+            Parent = sv,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+                ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
+            }),
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1),
+            }),
+            Rotation = 0,
+        })
+        local svBlack = mk("Frame", {
+            Parent = sv, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0),
+            BorderSizePixel = 0, BackgroundTransparency = 1,
+        })
+        mk("UICorner", {Parent = svBlack, CornerRadius = UDim.new(0, 7)})
+        mk("UIGradient", {
+            Parent = svBlack,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
+                ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
+            }),
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0),
+            }),
+            Rotation = 90,
+        })
+        local svKnob = mk("Frame", {
+            Parent = sv, Size = UDim2.fromOffset(10, 10), BackgroundColor3 = Color3.new(1, 1, 1),
+            BorderSizePixel = 0,
+        })
+        mk("UICorner", {Parent = svKnob, CornerRadius = UDim.new(1, 0)})
+        mk("UIStroke", {Parent = svKnob, Color = Color3.new(0, 0, 0), Thickness = 1, Transparency = 0.2})
+
+        local hueBar = mk("Frame", {
+            Parent = holder, Position = UDim2.new(1, -36, 0, 42), Size = UDim2.new(0, 26, 0, 60),
+            BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
+        })
+        mk("UICorner", {Parent = hueBar, CornerRadius = UDim.new(0, 7)})
+        mk("UIGradient", {
+            Parent = hueBar,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+                ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+                ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+                ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)),
+                ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
+                ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+                ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0)),
+            }),
+            Rotation = 90,
+        })
+        local hueKnob = mk("Frame", {
+            Parent = hueBar, Size = UDim2.new(1, -4, 0, 4), Position = UDim2.new(0, 2, 0, 2),
+            BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
+        })
+        mk("UICorner", {Parent = hueKnob, CornerRadius = UDim.new(1, 0)})
+
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 10, 0, 42), Size = UDim2.new(1, -20, 0, 18),
+            Parent = holder, Position = UDim2.new(0, 10, 0, 110), Size = UDim2.new(1, -20, 0, 20),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = "#FFAA00", Text = colorToHex(current), ClearTextOnFocus = false,
             TextColor3 = theme.Text, PlaceholderColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
@@ -238,23 +316,69 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = box, CornerRadius = UDim.new(0, 7)})
         mk("UIPadding", {Parent = box, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
 
+        local function applyColor(fromCallback)
+            current = Color3.fromHSV(hue, sat, val)
+            preview.BackgroundColor3 = current
+            box.Text = colorToHex(current)
+            sv.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+            svKnob.Position = UDim2.new(sat, -5, 1 - val, -5)
+            hueKnob.Position = UDim2.new(0, 2, hue, -2)
+            if fromCallback and cfg.Callback then cfg.Callback(current) end
+        end
+
+        local draggingSV, draggingHue = false, false
+        local function setSVFrom(x, y)
+            local px = math.clamp((x - sv.AbsolutePosition.X) / math.max(sv.AbsoluteSize.X, 1), 0, 1)
+            local py = math.clamp((y - sv.AbsolutePosition.Y) / math.max(sv.AbsoluteSize.Y, 1), 0, 1)
+            sat = px
+            val = 1 - py
+            applyColor(true)
+        end
+        local function setHueFrom(y)
+            local py = math.clamp((y - hueBar.AbsolutePosition.Y) / math.max(hueBar.AbsoluteSize.Y, 1), 0, 1)
+            hue = py
+            applyColor(true)
+        end
+        sv.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingSV = true
+                setSVFrom(i.Position.X, i.Position.Y)
+            end
+        end)
+        hueBar.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingHue = true
+                setHueFrom(i.Position.Y)
+            end
+        end)
+        UIS.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingSV = false
+                draggingHue = false
+            end
+        end)
+        UIS.InputChanged:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseMovement then
+                if draggingSV then setSVFrom(i.Position.X, i.Position.Y) end
+                if draggingHue then setHueFrom(i.Position.Y) end
+            end
+        end)
+
         box.FocusLost:Connect(function()
             local c = hexToColor(box.Text)
             if c then
-                current = c
-                preview.BackgroundColor3 = c
-                box.Text = colorToHex(c)
-                if cfg.Callback then cfg.Callback(c) end
+                hue, sat, val = Color3.toHSV(c)
+                applyColor(true)
             else
                 box.Text = colorToHex(current)
             end
         end)
+        applyColor(false)
         return {
             SetValue = function(v)
                 if typeof(v) == "Color3" then
-                    current = v
-                    preview.BackgroundColor3 = v
-                    box.Text = colorToHex(v)
+                    hue, sat, val = Color3.toHSV(v)
+                    applyColor(false)
                 end
             end,
             GetValue = function() return current end,
@@ -817,6 +941,7 @@ end
 
 function FoxnameUI:CreateWindow(cfg)
     cfg = cfg or {}
+    local CurrentTheme = copyTable(Theme)
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
     local gui = mk("ScreenGui", {Name = "FoxnameUI", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
 
@@ -825,28 +950,28 @@ function FoxnameUI:CreateWindow(cfg)
     local maxSize = cfg.MaxSize or UDim2.fromOffset(980, 700)
     local main = mk("Frame", {
         Parent = gui, Size = defaultSize, Position = UDim2.fromScale(0.5, 0.5),
-        AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Background, BorderSizePixel = 0,
+        AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = CurrentTheme.Background, BorderSizePixel = 0,
         ClipsDescendants = false,
     })
     mk("UICorner", {Parent = main, CornerRadius = UDim.new(0, 14)})
-    mk("UIStroke", {Parent = main, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+    local mainStroke = mk("UIStroke", {Parent = main, Color = CurrentTheme.Border, Thickness = 1, Transparency = 0.2})
 
-    local top = mk("Frame", {Parent = main, Size = UDim2.new(1, 0, 0, 58), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0})
+    local top = mk("Frame", {Parent = main, Size = UDim2.new(1, 0, 0, 58), BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0})
     mk("UICorner", {Parent = top, CornerRadius = UDim.new(0, 14)})
 
     local titleLabel = mk("TextLabel", {
         Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 12),
         Size = UDim2.new(1, -120, 0, 24), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
-        TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
+        TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
     })
     local authorText = mk("TextLabel", {
         Parent = top, BackgroundTransparency = 1, Position = UDim2.new(0, 38, 0, 37),
         Size = UDim2.new(1, -130, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Top, Text = tostring(cfg.Author or ""),
-        TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
+        TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
     })
     authorText.Visible = (type(cfg.Author) == "string" and cfg.Author ~= "")
-    attachIcon(top, (cfg.Icon or "zap"), Theme.Text, 14, 38)
+    attachIcon(top, (cfg.Icon or "zap"), CurrentTheme.Text, 14, 38)
     local topIcon = top:FindFirstChild("FxIcon")
     if topIcon and topIcon:IsA("ImageLabel") then
         topIcon.Size = UDim2.new(0, 20, 0, 20)
@@ -854,7 +979,7 @@ function FoxnameUI:CreateWindow(cfg)
 
     local hideBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -66, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "-", TextColor3 = Theme.Text,
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "-", TextColor3 = CurrentTheme.Text,
         Font = Enum.Font.GothamBold, TextSize = 16, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = hideBtn, CornerRadius = UDim.new(0, 8)})
@@ -866,7 +991,7 @@ function FoxnameUI:CreateWindow(cfg)
 
     local closeBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -34, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "X", TextColor3 = Color3.fromRGB(255, 110, 120),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "X", TextColor3 = CurrentTheme.Danger,
         Font = Enum.Font.GothamBold, TextSize = 14, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
@@ -886,8 +1011,8 @@ function FoxnameUI:CreateWindow(cfg)
             tween(btn, 0.12, {TextColor3 = textColor})
         end)
     end
-    styleHeaderBtnHover(hideBtn, Theme.Text)
-    styleHeaderBtnHover(closeBtn, Color3.fromRGB(255, 110, 120))
+    styleHeaderBtnHover(hideBtn, CurrentTheme.Text)
+    styleHeaderBtnHover(closeBtn, CurrentTheme.Danger)
     top:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
         local h = top.AbsoluteSize.Y
         local bh = math.clamp(math.floor(h * 0.42), 22, 26)
@@ -908,7 +1033,7 @@ function FoxnameUI:CreateWindow(cfg)
     local openH = math.clamp(openDefault.Y.Offset, openMin.Y.Offset, openMax.Y.Offset)
     local openBtn = mk("TextButton", {
         Parent = gui, Size = UDim2.fromOffset(openW, openH), Position = UDim2.new(0, 20, 0.5, -22),
-        BackgroundColor3 = Theme.Accent, Text = "=", TextColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundColor3 = CurrentTheme.Accent, Text = "=", TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold, TextSize = 18, Visible = false, BorderSizePixel = 0, AutoButtonColor = false,
     })
     openBtn.Text = openCfg.Title or "Open"
@@ -933,7 +1058,7 @@ function FoxnameUI:CreateWindow(cfg)
 
     local tabButtons = mk("Frame", {
         Parent = main, Size = UDim2.new(0, 168, 1, -58), Position = UDim2.new(0, 0, 0, 58),
-        BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
+        BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0,
         ClipsDescendants = true,
     })
     mk("UICorner", {Parent = tabButtons, CornerRadius = UDim.new(0, 14)})
@@ -950,16 +1075,16 @@ function FoxnameUI:CreateWindow(cfg)
     })
     local resizeGlyph = mk("TextLabel", {
         Parent = resizeHandle, BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1),
-        Text = ")", TextColor3 = Theme.Border, Font = Enum.Font.GothamBold, TextSize = 30,
+        Text = ")", TextColor3 = CurrentTheme.Border, Font = Enum.Font.GothamBold, TextSize = 30,
         TextXAlignment = Enum.TextXAlignment.Right, TextYAlignment = Enum.TextYAlignment.Bottom, ZIndex = 61,
     })
     resizeGlyph.Rotation = 32
     local dragBar = mk("Frame", {
         Parent = main, Name = "DragBar", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6),
-        Size = UDim2.fromOffset(90, 5), BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, ZIndex = 20,
+        Size = UDim2.fromOffset(90, 5), BackgroundColor3 = CurrentTheme.Surface3, BorderSizePixel = 0, ZIndex = 20,
     })
     mk("UICorner", {Parent = dragBar, CornerRadius = UDim.new(1, 0)})
-    mk("UIStroke", {Parent = dragBar, Color = Theme.Border, Thickness = 1, Transparency = 0.35})
+    mk("UIStroke", {Parent = dragBar, Color = CurrentTheme.Border, Thickness = 1, Transparency = 0.35})
 
     local dragging = false
     local dragStart, startPos
@@ -1055,30 +1180,30 @@ function FoxnameUI:CreateWindow(cfg)
         })
         local confirm = mk("Frame", {
             Parent = overlay, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-            Size = UDim2.fromOffset(320, 150), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ZIndex = 1001,
+            Size = UDim2.fromOffset(320, 150), BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0, ZIndex = 1001,
         })
         mk("UICorner", {Parent = confirm, CornerRadius = UDim.new(0, 12)})
-        mk("UIStroke", {Parent = confirm, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+        mk("UIStroke", {Parent = confirm, Color = CurrentTheme.Border, Thickness = 1, Transparency = 0.2})
         local confirmScale = mk("UIScale", {Parent = confirm, Scale = 0.85})
         mk("TextLabel", {
             Parent = confirm, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 12), Size = UDim2.new(1, -28, 0, 24),
-            Text = "Are you sure?", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1002,
+            Text = "Are you sure?", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1002,
         })
         mk("TextLabel", {
             Parent = confirm, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 42), Size = UDim2.new(1, -28, 0, 34),
             Text = "This will destroy the UI and close all tabs.", TextWrapped = true,
-            TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1002,
+            TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1002,
         })
         local yes = mk("TextButton", {
             Parent = confirm, Position = UDim2.new(0, 14, 1, -44), Size = UDim2.new(0.5, -20, 0, 30),
-            BackgroundColor3 = Theme.Danger, BorderSizePixel = 0, Text = "Yes, Destroy",
+            BackgroundColor3 = CurrentTheme.Danger, BorderSizePixel = 0, Text = "Yes, Destroy",
             TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1002,
         })
         mk("UICorner", {Parent = yes, CornerRadius = UDim.new(0, 8)})
         local no = mk("TextButton", {
             Parent = confirm, Position = UDim2.new(0.5, 6, 1, -44), Size = UDim2.new(0.5, -20, 0, 30),
-            BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, Text = "Cancel",
-            TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1002,
+            BackgroundColor3 = CurrentTheme.Surface3, BorderSizePixel = 0, Text = "Cancel",
+            TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1002,
         })
         mk("UICorner", {Parent = no, CornerRadius = UDim.new(0, 8)})
         tween(overlay, 0.14, {BackgroundTransparency = 0.45}, Enum.EasingStyle.Quad)
@@ -1099,8 +1224,10 @@ function FoxnameUI:CreateWindow(cfg)
         end)
     end)
 
-    local elements = CreateElements(Theme)
+    local elements = CreateElements(CurrentTheme)
     local tabs = {}
+    local allTabs = {}
+    local sections = {}
     local currentTab
     local currentNavSection = nil
 
@@ -1108,12 +1235,12 @@ function FoxnameUI:CreateWindow(cfg)
         if not tab then return end
         if currentTab then
             currentTab.Container.Visible = false
-            tween(currentTab.Button, 0.12, {BackgroundColor3 = Theme.Surface2})
+            tween(currentTab.Button, 0.12, {BackgroundColor3 = CurrentTheme.Surface2})
         end
         currentTab = tab
         tab.Container.Visible = true
         tab.Container.CanvasPosition = Vector2.new(0, 0)
-        tween(tab.Button, 0.12, {BackgroundColor3 = Theme.Accent})
+        tween(tab.Button, 0.12, {BackgroundColor3 = CurrentTheme.Accent})
     end
 
     local windowApi = {}
@@ -1125,19 +1252,19 @@ function FoxnameUI:CreateWindow(cfg)
             BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
         })
         local head = mk("TextButton", {
-            Parent = row, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
+            Parent = row, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = CurrentTheme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = head, CornerRadius = UDim.new(0, 9)})
         mk("TextLabel", {
             Parent = head, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -30, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
-            Text = cfg.Title or "Section", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+            Text = cfg.Title or "Section", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
         })
-        attachIcon(head, cfg.Icon, cfg.IconColor or Theme.MutedText, 5, 34)
+        attachIcon(head, cfg.Icon, cfg.IconColor or CurrentTheme.MutedText, 5, 34)
         local arrow = mk("TextLabel", {
             Parent = head, BackgroundTransparency = 1, Position = UDim2.new(1, -24, 0, 0), Size = UDim2.new(0, 22, 1, 0),
-            Text = "v", TextColor3 = Theme.MutedText, Font = Enum.Font.GothamBold, TextSize = 16,
+            Text = "v", TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.GothamBold, TextSize = 14,
             TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center,
             Rotation = opened and 180 or 0,
         })
@@ -1162,7 +1289,9 @@ function FoxnameUI:CreateWindow(cfg)
         list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() sync(false) end)
         head.MouseButton1Click:Connect(function() opened = not opened; sync(true) end)
         sync(false)
-        return {Row = row, Header = head, Container = body}
+        local secObj = {Row = row, Header = head, Container = body, Label = head:FindFirstChild("FxLabel"), Icon = head:FindFirstChild("FxIcon"), Arrow = arrow}
+        table.insert(sections, secObj)
+        return secObj
     end
 
     local defaultSection = createNavSection({Title = "Main", Opened = true, Icon = "list"})
@@ -1171,8 +1300,9 @@ function FoxnameUI:CreateWindow(cfg)
         local cfg = type(nameOrCfg) == "table" and nameOrCfg or {Title = nameOrCfg, Icon = iconArg}
         local name = cfg.Title or "Tab"
         local icon = cfg.Icon
+        local locked = cfg.Locked == true
         local btn = mk("TextButton", {
-            Parent = parentContainer, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
+            Parent = parentContainer, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = CurrentTheme.Surface2,
             BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold,
             TextSize = 13, AutoButtonColor = false,
         })
@@ -1180,9 +1310,9 @@ function FoxnameUI:CreateWindow(cfg)
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            Text = name, TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+            Text = name, TextColor3 = locked and CurrentTheme.MutedText or CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
         })
-        attachIcon(btn, icon, Theme.Text, 5, 36)
+        attachIcon(btn, icon, locked and CurrentTheme.MutedText or CurrentTheme.Text, 5, 36)
 
         local container = mk("ScrollingFrame", {
             Parent = contentArea, Size = UDim2.new(1, 0, 1, 0), CanvasSize = UDim2.new(0, 0, 0, 0),
@@ -1212,8 +1342,15 @@ function FoxnameUI:CreateWindow(cfg)
         function tab:Space(c) return elements:Space(container, c or {}) end
         function tab:Colorpicker(c) return elements:Colorpicker(container, c or {}) end
 
-        btn.MouseButton1Click:Connect(function() show(tab) end)
+        btn.MouseButton1Click:Connect(function()
+            if locked then return end
+            show(tab)
+        end)
+        if locked then
+            btn.BackgroundColor3 = CurrentTheme.Surface
+        end
         table.insert(tabs, tab)
+        table.insert(allTabs, {Button = btn, Title = string.lower(name), Locked = locked, Tab = tab})
         if #tabs == 1 then show(tab) end
         return tab
     end
@@ -1232,31 +1369,31 @@ function FoxnameUI:CreateWindow(cfg)
         })
         local dlg = mk("Frame", {
             Parent = overlay, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-            Size = UDim2.fromOffset(cfg.Width or 340, cfg.Height or 160), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ZIndex = 1201,
+            Size = UDim2.fromOffset(cfg.Width or 340, cfg.Height or 160), BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0, ZIndex = 1201,
         })
         mk("UICorner", {Parent = dlg, CornerRadius = UDim.new(0, 12)})
-        mk("UIStroke", {Parent = dlg, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+        mk("UIStroke", {Parent = dlg, Color = CurrentTheme.Border, Thickness = 1, Transparency = 0.2})
         local scale = mk("UIScale", {Parent = dlg, Scale = 0.9})
         mk("TextLabel", {
             Parent = dlg, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 12), Size = UDim2.new(1, -28, 0, 24),
-            Text = cfg.Title or "Dialog", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 16,
+            Text = cfg.Title or "Dialog", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 16,
             TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1202,
         })
         mk("TextLabel", {
             Parent = dlg, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 40), Size = UDim2.new(1, -28, 0, 56),
-            Text = cfg.Content or "", TextWrapped = true, TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
+            Text = cfg.Content or "", TextWrapped = true, TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
             TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 1202,
         })
         local okBtn = mk("TextButton", {
             Parent = dlg, Position = UDim2.new(0, 14, 1, -42), Size = UDim2.new(0.5, -20, 0, 28),
-            BackgroundColor3 = Theme.Accent, BorderSizePixel = 0, Text = cfg.ConfirmText or "Confirm",
+            BackgroundColor3 = CurrentTheme.Accent, BorderSizePixel = 0, Text = cfg.ConfirmText or "Confirm",
             TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1202,
         })
         mk("UICorner", {Parent = okBtn, CornerRadius = UDim.new(0, 8)})
         local cancelBtn = mk("TextButton", {
             Parent = dlg, Position = UDim2.new(0.5, 6, 1, -42), Size = UDim2.new(0.5, -20, 0, 28),
-            BackgroundColor3 = Theme.Surface3, BorderSizePixel = 0, Text = cfg.CancelText or "Cancel",
-            TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1202,
+            BackgroundColor3 = CurrentTheme.Surface3, BorderSizePixel = 0, Text = cfg.CancelText or "Cancel",
+            TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1202,
         })
         mk("UICorner", {Parent = cancelBtn, CornerRadius = UDim.new(0, 8)})
         tween(overlay, 0.12, {BackgroundTransparency = 0.45})
@@ -1284,6 +1421,71 @@ function FoxnameUI:CreateWindow(cfg)
         end
         return sec
     end
+    local function applySearchFilter()
+        local q = string.lower((searchBox.Text or ""):gsub("^%s+", ""):gsub("%s+$", ""))
+        for _, t in ipairs(allTabs) do
+            t.Button.Visible = (q == "") or string.find(t.Title, q, 1, true) ~= nil
+        end
+    end
+    searchBox:GetPropertyChangedSignal("Text"):Connect(applySearchFilter)
+
+    local function applyTheme()
+        main.BackgroundColor3 = CurrentTheme.Background
+        if mainStroke then mainStroke.Color = CurrentTheme.Border end
+        top.BackgroundColor3 = CurrentTheme.Surface
+        titleLabel.TextColor3 = CurrentTheme.Text
+        authorText.TextColor3 = CurrentTheme.MutedText
+        hideBtn.TextColor3 = CurrentTheme.Text
+        closeBtn.TextColor3 = CurrentTheme.Danger
+        tabButtons.BackgroundColor3 = CurrentTheme.Surface
+        searchBox.BackgroundColor3 = CurrentTheme.Surface2
+        searchBox.TextColor3 = CurrentTheme.Text
+        searchBox.PlaceholderColor3 = CurrentTheme.MutedText
+        openBtn.BackgroundColor3 = CurrentTheme.Accent
+        dragBar.BackgroundColor3 = CurrentTheme.Surface3
+        resizeGlyph.TextColor3 = CurrentTheme.Border
+        for _, s in ipairs(sections) do
+            s.Header.BackgroundColor3 = CurrentTheme.Surface2
+            if s.Label then s.Label.TextColor3 = CurrentTheme.Text end
+            if s.Icon then s.Icon.ImageColor3 = CurrentTheme.MutedText end
+            if s.Arrow then s.Arrow.TextColor3 = CurrentTheme.MutedText end
+        end
+        for _, t in ipairs(allTabs) do
+            if t.Locked then
+                t.Button.BackgroundColor3 = CurrentTheme.Surface
+            elseif currentTab and currentTab.Button == t.Button then
+                t.Button.BackgroundColor3 = CurrentTheme.Accent
+            else
+                t.Button.BackgroundColor3 = CurrentTheme.Surface2
+            end
+            local lb = t.Button:FindFirstChild("FxLabel")
+            if lb and lb:IsA("TextLabel") then
+                lb.TextColor3 = t.Locked and CurrentTheme.MutedText or CurrentTheme.Text
+            end
+            local ic = t.Button:FindFirstChild("FxIcon")
+            if ic and ic:IsA("ImageLabel") then
+                ic.ImageColor3 = t.Locked and CurrentTheme.MutedText or CurrentTheme.Text
+            end
+        end
+    end
+    function windowApi:SetTheme(themeTable)
+        for k, v in pairs(themeTable or {}) do
+            CurrentTheme[k] = v
+        end
+        applyTheme()
+    end
+    function windowApi:AddTheme(name, themeTable)
+        self.Themes = self.Themes or {}
+        self.Themes[name] = copyTable(themeTable or {})
+    end
+    function windowApi:UseTheme(name)
+        if self.Themes and self.Themes[name] then
+            self:SetTheme(self.Themes[name])
+            return true
+        end
+        return false
+    end
+    applyTheme()
 
     return windowApi
 end
@@ -1292,6 +1494,12 @@ FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
 
-
-
+    local searchBox = mk("TextBox", {
+        Parent = tabButtons, Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
+        Text = "", PlaceholderText = "Search tabs...", ClearTextOnFocus = false,
+        TextColor3 = CurrentTheme.Text, PlaceholderColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = -1000,
+    })
+    mk("UICorner", {Parent = searchBox, CornerRadius = UDim.new(0, 8)})
+    mk("UIPadding", {Parent = searchBox, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
 

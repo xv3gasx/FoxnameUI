@@ -49,7 +49,7 @@ local Main = MiscSection:Tab({ Title = "Main", Icon = "app-window-mac", Locked =
 Main:Section({ Title = "Main Features" })
 Main:Paragraph({
     Title = "Welcome",
-    Content = "New demo elements added: Paragraph, Space, Colorpicker and Dialog.",
+    Content = "New features: Colorpicker v2, Locked Tabs, Search box, Theme manager.",
 })
 Main:Space({ Height = 4 })
 
@@ -138,15 +138,53 @@ Visual:Dropdown({
 })
 
 local Settings = MiscSection:Tab({ Title = "Settings", Icon = "settings", Locked = false })
+local Premium = MiscSection:Tab({ Title = "Premium", Icon = "lock", Locked = true })
 local uiVisible = true
 Settings:Section({ Title = "Window Controls" })
 
 Settings:Colorpicker({
     Title = "Accent Preview",
-    Description = "Type hex color and press enter.",
+    Description = "Drag on palette or hue bar, or type hex.",
     Default = Color3.fromRGB(255, 120, 40),
     Callback = function(c)
         print("Picked color:", c)
+    end,
+})
+
+Settings:Button({
+    Title = "Apply Ocean Theme",
+    Description = "Demo for window:SetTheme()",
+    Callback = function()
+        Window:SetTheme({
+            Accent = Color3.fromRGB(40, 160, 255),
+            Background = Color3.fromRGB(12, 18, 28),
+            Surface = Color3.fromRGB(18, 26, 40),
+            Surface2 = Color3.fromRGB(28, 38, 56),
+            Surface3 = Color3.fromRGB(42, 54, 76),
+            Text = Color3.fromRGB(238, 245, 255),
+            MutedText = Color3.fromRGB(160, 180, 210),
+            Border = Color3.fromRGB(68, 88, 120),
+            Danger = Color3.fromRGB(240, 90, 90),
+        })
+    end,
+})
+
+Settings:Button({
+    Title = "Save + Use Ember Copy",
+    Description = "Demo for AddTheme/UseTheme",
+    Callback = function()
+        Window:AddTheme("EmberCopy", {
+            Accent = Color3.fromRGB(255, 120, 40),
+            Background = Color3.fromRGB(16, 18, 24),
+            Surface = Color3.fromRGB(24, 27, 36),
+            Surface2 = Color3.fromRGB(32, 36, 48),
+            Surface3 = Color3.fromRGB(40, 45, 60),
+            Text = Color3.fromRGB(238, 241, 248),
+            MutedText = Color3.fromRGB(156, 164, 184),
+            Border = Color3.fromRGB(58, 64, 84),
+            Danger = Color3.fromRGB(240, 90, 90),
+        })
+        Window:UseTheme("EmberCopy")
     end,
 })
 
