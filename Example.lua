@@ -38,27 +38,15 @@ local Window = FoxnameUI:CreateWindow({
     }
 })
 
-local Main = Window:Tab("Main", "app-window-mac")
-Main:Section({ Title = "Main Features" })
-
-local InfoSection = Window:Section({
-    Title = "Info",
+Window:Section({
+    Title = "Misc",
     Opened = true,
-    Icon = "info",
-    Box = true,
-    BoxBorder = true,
-    IconColor = Color3.fromRGB(100, 100, 255)
+    Icon = "file-code-2",
+    IconColor = Color3.fromRGB(170, 170, 170),
 })
 
-if InfoSection then
-    InfoSection:Button({
-        Title = "Print Info",
-        Description = "Test button inside Window:Section",
-        Callback = function()
-            print("Info section button clicked")
-        end,
-    })
-end
+local Main = Window:Tab("Main", "app-window-mac")
+Main:Section({ Title = "Main Features" })
 
 Main:Toggle({
     Title = "Auto Farm",

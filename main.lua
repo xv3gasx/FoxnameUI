@@ -984,6 +984,7 @@ function FoxnameUI:CreateWindow(cfg)
     local elements = CreateElements(Theme)
     local tabs = {}
     local currentTab
+    local currentNavSection = nil
 
     local function show(tab)
         if not tab then return end
@@ -998,9 +999,57 @@ function FoxnameUI:CreateWindow(cfg)
     end
 
     local windowApi = {}
+    local function createNavSection(cfg)
+        cfg = cfg or {}
+        local opened = cfg.Opened ~= false
+        local row = mk("Frame", {
+            Parent = tabButtons, Size = UDim2.new(1, 0, 0, opened and 74 or 32),
+            BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
+        })
+        local head = mk("TextButton", {
+            Parent = row, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
+            BorderSizePixel = 0, Text = "", AutoButtonColor = false,
+        })
+        mk("UICorner", {Parent = head, CornerRadius = UDim.new(0, 9)})
+        mk("TextLabel", {
+            Parent = head, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, -30, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
+            Text = cfg.Title or "Section", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+        })
+        attachIcon(head, cfg.Icon, cfg.IconColor or Theme.MutedText, 5, 34)
+        local arrow = mk("TextLabel", {
+            Parent = head, BackgroundTransparency = 1, Position = UDim2.new(1, -20, 0, 0), Size = UDim2.new(0, 20, 1, 0),
+            Text = opened and "^" or "v", TextColor3 = Theme.MutedText, Font = Enum.Font.GothamBold, TextSize = 12,
+        })
+        local body = mk("Frame", {
+            Parent = row, Position = UDim2.new(0, 0, 0, 36), Size = UDim2.new(1, 0, 0, opened and 38 or 0),
+            BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
+        })
+        local list = mk("UIListLayout", {Parent = body, Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder})
+        local function sync(anim)
+            local bh = opened and list.AbsoluteContentSize.Y or 0
+            local rh = 32 + 4 + bh
+            arrow.Text = opened and "^" or "v"
+            if anim then
+                tween(body, 0.16, {Size = UDim2.new(1, 0, 0, bh)})
+                tween(row, 0.16, {Size = UDim2.new(1, 0, 0, rh)})
+            else
+                body.Size = UDim2.new(1, 0, 0, bh)
+                row.Size = UDim2.new(1, 0, 0, rh)
+            end
+        end
+        list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() sync(false) end)
+        head.MouseButton1Click:Connect(function() opened = not opened; sync(true) end)
+        sync(false)
+        return {Row = row, Header = head, Container = body}
+    end
+
+    local defaultSection = createNavSection({Title = "Main", Opened = true, Icon = "list"})
+    currentNavSection = defaultSection
     function windowApi:Tab(name, icon)
+        local parentContainer = (currentNavSection and currentNavSection.Container) or tabButtons
         local btn = mk("TextButton", {
-            Parent = tabButtons, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
+            Parent = parentContainer, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
             BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold,
             TextSize = 13, AutoButtonColor = false,
         })
@@ -1047,8 +1096,9 @@ function FoxnameUI:CreateWindow(cfg)
     function windowApi:Show() main.Position = savedPos; main.Size = savedSize; main.Visible = true; openBtn.Visible = false end
     function windowApi:Destroy() gui:Destroy() end
     function windowApi:Section(cfg)
-        if not currentTab then return nil end
-        return elements:WindowSection(currentTab.Container, cfg or {})
+        local sec = createNavSection(cfg or {})
+        currentNavSection = sec
+        return sec
     end
 
     return windowApi
