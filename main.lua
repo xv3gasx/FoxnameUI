@@ -1046,8 +1046,10 @@ function FoxnameUI:CreateWindow(cfg)
 
     local defaultSection = createNavSection({Title = "Main", Opened = true, Icon = "list"})
     currentNavSection = defaultSection
-    function windowApi:Tab(name, icon)
-        local parentContainer = (currentNavSection and currentNavSection.Container) or tabButtons
+    local function createTab(parentContainer, nameOrCfg, iconArg)
+        local cfg = type(nameOrCfg) == "table" and nameOrCfg or {Title = nameOrCfg, Icon = iconArg}
+        local name = cfg.Title or "Tab"
+        local icon = cfg.Icon
         local btn = mk("TextButton", {
             Parent = parentContainer, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Theme.Surface2,
             BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold,
@@ -1091,13 +1093,18 @@ function FoxnameUI:CreateWindow(cfg)
         if #tabs == 1 then show(tab) end
         return tab
     end
+    function windowApi:Tab(nameOrCfg, icon)
+        return createTab(tabButtons, nameOrCfg, icon)
+    end
 
     function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = openVisible end
     function windowApi:Show() main.Position = savedPos; main.Size = savedSize; main.Visible = true; openBtn.Visible = false end
     function windowApi:Destroy() gui:Destroy() end
     function windowApi:Section(cfg)
         local sec = createNavSection(cfg or {})
-        currentNavSection = sec
+        function sec:Tab(tabCfg)
+            return createTab(sec.Container, tabCfg)
+        end
         return sec
     end
 

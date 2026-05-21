@@ -38,14 +38,14 @@ local Window = FoxnameUI:CreateWindow({
     }
 })
 
-Window:Section({
+local MiscSection = Window:Section({
     Title = "Misc",
     Opened = true,
     Icon = "file-code-2",
     IconColor = Color3.fromRGB(170, 170, 170),
 })
 
-local Main = Window:Tab("Main", "app-window-mac")
+local Main = MiscSection:Tab({ Title = "Main", Icon = "app-window-mac", Locked = false })
 Main:Section({ Title = "Main Features" })
 
 Main:Toggle({
@@ -96,7 +96,7 @@ Main:Button({
 
 Main:Divider()
 
-local Visual = Window:Tab("Visual", "eye")
+local Visual = MiscSection:Tab({ Title = "Visual", Icon = "eye", Locked = false })
 Visual:Section({ Title = "ESP" })
 
 Visual:Toggle({
@@ -132,7 +132,7 @@ Visual:Dropdown({
     end,
 })
 
-local Settings = Window:Tab("Settings", "settings")
+local Settings = MiscSection:Tab({ Title = "Settings", Icon = "settings", Locked = false })
 local uiVisible = true
 Settings:Section({ Title = "Window Controls" })
 
