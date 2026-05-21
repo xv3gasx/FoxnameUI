@@ -1065,6 +1065,14 @@ function FoxnameUI:CreateWindow(cfg)
     local btnList = mk("UIListLayout", {Parent = tabButtons, Padding = UDim.new(0, 7)})
     btnList.SortOrder = Enum.SortOrder.LayoutOrder
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
+    local searchBox = mk("TextBox", {
+        Parent = tabButtons, Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
+        Text = "", PlaceholderText = "Search tabs...", ClearTextOnFocus = false,
+        TextColor3 = CurrentTheme.Text, PlaceholderColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = -1000,
+    })
+    mk("UICorner", {Parent = searchBox, CornerRadius = UDim.new(0, 8)})
+    mk("UIPadding", {Parent = searchBox, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
 
     local contentArea = mk("Frame", {
         Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
@@ -1493,13 +1501,3 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
-
-    local searchBox = mk("TextBox", {
-        Parent = tabButtons, Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
-        Text = "", PlaceholderText = "Search tabs...", ClearTextOnFocus = false,
-        TextColor3 = CurrentTheme.Text, PlaceholderColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = -1000,
-    })
-    mk("UICorner", {Parent = searchBox, CornerRadius = UDim.new(0, 8)})
-    mk("UIPadding", {Parent = searchBox, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
-
