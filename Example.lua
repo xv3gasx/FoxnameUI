@@ -21,12 +21,12 @@ FoxnameUI:Notify({
 })
 
 local Window = FoxnameUI:CreateWindow({
-    Title = "Foxname Hub",
+    Title = "Foxname - Murder Mystery 2",
     Icon = "app-window",
-    Author = "Vegas",
-    DefaultSize = UDim2.fromOffset(700, 470),
-    MinSize = UDim2.fromOffset(560, 360),
-    MaxSize = UDim2.fromOffset(1100, 760),
+    Author = "discord.gg/v8ZPq4y2nD",
+    DefaultSize = UDim2.fromOffset(730, 525),
+    MinSize = UDim2.fromOffset(640, 430),
+    MaxSize = UDim2.fromOffset(1200, 820),
     OpenButton = {
         Title = "Fox",
         Shape = "Pill", -- Circle | Pill | Square
@@ -55,7 +55,6 @@ Main:Space({ Height = 4 })
 
 Main:Toggle({
     Title = "Auto Farm",
-    Description = "Automatically farms while enabled.",
     Value = false,
     Callback = function(v)
         print("Auto Farm:", v)
@@ -64,7 +63,6 @@ Main:Toggle({
 
 Main:Slider({
     Title = "WalkSpeed",
-    Description = "Adjust your movement speed.",
     Min = 16,
     Max = 120,
     Default = 24,
@@ -75,7 +73,6 @@ Main:Slider({
 
 Main:Input({
     Title = "Player Name",
-    Description = "Enter a target player name.",
     Placeholder = "Type player...",
     Callback = function(text, enter)
         print("Input:", text, "Enter:", enter)
@@ -93,7 +90,6 @@ Main:Dropdown({
 
 Main:Button({
     Title = "Rejoin",
-    Description = "Reconnect to the current server.",
     Callback = function()
         print("Rejoin clicked")
     end,
@@ -106,7 +102,6 @@ Visual:Section({ Title = "ESP" })
 
 Visual:Toggle({
     Title = "ESP",
-    Description = "Show highlighted targets.",
     Value = true,
     Callback = function(v)
         print("ESP:", v)
@@ -115,7 +110,6 @@ Visual:Toggle({
 
 Visual:Slider({
     Title = "ESP Distance",
-    Description = "Maximum distance for ESP rendering.",
     Min = 50,
     Max = 3000,
     Default = 700,
@@ -153,7 +147,6 @@ Settings:Colorpicker({
 
 Settings:Button({
     Title = "Apply Ocean Theme",
-    Description = "Demo for window:SetTheme()",
     Callback = function()
         Window:SetTheme({
             Accent = Color3.fromRGB(40, 160, 255),
@@ -171,7 +164,6 @@ Settings:Button({
 
 Settings:Button({
     Title = "Save + Use Ember Copy",
-    Description = "Demo for AddTheme/UseTheme",
     Callback = function()
         Window:AddTheme("EmberCopy", {
             Accent = Color3.fromRGB(255, 120, 40),
@@ -206,7 +198,6 @@ Settings:Keybind({
 
 Settings:Button({
     Title = "Hide Window",
-    Description = "Hide the main window.",
     Callback = function()
         Window:Hide()
         uiVisible = false
@@ -215,7 +206,6 @@ Settings:Button({
 
 Settings:Button({
     Title = "Show Window",
-    Description = "Show the main window again.",
     Callback = function()
         Window:Show()
         uiVisible = true
@@ -224,7 +214,6 @@ Settings:Button({
 
 Settings:Button({
     Title = "Test Notify",
-    Description = "Send a demo notification.",
     Callback = function()
         FoxnameUI:Notify({
             Title = "Test",
@@ -236,7 +225,6 @@ Settings:Button({
 
 Settings:Button({
     Title = "Destroy UI",
-    Description = "Close and remove the UI.",
     Callback = function()
         Window:Dialog({
             Title = "Destroy UI",

@@ -534,7 +534,7 @@ local function CreateElements(theme)
 
     function Elements:Toggle(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 54 or 36
+        local cardH = hasDesc and 62 or 46
         local state = cfg.Value == true
         local btn = mk("TextButton", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundColor3 = theme.Surface2,
@@ -543,40 +543,40 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
 
-        local titleY = hasDesc and 12 or 0
-        local titleH = hasDesc and 16 or cardH
+        local titleY = hasDesc and 11 or 0
+        local titleH = hasDesc and 18 or cardH
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, 12, 0, titleY),
-            Size = UDim2.new(1, -52, 0, titleH), TextXAlignment = Enum.TextXAlignment.Left,
+            Position = UDim2.new(0, 16, 0, titleY),
+            Size = UDim2.new(1, -80, 0, titleH), TextXAlignment = Enum.TextXAlignment.Left,
             TextYAlignment = Enum.TextYAlignment.Center,
-            Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 32/2,
+            Text = cfg.Title or "Toggle", TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 30/2,
         })
         -- Element-level icons disabled by design.
         if hasDesc then
             mk("TextLabel", {
                 Parent = btn, BackgroundTransparency = 1,
-                Position = UDim2.new(0, 12, 0, 30),
-                Size = UDim2.new(1, -52, 0, 14),
+                Position = UDim2.new(0, 16, 0, 33),
+                Size = UDim2.new(1, -80, 0, 16),
                 TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
                 Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 24/2,
             })
         end
 
         local rail = mk("Frame", {
-            Parent = btn, Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -42, 0.5, -9), BorderSizePixel = 0,
+            Parent = btn, Size = UDim2.new(0, 50, 0, 28), Position = UDim2.new(1, -62, 0.5, -14), BorderSizePixel = 0,
             BackgroundColor3 = state and theme.Accent or theme.Border,
         })
         mk("UICorner", {Parent = rail, CornerRadius = UDim.new(1, 0)})
         local knob = mk("Frame", {
-            Parent = rail, Size = UDim2.new(0, 14, 0, 14),
-            Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
+            Parent = rail, Size = UDim2.new(0, 22, 0, 22),
+            Position = state and UDim2.new(1, -24, 0.5, -11) or UDim2.new(0, 2, 0.5, -11),
             BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         })
         mk("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
 
         local function sync(animated)
-            local kPos = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+            local kPos = state and UDim2.new(1, -24, 0.5, -11) or UDim2.new(0, 2, 0.5, -11)
             local rCol = state and theme.Accent or theme.Border
             if animated then
                 tween(knob, 0.16, {Position = kPos}, Enum.EasingStyle.Back)
@@ -1070,15 +1070,25 @@ function FoxnameUI:CreateWindow(cfg)
     local savedSize = defaultSize
     local savedPos = main.Position
 
-    local tabButtons = mk("Frame", {
+    local tabButtons = mk("ScrollingFrame", {
         Parent = main, Size = UDim2.new(0, 168, 1, -58), Position = UDim2.new(0, 0, 0, 58),
         BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0,
-        ClipsDescendants = true,
+        ClipsDescendants = true, CanvasSize = UDim2.new(0, 0, 0, 0), ScrollBarThickness = 0, ScrollingDirection = Enum.ScrollingDirection.Y,
     })
     mk("UICorner", {Parent = tabButtons, CornerRadius = UDim.new(0, 14)})
     local btnList = mk("UIListLayout", {Parent = tabButtons, Padding = UDim.new(0, 7)})
     btnList.SortOrder = Enum.SortOrder.LayoutOrder
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
+    local tabScrollIndicatorTrack = mk("Frame", {
+        Parent = tabButtons, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -3, 0, 10),
+        Size = UDim2.new(0, 2, 1, -20), BackgroundColor3 = CurrentTheme.Border, BorderSizePixel = 0, BackgroundTransparency = 0.7, ZIndex = 20,
+    })
+    mk("UICorner", {Parent = tabScrollIndicatorTrack, CornerRadius = UDim.new(1, 0)})
+    local tabScrollIndicatorThumb = mk("Frame", {
+        Parent = tabScrollIndicatorTrack, Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0.2, 0),
+        BackgroundColor3 = CurrentTheme.MutedText, BorderSizePixel = 0, ZIndex = 21,
+    })
+    mk("UICorner", {Parent = tabScrollIndicatorThumb, CornerRadius = UDim.new(1, 0)})
     local searchBox = mk("TextBox", {
         Parent = tabButtons, Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
         Text = "", PlaceholderText = "Search tabs...", ClearTextOnFocus = false,
@@ -1466,6 +1476,8 @@ function FoxnameUI:CreateWindow(cfg)
         openBtn.BackgroundColor3 = CurrentTheme.Accent
         dragBar.BackgroundColor3 = CurrentTheme.Surface3
         resizeGlyph.TextColor3 = CurrentTheme.Border
+        tabScrollIndicatorTrack.BackgroundColor3 = CurrentTheme.Border
+        tabScrollIndicatorThumb.BackgroundColor3 = CurrentTheme.MutedText
         for _, s in ipairs(sections) do
             s.Header.BackgroundColor3 = CurrentTheme.Surface2
             if s.Label then s.Label.TextColor3 = CurrentTheme.Text end
@@ -1533,6 +1545,30 @@ function FoxnameUI:CreateWindow(cfg)
         end
         LastAppliedTheme = copyTable(CurrentTheme)
     end
+    local function updateTabSidebarCanvas()
+        tabButtons.CanvasSize = UDim2.new(0, 0, 0, btnList.AbsoluteContentSize.Y + 20)
+        local absCanvasY = tabButtons.AbsoluteCanvasSize.Y
+        local absViewY = tabButtons.AbsoluteWindowSize.Y
+        local overflow = absCanvasY > absViewY + 1
+        tabScrollIndicatorTrack.Visible = overflow
+        if not overflow then
+            tabScrollIndicatorThumb.Position = UDim2.new(0, 0, 0, 0)
+            tabScrollIndicatorThumb.Size = UDim2.new(1, 0, 1, 0)
+            return
+        end
+        local ratio = math.clamp(absViewY / math.max(absCanvasY, 1), 0.12, 1)
+        local maxTrackY = tabScrollIndicatorTrack.AbsoluteSize.Y
+        local thumbH = math.max(12, maxTrackY * ratio)
+        local maxScroll = math.max(absCanvasY - absViewY, 1)
+        local scrollAlpha = math.clamp(tabButtons.CanvasPosition.Y / maxScroll, 0, 1)
+        local travel = math.max(maxTrackY - thumbH, 0)
+        tabScrollIndicatorThumb.Size = UDim2.new(1, 0, 0, thumbH)
+        tabScrollIndicatorThumb.Position = UDim2.new(0, 0, 0, scrollAlpha * travel)
+    end
+    btnList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabSidebarCanvas)
+    tabButtons:GetPropertyChangedSignal("CanvasPosition"):Connect(updateTabSidebarCanvas)
+    tabButtons:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateTabSidebarCanvas)
+    task.defer(updateTabSidebarCanvas)
     function windowApi:SetTheme(themeTable)
         for k, v in pairs(themeTable or {}) do
             CurrentTheme[k] = v
