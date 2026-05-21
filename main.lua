@@ -1018,8 +1018,10 @@ function FoxnameUI:CreateWindow(cfg)
         })
         attachIcon(head, cfg.Icon, cfg.IconColor or Theme.MutedText, 5, 34)
         local arrow = mk("TextLabel", {
-            Parent = head, BackgroundTransparency = 1, Position = UDim2.new(1, -20, 0, 0), Size = UDim2.new(0, 20, 1, 0),
-            Text = opened and "^" or "v", TextColor3 = Theme.MutedText, Font = Enum.Font.GothamBold, TextSize = 12,
+            Parent = head, BackgroundTransparency = 1, Position = UDim2.new(1, -24, 0, 0), Size = UDim2.new(0, 22, 1, 0),
+            Text = "v", TextColor3 = Theme.MutedText, Font = Enum.Font.GothamBold, TextSize = 16,
+            TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center,
+            Rotation = opened and 180 or 0,
         })
         local body = mk("Frame", {
             Parent = row, Position = UDim2.new(0, 0, 0, 36), Size = UDim2.new(1, 0, 0, opened and 38 or 0),
@@ -1029,13 +1031,14 @@ function FoxnameUI:CreateWindow(cfg)
         local function sync(anim)
             local bh = opened and list.AbsoluteContentSize.Y or 0
             local rh = 32 + 4 + bh
-            arrow.Text = opened and "^" or "v"
             if anim then
                 tween(body, 0.16, {Size = UDim2.new(1, 0, 0, bh)})
                 tween(row, 0.16, {Size = UDim2.new(1, 0, 0, rh)})
+                tween(arrow, 0.16, {Rotation = opened and 180 or 0}, Enum.EasingStyle.Quad)
             else
                 body.Size = UDim2.new(1, 0, 0, bh)
                 row.Size = UDim2.new(1, 0, 0, rh)
+                arrow.Rotation = opened and 180 or 0
             end
         end
         list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() sync(false) end)
@@ -1114,7 +1117,6 @@ end
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
 return FoxnameUI
-
 
 
 
