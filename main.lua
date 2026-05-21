@@ -32,6 +32,11 @@ local function copyTable(t)
     return out
 end
 
+local function colorClose(a, b)
+    if typeof(a) ~= "Color3" or typeof(b) ~= "Color3" then return false end
+    return math.abs(a.R - b.R) < 0.001 and math.abs(a.G - b.G) < 0.001 and math.abs(a.B - b.B) < 0.001
+end
+
 local function mk(class, props)
     local i = Instance.new(class)
     for k, v in pairs(props or {}) do
@@ -844,7 +849,7 @@ local function CreateElements(theme)
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
-        mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
+        local stroke = mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local label = mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
@@ -861,6 +866,14 @@ local function CreateElements(theme)
             waiting = true
             activeKeybindCapture = true
             syncText()
+        end)
+        btn.MouseEnter:Connect(function()
+            tween(btn, 0.12, {BackgroundColor3 = theme.Surface3})
+            tween(stroke, 0.12, {Transparency = 0.05})
+        end)
+        btn.MouseLeave:Connect(function()
+            tween(btn, 0.12, {BackgroundColor3 = theme.Surface2})
+            tween(stroke, 0.12, {Transparency = 0.25})
         end)
 
         UIS.InputBegan:Connect(function(input, gp)
@@ -942,6 +955,7 @@ end
 function FoxnameUI:CreateWindow(cfg)
     cfg = cfg or {}
     local CurrentTheme = copyTable(Theme)
+    local LastAppliedTheme = copyTable(CurrentTheme)
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
     local gui = mk("ScreenGui", {Name = "FoxnameUI", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
 
@@ -1475,6 +1489,49 @@ function FoxnameUI:CreateWindow(cfg)
                 ic.ImageColor3 = t.Locked and CurrentTheme.MutedText or CurrentTheme.Text
             end
         end
+        -- Hard refresh element colors immediately (no hover needed)
+        local oldToNew = {
+            {from = LastAppliedTheme.Accent, to = CurrentTheme.Accent},
+            {from = LastAppliedTheme.Background, to = CurrentTheme.Background},
+            {from = LastAppliedTheme.Surface, to = CurrentTheme.Surface},
+            {from = LastAppliedTheme.Surface2, to = CurrentTheme.Surface2},
+            {from = LastAppliedTheme.Surface3, to = CurrentTheme.Surface3},
+            {from = LastAppliedTheme.Text, to = CurrentTheme.Text},
+            {from = LastAppliedTheme.MutedText, to = CurrentTheme.MutedText},
+            {from = LastAppliedTheme.Border, to = CurrentTheme.Border},
+            {from = LastAppliedTheme.Danger, to = CurrentTheme.Danger},
+        }
+        local function remapColor(c)
+            for _, pair in ipairs(oldToNew) do
+                if colorClose(c, pair.from) then
+                    return pair.to
+                end
+            end
+            return nil
+        end
+        for _, inst in ipairs(main:GetDescendants()) do
+            if inst:IsA("Frame") or inst:IsA("TextButton") or inst:IsA("TextBox") then
+                local nc = remapColor(inst.BackgroundColor3)
+                if nc then inst.BackgroundColor3 = nc end
+            end
+            if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
+                local nc = remapColor(inst.TextColor3)
+                if nc then inst.TextColor3 = nc end
+            end
+            if inst:IsA("TextBox") then
+                local nc = remapColor(inst.PlaceholderColor3)
+                if nc then inst.PlaceholderColor3 = nc end
+            end
+            if inst:IsA("ImageLabel") then
+                local nc = remapColor(inst.ImageColor3)
+                if nc then inst.ImageColor3 = nc end
+            end
+            if inst:IsA("UIStroke") then
+                local nc = remapColor(inst.Color)
+                if nc then inst.Color = nc end
+            end
+        end
+        LastAppliedTheme = copyTable(CurrentTheme)
     end
     function windowApi:SetTheme(themeTable)
         for k, v in pairs(themeTable or {}) do
