@@ -41,6 +41,25 @@ local Window = FoxnameUI:CreateWindow({
 local Main = Window:Tab("Main", "app-window-mac")
 Main:Section({ Title = "Main Features" })
 
+local InfoSection = Window:Section({
+    Title = "Info",
+    Opened = true,
+    Icon = "info",
+    Box = true,
+    BoxBorder = true,
+    IconColor = Color3.fromRGB(100, 100, 255)
+})
+
+if InfoSection then
+    InfoSection:Button({
+        Title = "Print Info",
+        Description = "Test button inside Window:Section",
+        Callback = function()
+            print("Info section button clicked")
+        end,
+    })
+end
+
 Main:Toggle({
     Title = "Auto Farm",
     Description = "Automatically farms while enabled.",

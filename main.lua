@@ -143,6 +143,94 @@ local function CreateElements(theme)
         return line
     end
 
+    function Elements:WindowSection(parent, cfg)
+        cfg = cfg or {}
+        local opened = cfg.Opened ~= false
+        local box = cfg.Box ~= false
+        local boxBorder = cfg.BoxBorder ~= false
+        local title = cfg.Title or "Section"
+
+        local holder = mk("Frame", {
+            Parent = parent,
+            Size = UDim2.new(1, 0, 0, opened and 84 or 38),
+            BackgroundTransparency = 1,
+            ClipsDescendants = true,
+        })
+
+        local header = mk("TextButton", {
+            Parent = holder,
+            Size = UDim2.new(1, 0, 0, 34),
+            BackgroundColor3 = theme.Surface2,
+            BorderSizePixel = 0,
+            Text = "",
+            AutoButtonColor = false,
+        })
+        mk("UICorner", {Parent = header, CornerRadius = UDim.new(0, 9)})
+        if boxBorder then
+            mk("UIStroke", {Parent = header, Color = theme.Border, Thickness = 1, Transparency = 0.25})
+        end
+        mk("TextLabel", {
+            Parent = header, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
+            Size = UDim2.new(1, -36, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center, Text = title, TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+        })
+        local arrow = mk("TextLabel", {
+            Parent = header, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 1, 0), Position = UDim2.new(1, -24, 0, 0),
+            Text = opened and "^" or "v", TextColor3 = theme.MutedText, Font = Enum.Font.GothamBold, TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center,
+        })
+
+        local body = mk("Frame", {
+            Parent = holder,
+            Position = UDim2.new(0, 0, 0, 38),
+            Size = UDim2.new(1, 0, 0, opened and 46 or 0),
+            BackgroundColor3 = box and theme.Surface2 or theme.Background,
+            BackgroundTransparency = box and 0 or 1,
+            BorderSizePixel = 0,
+            ClipsDescendants = true,
+        })
+        mk("UICorner", {Parent = body, CornerRadius = UDim.new(0, 9)})
+        if box and boxBorder then
+            mk("UIStroke", {Parent = body, Color = theme.Border, Thickness = 1, Transparency = 0.25})
+        end
+        local bodyLayout = mk("UIListLayout", {Parent = body, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
+        mk("UIPadding", {Parent = body, PaddingTop = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
+
+        local function sync(animated)
+            local bodyH = opened and (bodyLayout.AbsoluteContentSize.Y + 16) or 0
+            local holderH = 38 + bodyH
+            arrow.Text = opened and "^" or "v"
+            if animated then
+                tween(body, 0.16, {Size = UDim2.new(1, 0, 0, bodyH)})
+                tween(holder, 0.16, {Size = UDim2.new(1, 0, 0, holderH)})
+            else
+                body.Size = UDim2.new(1, 0, 0, bodyH)
+                holder.Size = UDim2.new(1, 0, 0, holderH)
+            end
+        end
+
+        bodyLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            sync(false)
+        end)
+        header.MouseButton1Click:Connect(function()
+            opened = not opened
+            sync(true)
+        end)
+        sync(false)
+
+        return {
+            Object = holder,
+            Button = function(_, c) return Elements:Button(body, c) end,
+            Toggle = function(_, c) return Elements:Toggle(body, c) end,
+            Slider = function(_, c) return Elements:Slider(body, c) end,
+            Input = function(_, c) return Elements:Input(body, c) end,
+            Dropdown = function(_, c) return Elements:Dropdown(body, c) end,
+            Keybind = function(_, c) return Elements:Keybind(body, c) end,
+            Section = function(_, c) return Elements:Section(body, c or {}) end,
+            Divider = function(_) return Elements:Divider(body) end,
+        }
+    end
+
     function Elements:Button(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local cardH = hasDesc and 66 or 40
@@ -958,6 +1046,10 @@ function FoxnameUI:CreateWindow(cfg)
     function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = openVisible end
     function windowApi:Show() main.Position = savedPos; main.Size = savedSize; main.Visible = true; openBtn.Visible = false end
     function windowApi:Destroy() gui:Destroy() end
+    function windowApi:Section(cfg)
+        if not currentTab then return nil end
+        return elements:WindowSection(currentTab.Container, cfg or {})
+    end
 
     return windowApi
 end
