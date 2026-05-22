@@ -1039,7 +1039,7 @@ function FoxnameUI:CreateWindow(cfg)
     local function styleHeaderBtnHover(btn, icon, iconColor)
         local hoverLayer = btn:FindFirstChild("FxHover")
         btn.MouseEnter:Connect(function()
-            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.5}, Enum.EasingStyle.Sine) end
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.2}, Enum.EasingStyle.Sine) end
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
         btn.MouseLeave:Connect(function()
@@ -1700,6 +1700,74 @@ function FoxnameUI:CreateWindow(cfg)
         updateTabSidebarCanvas()
     end)
     task.defer(updateTabSidebarCanvas)
+    windowApi.Themes = {
+        Ember = copyTable(Theme),
+        Ocean = {
+            Accent = Color3.fromRGB(40, 160, 255),
+            Accent2 = Color3.fromRGB(90, 200, 255),
+            Background = Color3.fromRGB(12, 18, 28),
+            Surface = Color3.fromRGB(18, 26, 40),
+            Surface2 = Color3.fromRGB(28, 38, 56),
+            Surface3 = Color3.fromRGB(42, 54, 76),
+            Text = Color3.fromRGB(238, 245, 255),
+            MutedText = Color3.fromRGB(160, 180, 210),
+            Border = Color3.fromRGB(68, 88, 120),
+            Success = Color3.fromRGB(88, 220, 170),
+            Danger = Color3.fromRGB(240, 90, 90),
+        },
+        Rose = {
+            Accent = Color3.fromRGB(255, 90, 140),
+            Accent2 = Color3.fromRGB(255, 130, 170),
+            Background = Color3.fromRGB(24, 14, 22),
+            Surface = Color3.fromRGB(34, 20, 30),
+            Surface2 = Color3.fromRGB(48, 28, 42),
+            Surface3 = Color3.fromRGB(62, 36, 54),
+            Text = Color3.fromRGB(250, 238, 245),
+            MutedText = Color3.fromRGB(196, 160, 178),
+            Border = Color3.fromRGB(94, 58, 78),
+            Success = Color3.fromRGB(100, 220, 140),
+            Danger = Color3.fromRGB(255, 110, 120),
+        },
+        Forest = {
+            Accent = Color3.fromRGB(70, 190, 120),
+            Accent2 = Color3.fromRGB(120, 220, 160),
+            Background = Color3.fromRGB(14, 22, 16),
+            Surface = Color3.fromRGB(22, 32, 24),
+            Surface2 = Color3.fromRGB(32, 46, 35),
+            Surface3 = Color3.fromRGB(44, 60, 46),
+            Text = Color3.fromRGB(236, 246, 236),
+            MutedText = Color3.fromRGB(156, 184, 162),
+            Border = Color3.fromRGB(64, 92, 70),
+            Success = Color3.fromRGB(94, 220, 140),
+            Danger = Color3.fromRGB(235, 105, 105),
+        },
+        Midnight = {
+            Accent = Color3.fromRGB(120, 110, 255),
+            Accent2 = Color3.fromRGB(160, 150, 255),
+            Background = Color3.fromRGB(8, 10, 16),
+            Surface = Color3.fromRGB(15, 18, 28),
+            Surface2 = Color3.fromRGB(24, 28, 42),
+            Surface3 = Color3.fromRGB(34, 40, 58),
+            Text = Color3.fromRGB(235, 240, 255),
+            MutedText = Color3.fromRGB(146, 156, 188),
+            Border = Color3.fromRGB(56, 66, 98),
+            Success = Color3.fromRGB(90, 210, 160),
+            Danger = Color3.fromRGB(240, 92, 108),
+        },
+        Carbon = {
+            Accent = Color3.fromRGB(180, 180, 190),
+            Accent2 = Color3.fromRGB(210, 210, 220),
+            Background = Color3.fromRGB(14, 14, 16),
+            Surface = Color3.fromRGB(22, 22, 24),
+            Surface2 = Color3.fromRGB(32, 32, 36),
+            Surface3 = Color3.fromRGB(44, 44, 50),
+            Text = Color3.fromRGB(236, 236, 240),
+            MutedText = Color3.fromRGB(150, 150, 160),
+            Border = Color3.fromRGB(66, 66, 74),
+            Success = Color3.fromRGB(90, 200, 140),
+            Danger = Color3.fromRGB(225, 98, 98),
+        },
+    }
     function windowApi:SetTheme(themeTable)
         for k, v in pairs(themeTable or {}) do
             CurrentTheme[k] = v
@@ -1707,7 +1775,6 @@ function FoxnameUI:CreateWindow(cfg)
         applyTheme()
     end
     function windowApi:AddTheme(name, themeTable)
-        self.Themes = self.Themes or {}
         self.Themes[name] = copyTable(themeTable or {})
     end
     function windowApi:UseTheme(name)

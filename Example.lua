@@ -248,3 +248,9 @@ Settings:Button({
     end,
 })
 
+Settings:Button({
+    Title = "Use Rose Theme",
+    Callback = function()
+        Window:UseTheme("Rose")
+    end,
+})
