@@ -1018,7 +1018,7 @@ function FoxnameUI:CreateWindow(cfg)
     local hideHover = mk("Frame", {
         Name = "FxHover",
         Parent = hideBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = 2,
+        BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2,
     })
     mk("UICorner", {Parent = hideHover, CornerRadius = UDim.new(0, 8)})
     local hideIcon = setTopbarLucideIcon(hideBtn, "minus", CurrentTheme.Text)
@@ -1032,32 +1032,18 @@ function FoxnameUI:CreateWindow(cfg)
     local closeHover = mk("Frame", {
         Name = "FxHover",
         Parent = closeBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = 2,
+        BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2,
     })
     mk("UICorner", {Parent = closeHover, CornerRadius = UDim.new(0, 8)})
     local closeIcon = setTopbarLucideIcon(closeBtn, "x", CurrentTheme.Danger)
     local function styleHeaderBtnHover(btn, icon, iconColor)
         local hoverLayer = btn:FindFirstChild("FxHover")
-        local hovering = false
-        local pulseId = 0
         btn.MouseEnter:Connect(function()
-            hovering = true
-            pulseId = pulseId + 1
-            local myId = pulseId
-            task.spawn(function()
-                local low = true
-                while hovering and myId == pulseId and hoverLayer and hoverLayer.Parent do
-                    tween(hoverLayer, 0.24, {BackgroundTransparency = low and 0.80 or 0.88}, Enum.EasingStyle.Sine)
-                    low = not low
-                    task.wait(0.24)
-                end
-            end)
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.5}, Enum.EasingStyle.Sine) end
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
         btn.MouseLeave:Connect(function()
-            hovering = false
-            pulseId = pulseId + 1
-            if hoverLayer then tween(hoverLayer, 0.14, {BackgroundTransparency = 0.92}, Enum.EasingStyle.Sine) end
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 1}, Enum.EasingStyle.Sine) end
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
     end
