@@ -991,44 +991,64 @@ function FoxnameUI:CreateWindow(cfg)
         topIcon.Size = UDim2.new(0, 20, 0, 20)
     end
 
+    local function setTopbarLucideIcon(btn, iconName, color)
+        local img, meta = getIconSprite(iconName)
+        if not img then return nil end
+        local icon = btn:FindFirstChild("FxBtnIcon")
+        if not icon then
+            icon = mk("ImageLabel", {
+                Parent = btn, Name = "FxBtnIcon", BackgroundTransparency = 1,
+                AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+                Size = UDim2.fromOffset(14, 14), ZIndex = 3,
+            })
+        end
+        icon.Image = img
+        icon.ImageRectSize = meta.ImageRectSize
+        icon.ImageRectOffset = meta.ImageRectPosition
+        icon.ImageColor3 = color
+        return icon
+    end
+
     local hideBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -66, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "-", TextColor3 = CurrentTheme.Text,
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "",
         Font = Enum.Font.GothamBold, TextSize = 16, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = hideBtn, CornerRadius = UDim.new(0, 8)})
     local hideHover = mk("Frame", {
         Name = "FxHover",
         Parent = hideBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = hideBtn.ZIndex - 1,
+        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = 2,
     })
     mk("UICorner", {Parent = hideHover, CornerRadius = UDim.new(0, 8)})
+    local hideIcon = setTopbarLucideIcon(hideBtn, "minus", CurrentTheme.Text)
 
     local closeBtn = mk("TextButton", {
         Parent = top, Size = UDim2.new(0, 28, 0, 24), Position = UDim2.new(1, -34, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "X", TextColor3 = CurrentTheme.Danger,
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 1, Text = "",
         Font = Enum.Font.GothamBold, TextSize = 14, BorderSizePixel = 0, AutoButtonColor = false,
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
     local closeHover = mk("Frame", {
         Name = "FxHover",
         Parent = closeBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = closeBtn.ZIndex - 1,
+        BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = 2,
     })
     mk("UICorner", {Parent = closeHover, CornerRadius = UDim.new(0, 8)})
-    local function styleHeaderBtnHover(btn, textColor)
+    local closeIcon = setTopbarLucideIcon(closeBtn, "x", CurrentTheme.Danger)
+    local function styleHeaderBtnHover(btn, icon, iconColor)
         local hoverLayer = btn:FindFirstChild("FxHover")
         btn.MouseEnter:Connect(function()
             if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.78}) end
-            tween(btn, 0.12, {TextColor3 = textColor})
+            if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
         btn.MouseLeave:Connect(function()
             if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.92}) end
-            tween(btn, 0.12, {TextColor3 = textColor})
+            if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
     end
-    styleHeaderBtnHover(hideBtn, CurrentTheme.Text)
-    styleHeaderBtnHover(closeBtn, CurrentTheme.Danger)
+    styleHeaderBtnHover(hideBtn, hideIcon, CurrentTheme.Text)
+    styleHeaderBtnHover(closeBtn, closeIcon, CurrentTheme.Danger)
     top:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
         local h = top.AbsoluteSize.Y
         local bh = math.clamp(math.floor(h * 0.42), 22, 26)
@@ -1555,8 +1575,14 @@ function FoxnameUI:CreateWindow(cfg)
         top.BackgroundColor3 = CurrentTheme.Surface
         titleLabel.TextColor3 = CurrentTheme.Text
         authorText.TextColor3 = CurrentTheme.MutedText
-        hideBtn.TextColor3 = CurrentTheme.Text
-        closeBtn.TextColor3 = CurrentTheme.Danger
+        local hideTopIcon = hideBtn:FindFirstChild("FxBtnIcon")
+        if hideTopIcon and hideTopIcon:IsA("ImageLabel") then
+            hideTopIcon.ImageColor3 = CurrentTheme.Text
+        end
+        local closeTopIcon = closeBtn:FindFirstChild("FxBtnIcon")
+        if closeTopIcon and closeTopIcon:IsA("ImageLabel") then
+            closeTopIcon.ImageColor3 = CurrentTheme.Danger
+        end
         tabButtons.BackgroundColor3 = CurrentTheme.Surface
         searchBox.BackgroundColor3 = CurrentTheme.Surface2
         searchBox.TextColor3 = CurrentTheme.Text
