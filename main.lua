@@ -572,7 +572,7 @@ local function CreateElements(theme)
 
     function Elements:Button(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 66 or 42
+        local cardH = hasDesc and 70 or 44
         local b = mk("TextButton", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, cardH),
@@ -597,7 +597,7 @@ local function CreateElements(theme)
             Text = cfg.Title or "Button",
             TextColor3 = theme.Text,
             Font = Enum.Font.GothamBold,
-            TextSize = 15,
+            TextSize = 16,
         })
         -- Element-level icons disabled by design.
         if hasDesc then
@@ -626,7 +626,7 @@ local function CreateElements(theme)
 
     function Elements:Toggle(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 62 or 46
+        local cardH = hasDesc and 64 or 48
         local state = cfg.Value == true
         local btn = mk("TextButton", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundColor3 = theme.Surface2,
@@ -691,7 +691,7 @@ local function CreateElements(theme)
 
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 68 or 52
+        local cardH = hasDesc and 72 or 54
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -707,13 +707,13 @@ local function CreateElements(theme)
             Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH),
             TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Input",
             TextYAlignment = Enum.TextYAlignment.Center,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 15,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 16,
         })
         -- Element-level icons disabled by design.
         addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 48 or 28), Size = UDim2.new(1, -12, 0, 22),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 50 or 30), Size = UDim2.new(1, -12, 0, 24),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -734,7 +734,7 @@ local function CreateElements(theme)
         local value = cfg.Default or min
 
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 64 or 50
+        local cardH = hasDesc and 68 or 52
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -750,14 +750,14 @@ local function CreateElements(theme)
             Size = UDim2.new(1, hasIcon and -44 or -20, 0, titleH), BackgroundTransparency = 1,
             TextXAlignment = Enum.TextXAlignment.Left, Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value)),
             TextYAlignment = Enum.TextYAlignment.Center,
-            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 15,
+            TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 16,
             ZIndex = 3,
         })
         -- Element-level icons disabled by design.
         addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 48 or 28), Size = UDim2.new(1, -12, 0, 14),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 50 or 30), Size = UDim2.new(1, -12, 0, 15),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             ZIndex = 1,
         })
@@ -769,7 +769,7 @@ local function CreateElements(theme)
         })
         mk("UICorner", {Parent = fill, CornerRadius = UDim.new(0, 8)})
         local knob = mk("Frame", {
-            Parent = bar, Size = UDim2.new(0, 16, 0, 16), Position = UDim2.new(fill.Size.X.Scale, -8, 0.5, -8),
+            Parent = bar, Size = UDim2.new(0, 17, 0, 17), Position = UDim2.new(fill.Size.X.Scale, -8, 0.5, -8),
             BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0,
             ZIndex = 3,
         })
@@ -802,8 +802,8 @@ local function CreateElements(theme)
         local values = cfg.Values or {}
         local multi = cfg.Multi == true
         local selected = multi and {} or (cfg.Default or values[1] or "")
-        local rowHeight = 30
-        local headerHeight = 36
+        local rowHeight = 32
+        local headerHeight = 38
         local expanded = false
 
         local holder = mk("Frame", {
@@ -937,7 +937,7 @@ local function CreateElements(theme)
         local waiting = false
 
         local btn = mk("TextButton", {
-            Parent = parent, Size = UDim2.new(1, 0, 0, 40), BackgroundColor3 = theme.Surface2,
+            Parent = parent, Size = UDim2.new(1, 0, 0, 42), BackgroundColor3 = theme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
@@ -1215,7 +1215,7 @@ function FoxnameUI:CreateWindow(cfg)
     local savedPos = main.Position
 
     local tabButtons = mk("ScrollingFrame", {
-        Parent = main, Size = UDim2.new(0, 156, 1, -58), Position = UDim2.new(0, 0, 0, 58),
+        Parent = main, Size = UDim2.new(0, 164, 1, -58), Position = UDim2.new(0, 0, 0, 58),
         BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0,
         ClipsDescendants = true, CanvasSize = UDim2.new(0, 0, 0, 0), ScrollBarThickness = 0, ScrollingDirection = Enum.ScrollingDirection.Y,
     })
@@ -1225,7 +1225,7 @@ function FoxnameUI:CreateWindow(cfg)
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
     local tabScrollIndicatorTrack = mk("Frame", {
         Parent = main, AnchorPoint = Vector2.new(0, 0),
-        Position = UDim2.new(0, 141, 0, 68),
+        Position = UDim2.new(0, 149, 0, 68),
         Size = UDim2.new(0, 2, 1, -78), BackgroundColor3 = CurrentTheme.Border, BorderSizePixel = 0, BackgroundTransparency = 0.7, ZIndex = 20,
     })
     mk("UICorner", {Parent = tabScrollIndicatorTrack, CornerRadius = UDim.new(1, 0)})
@@ -1235,7 +1235,7 @@ function FoxnameUI:CreateWindow(cfg)
     })
     mk("UICorner", {Parent = tabScrollIndicatorThumb, CornerRadius = UDim.new(1, 0)})
     local searchBox = mk("TextBox", {
-        Parent = tabButtons, Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
+        Parent = tabButtons, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
         Text = "", PlaceholderText = "Search tabs...", ClearTextOnFocus = false,
         TextColor3 = CurrentTheme.Text, PlaceholderColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
         TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = -1000,
@@ -1244,7 +1244,7 @@ function FoxnameUI:CreateWindow(cfg)
     mk("UIPadding", {Parent = searchBox, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
 
     local contentArea = mk("Frame", {
-        Parent = main, Position = UDim2.new(0, 156, 0, 58), Size = UDim2.new(1, -156, 1, -58), BackgroundTransparency = 1,
+        Parent = main, Position = UDim2.new(0, 164, 0, 58), Size = UDim2.new(1, -164, 1, -58), BackgroundTransparency = 1,
     })
     local contentPanel = mk("Frame", {
         Parent = contentArea, Position = UDim2.new(0, 10, 0, 10), Size = UDim2.new(1, -20, 1, -20),
@@ -1434,11 +1434,11 @@ function FoxnameUI:CreateWindow(cfg)
         cfg = cfg or {}
         local opened = cfg.Opened ~= false
         local row = mk("Frame", {
-            Parent = tabButtons, Size = UDim2.new(1, 0, 0, opened and 74 or 34),
+            Parent = tabButtons, Size = UDim2.new(1, 0, 0, opened and 78 or 36),
             BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
         })
         local head = mk("TextButton", {
-            Parent = row, Size = UDim2.new(1, 0, 0, 34), BackgroundColor3 = CurrentTheme.Surface2,
+            Parent = row, Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = CurrentTheme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = head, CornerRadius = UDim.new(0, 9)})
@@ -1463,13 +1463,13 @@ function FoxnameUI:CreateWindow(cfg)
             ZIndex = 2,
         })
         local body = mk("Frame", {
-            Parent = row, Position = UDim2.new(0, 0, 0, 38), Size = UDim2.new(1, 0, 0, opened and 36 or 0),
+            Parent = row, Position = UDim2.new(0, 0, 0, 40), Size = UDim2.new(1, 0, 0, opened and 38 or 0),
             BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
         })
         local list = mk("UIListLayout", {Parent = body, Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder})
         local function sync(anim)
             local bh = opened and list.AbsoluteContentSize.Y or 0
-            local rh = 34 + 4 + bh
+            local rh = 36 + 4 + bh
             if anim then
                 tween(body, 0.16, {Size = UDim2.new(1, 0, 0, bh)})
                 tween(row, 0.16, {Size = UDim2.new(1, 0, 0, rh)})
@@ -1511,7 +1511,7 @@ function FoxnameUI:CreateWindow(cfg)
         local lockedTitle = tostring(cfg.LockedTitle or ""):gsub("^%s+", ""):gsub("%s+$", "")
         if lockedTitle == "" then lockedTitle = "Locked" end
         local btn = mk("TextButton", {
-            Parent = parentContainer, Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = CurrentTheme.Surface2,
+            Parent = parentContainer, Size = UDim2.new(1, 0, 0, 38), BackgroundColor3 = CurrentTheme.Surface2,
             BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold,
             TextSize = 13, AutoButtonColor = false,
         })
