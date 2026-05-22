@@ -337,18 +337,23 @@ local function CreateElements(theme)
 
         local sv = mk("Frame", {
             Parent = holder, Position = UDim2.new(0, 10, 0, 42), Size = UDim2.new(1, -52, 0, 60),
-            BackgroundColor3 = Color3.fromHSV(hue, 1, 1), BorderSizePixel = 0,
+            BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
         })
         mk("UICorner", {Parent = sv, CornerRadius = UDim.new(0, 7)})
-        local svWhite = mk("UIGradient", {
+        local svHue = mk("UIGradient", {
             Parent = sv,
             Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-                ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
+                ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+                ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+                ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+                ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)),
+                ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
+                ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+                ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0)),
             }),
             Transparency = NumberSequence.new({
                 NumberSequenceKeypoint.new(0, 0),
-                NumberSequenceKeypoint.new(1, 1),
+                NumberSequenceKeypoint.new(1, 0),
             }),
             Rotation = 0,
         })
@@ -376,29 +381,24 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = svKnob, CornerRadius = UDim.new(1, 0)})
         mk("UIStroke", {Parent = svKnob, Color = Color3.new(0, 0, 0), Thickness = 1, Transparency = 0.2})
 
-        local hueBar = mk("Frame", {
+        local satBar = mk("Frame", {
             Parent = holder, Position = UDim2.new(1, -36, 0, 42), Size = UDim2.new(0, 26, 0, 60),
             BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
         })
-        mk("UICorner", {Parent = hueBar, CornerRadius = UDim.new(0, 7)})
-        mk("UIGradient", {
-            Parent = hueBar,
+        mk("UICorner", {Parent = satBar, CornerRadius = UDim.new(0, 7)})
+        local satGradient = mk("UIGradient", {
+            Parent = satBar,
             Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
-                ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-                ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
-                ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)),
-                ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
-                ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
-                ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0)),
+                ColorSequenceKeypoint.new(0, Color3.fromHSV(hue, 1, 1)),
+                ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
             }),
             Rotation = 90,
         })
-        local hueKnob = mk("Frame", {
-            Parent = hueBar, Size = UDim2.new(1, -4, 0, 4), Position = UDim2.new(0, 2, 0, 2),
+        local satKnob = mk("Frame", {
+            Parent = satBar, Size = UDim2.new(1, -4, 0, 4), Position = UDim2.new(0, 2, 0, 2),
             BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
         })
-        mk("UICorner", {Parent = hueKnob, CornerRadius = UDim.new(1, 0)})
+        mk("UICorner", {Parent = satKnob, CornerRadius = UDim.new(1, 0)})
 
         local box = mk("TextBox", {
             Parent = holder, Position = UDim2.new(0, 10, 0, 110), Size = UDim2.new(1, -20, 0, 20),
@@ -414,9 +414,12 @@ local function CreateElements(theme)
             current = Color3.fromHSV(hue, sat, val)
             preview.BackgroundColor3 = current
             box.Text = colorToHex(current)
-            sv.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-            svKnob.Position = UDim2.new(sat, -5, 1 - val, -5)
-            hueKnob.Position = UDim2.new(0, 2, hue, -2)
+            svKnob.Position = UDim2.new(hue, -5, 1 - val, -5)
+            satKnob.Position = UDim2.new(0, 2, 1 - sat, -2)
+            satGradient.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromHSV(hue, 1, 1)),
+                ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
+            })
             if fromCallback and cfg.Callback then cfg.Callback(current) end
         end
 
@@ -424,13 +427,13 @@ local function CreateElements(theme)
         local function setSVFrom(x, y)
             local px = math.clamp((x - sv.AbsolutePosition.X) / math.max(sv.AbsoluteSize.X, 1), 0, 1)
             local py = math.clamp((y - sv.AbsolutePosition.Y) / math.max(sv.AbsoluteSize.Y, 1), 0, 1)
-            sat = px
+            hue = px
             val = 1 - py
             applyColor(true)
         end
-        local function setHueFrom(y)
-            local py = math.clamp((y - hueBar.AbsolutePosition.Y) / math.max(hueBar.AbsoluteSize.Y, 1), 0, 1)
-            hue = py
+        local function setSatFrom(y)
+            local py = math.clamp((y - satBar.AbsolutePosition.Y) / math.max(satBar.AbsoluteSize.Y, 1), 0, 1)
+            sat = 1 - py
             applyColor(true)
         end
         sv.InputBegan:Connect(function(i)
@@ -439,10 +442,10 @@ local function CreateElements(theme)
                 setSVFrom(i.Position.X, i.Position.Y)
             end
         end)
-        hueBar.InputBegan:Connect(function(i)
+        satBar.InputBegan:Connect(function(i)
             if i.UserInputType == Enum.UserInputType.MouseButton1 then
                 draggingHue = true
-                setHueFrom(i.Position.Y)
+                setSatFrom(i.Position.Y)
             end
         end)
         UIS.InputEnded:Connect(function(i)
@@ -454,7 +457,7 @@ local function CreateElements(theme)
         UIS.InputChanged:Connect(function(i)
             if i.UserInputType == Enum.UserInputType.MouseMovement then
                 if draggingSV then setSVFrom(i.Position.X, i.Position.Y) end
-                if draggingHue then setHueFrom(i.Position.Y) end
+                if draggingHue then setSatFrom(i.Position.Y) end
             end
         end)
 
@@ -1001,7 +1004,7 @@ function FoxnameUI:Notify(cfg)
         gui = mk("ScreenGui", {Name = "FoxnameNotify", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
         NotifyHost = gui
         local stack = mk("Frame", {
-            Parent = gui, Name = "Stack", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -16, 1, -16),
+            Parent = gui, Name = "Stack", AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 16, 1, -16),
             Size = UDim2.new(0, 300, 1, -32), BackgroundTransparency = 1,
         })
         local layout = mk("UIListLayout", {Parent = stack, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
@@ -1013,7 +1016,7 @@ function FoxnameUI:Notify(cfg)
         Size = UDim2.fromOffset(280, 70), LayoutOrder = os.clock() * 1000,
     })
     local card = mk("Frame", {
-        Parent = wrap, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 360, 1, 0),
+        Parent = wrap, AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, -360, 1, 0),
         Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ClipsDescendants = true,
     })
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
@@ -1042,13 +1045,13 @@ function FoxnameUI:Notify(cfg)
         Parent = progressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = style.Color, BorderSizePixel = 0,
     })
     mk("UICorner", {Parent = progress, CornerRadius = UDim.new(1, 0)})
-    -- Entry: right -> left
-    tween(card, 0.48, {Position = UDim2.new(1, 0, 1, 0)}, Enum.EasingStyle.Quart)
+    -- Entry: left -> right
+    tween(card, 0.48, {Position = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Quart)
     local duration = cfg.Duration or 3
     tween(progress, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear)
     task.delay(duration, function()
-        -- Exit: left -> right
-        tween(card, 0.48, {Position = UDim2.new(1, 360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quart)
+        -- Exit: right -> left
+        tween(card, 0.48, {Position = UDim2.new(0, -360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quart)
         task.wait(0.5)
         if wrap and wrap.Parent then wrap:Destroy() end
     end)

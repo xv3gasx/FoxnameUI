@@ -170,38 +170,36 @@ Settings:Colorpicker({
     end,
 })
 
-Settings:Button({
-    Title = "Apply Ocean Theme",
-    Callback = function()
-        Window:SetTheme({
-            Accent = Color3.fromRGB(40, 160, 255),
-            Background = Color3.fromRGB(12, 18, 28),
-            Surface = Color3.fromRGB(18, 26, 40),
-            Surface2 = Color3.fromRGB(28, 38, 56),
-            Surface3 = Color3.fromRGB(42, 54, 76),
-            Text = Color3.fromRGB(238, 245, 255),
-            MutedText = Color3.fromRGB(160, 180, 210),
-            Border = Color3.fromRGB(68, 88, 120),
-            Danger = Color3.fromRGB(240, 90, 90),
-        })
+local themeNames = {}
+for themeName, _ in pairs(FoxnameUI:GetThemes()) do
+    table.insert(themeNames, themeName)
+end
+table.sort(themeNames, function(a, b)
+    return string.lower(a) < string.lower(b)
+end)
+
+local selectedTheme = Window:GetCurrentTheme() or themeNames[1]
+Settings:Dropdown({
+    Title = "Theme",
+    Values = themeNames,
+    Default = selectedTheme,
+    Callback = function(v)
+        selectedTheme = v
     end,
 })
 
 Settings:Button({
-    Title = "Save + Use Ember Copy",
+    Title = "Apply Selected Theme",
     Callback = function()
-        Window:AddTheme("EmberCopy", {
-            Accent = Color3.fromRGB(255, 120, 40),
-            Background = Color3.fromRGB(16, 18, 24),
-            Surface = Color3.fromRGB(24, 27, 36),
-            Surface2 = Color3.fromRGB(32, 36, 48),
-            Surface3 = Color3.fromRGB(40, 45, 60),
-            Text = Color3.fromRGB(238, 241, 248),
-            MutedText = Color3.fromRGB(156, 164, 184),
-            Border = Color3.fromRGB(58, 64, 84),
-            Danger = Color3.fromRGB(240, 90, 90),
-        })
-        Window:UseTheme("EmberCopy")
+        if selectedTheme and selectedTheme ~= "" then
+            Window:SetThemeByName(selectedTheme)
+            FoxnameUI:Notify({
+                Type = "success",
+                Title = "Theme Applied",
+                Content = "Current theme: " .. tostring(selectedTheme),
+                Duration = 2.5,
+            })
+        end
     end,
 })
 
@@ -281,16 +279,3 @@ Settings:Button({
     end,
 })
 
-Settings:Button({
-    Title = "Use Rose Theme",
-    Callback = function()
-        Window:SetThemeByName("Rose")
-    end,
-})
-
-Settings:Button({
-    Title = "Use CyberMint Theme",
-    Callback = function()
-        Window:SetThemeByName("CyberMint")
-    end,
-})
