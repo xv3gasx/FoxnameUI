@@ -1019,9 +1019,9 @@ function FoxnameUI:Notify(cfg)
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
     local typeStrip = mk("Frame", {
-        Parent = card, Position = UDim2.fromOffset(6, 6), Size = UDim2.new(0, 4, 1, -12), BackgroundColor3 = style.Color, BorderSizePixel = 0,
+        Parent = card, Position = UDim2.fromOffset(6, 5), Size = UDim2.new(0, 4, 1, -10), BackgroundColor3 = style.Color, BorderSizePixel = 0,
     })
-    mk("UICorner", {Parent = typeStrip, CornerRadius = UDim.new(1, 0)})
+    mk("UICorner", {Parent = typeStrip, CornerRadius = UDim.new(0, 3)})
     attachIcon(card, style.Icon, style.Color, 8, 34)
     mk("TextLabel", {
         Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 34, 0, 8), Size = UDim2.new(1, -46, 0, 20),
@@ -1809,7 +1809,13 @@ function FoxnameUI:CreateWindow(cfg)
         if type(value) == "string" then
             local t = self.Themes and self.Themes[value]
             if not t then return nil end
-            CurrentTheme = mergeTheme(Theme, t)
+            local merged = mergeTheme(Theme, t)
+            for k, _ in pairs(CurrentTheme) do
+                CurrentTheme[k] = nil
+            end
+            for k, v in pairs(merged) do
+                CurrentTheme[k] = v
+            end
             currentThemeName = tostring(t.Name or value)
             FoxnameUI.CurrentThemeName = currentThemeName
             if FoxnameUI.OnThemeChangeFunction then
