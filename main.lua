@@ -1080,8 +1080,9 @@ function FoxnameUI:CreateWindow(cfg)
     btnList.SortOrder = Enum.SortOrder.LayoutOrder
     mk("UIPadding", {Parent = tabButtons, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
     local tabScrollIndicatorTrack = mk("Frame", {
-        Parent = tabButtons, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -3, 0, 10),
-        Size = UDim2.new(0, 2, 1, -20), BackgroundColor3 = CurrentTheme.Border, BorderSizePixel = 0, BackgroundTransparency = 0.7, ZIndex = 20,
+        Parent = main, AnchorPoint = Vector2.new(0, 0),
+        Position = UDim2.new(0, 161, 0, 68),
+        Size = UDim2.new(0, 2, 1, -78), BackgroundColor3 = CurrentTheme.Border, BorderSizePixel = 0, BackgroundTransparency = 0.7, ZIndex = 20,
     })
     mk("UICorner", {Parent = tabScrollIndicatorTrack, CornerRadius = UDim.new(1, 0)})
     local tabScrollIndicatorThumb = mk("Frame", {
@@ -1576,6 +1577,11 @@ function FoxnameUI:CreateWindow(cfg)
     btnList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabSidebarCanvas)
     tabButtons:GetPropertyChangedSignal("CanvasPosition"):Connect(updateTabSidebarCanvas)
     tabButtons:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateTabSidebarCanvas)
+    main:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+        tabScrollIndicatorTrack.Position = UDim2.new(0, tabButtons.Position.X.Offset + tabButtons.Size.X.Offset - 7, 0, tabButtons.Position.Y.Offset + 10)
+        tabScrollIndicatorTrack.Size = UDim2.new(0, 2, 0, math.max(20, tabButtons.AbsoluteSize.Y - 20))
+        updateTabSidebarCanvas()
+    end)
     task.defer(updateTabSidebarCanvas)
     function windowApi:SetTheme(themeTable)
         for k, v in pairs(themeTable or {}) do
