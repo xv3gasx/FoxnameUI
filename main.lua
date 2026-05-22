@@ -925,13 +925,14 @@ function FoxnameUI:Notify(cfg)
     })
     local card = mk("Frame", {
         Parent = wrap, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 360, 1, 0),
-        Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0,
+        Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ClipsDescendants = true,
     })
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
-    mk("Frame", {
-        Parent = card, Size = UDim2.fromOffset(3, 70), BackgroundColor3 = style.Color, BorderSizePixel = 0,
+    local typeStrip = mk("Frame", {
+        Parent = card, Position = UDim2.fromOffset(0, 0), Size = UDim2.fromOffset(4, 70), BackgroundColor3 = style.Color, BorderSizePixel = 0,
     })
+    mk("UICorner", {Parent = typeStrip, CornerRadius = UDim.new(0, 12)})
     attachIcon(card, style.Icon, style.Color, 8, 34)
     mk("TextLabel", {
         Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 34, 0, 8), Size = UDim2.new(1, -46, 0, 20),
@@ -1389,7 +1390,6 @@ function FoxnameUI:CreateWindow(cfg)
         local cfg = type(nameOrCfg) == "table" and nameOrCfg or {Title = nameOrCfg, Icon = iconArg}
         local name = cfg.Title or "Tab"
         local icon = cfg.Icon
-        local initialBadge = cfg.Badge
         local locked = cfg.Locked == true
         local lockedTitle = tostring(cfg.LockedTitle or ""):gsub("^%s+", ""):gsub("%s+$", "")
         if lockedTitle == "" then lockedTitle = "Locked" end
@@ -1412,13 +1412,6 @@ function FoxnameUI:CreateWindow(cfg)
         attachIcon(btn, icon, CurrentTheme.Text, 5, 36)
         local tIcon = btn:FindFirstChild("FxIcon")
         if tIcon and tIcon:IsA("ImageLabel") then tIcon.ZIndex = 2 end
-        local badge = mk("TextLabel", {
-            Parent = btn, Name = "FxBadge", BackgroundColor3 = CurrentTheme.Accent, BackgroundTransparency = 0.06,
-            Position = UDim2.new(1, -28, 0.5, -8), Size = UDim2.fromOffset(18, 16), Visible = false,
-            Text = "", TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 11,
-            TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 4,
-        })
-        mk("UICorner", {Parent = badge, CornerRadius = UDim.new(1, 0)})
         local lockedOverlay = mk("Frame", {
             Parent = btn, Name = "FxLockedOverlay", Visible = locked,
             Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -1460,18 +1453,6 @@ function FoxnameUI:CreateWindow(cfg)
         function tab:Paragraph(c) return elements:Paragraph(container, c or {}) end
         function tab:Space(c) return elements:Space(container, c or {}) end
         function tab:Colorpicker(c) return elements:Colorpicker(container, c or {}) end
-        function tab:SetBadge(v)
-            local txt = tostring(v or ""):gsub("^%s+", ""):gsub("%s+$", "")
-            badge.Visible = txt ~= ""
-            badge.Text = txt
-            local w = math.max(18, 10 + (#txt * 7))
-            badge.Size = UDim2.fromOffset(w, 16)
-            badge.Position = UDim2.new(1, -(w + 10), 0.5, -8)
-        end
-        function tab:ClearBadge()
-            badge.Visible = false
-            badge.Text = ""
-        end
 
         btn.MouseButton1Click:Connect(function()
             if locked then return end
@@ -1493,9 +1474,6 @@ function FoxnameUI:CreateWindow(cfg)
         table.insert(allTabs, tabMeta)
         if secRef then
             table.insert(secRef.Tabs, tabMeta)
-        end
-        if initialBadge ~= nil then
-            tab:SetBadge(initialBadge)
         end
         if #tabs == 1 then show(tab) end
         return tab

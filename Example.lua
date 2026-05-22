@@ -97,7 +97,7 @@ Main:Button({
 
 Main:Divider()
 
-local Visual = MiscSection:Tab({ Title = "Visual", Icon = "eye", Locked = false, Badge = "3" })
+local Visual = MiscSection:Tab({ Title = "Visual", Icon = "eye", Locked = false })
 Visual:Section({ Title = "ESP" })
 
 Visual:Toggle({
