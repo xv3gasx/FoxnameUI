@@ -621,7 +621,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 22),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 48 or 28), Size = UDim2.new(1, -12, 0, 22),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -665,7 +665,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 24), Size = UDim2.new(1, -12, 0, 14),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 48 or 28), Size = UDim2.new(1, -12, 0, 14),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             ZIndex = 1,
         })
