@@ -1545,8 +1545,14 @@ function FoxnameUI:CreateWindow(cfg)
         end
         LastAppliedTheme = copyTable(CurrentTheme)
     end
+    local updatingTabSidebarCanvas = false
     local function updateTabSidebarCanvas()
-        tabButtons.CanvasSize = UDim2.new(0, 0, 0, btnList.AbsoluteContentSize.Y + 20)
+        if updatingTabSidebarCanvas then return end
+        updatingTabSidebarCanvas = true
+        local targetCanvasY = btnList.AbsoluteContentSize.Y + 20
+        if math.abs(tabButtons.CanvasSize.Y.Offset - targetCanvasY) > 0 then
+            tabButtons.CanvasSize = UDim2.new(0, 0, 0, targetCanvasY)
+        end
         local absCanvasY = tabButtons.AbsoluteCanvasSize.Y
         local absViewY = tabButtons.AbsoluteWindowSize.Y
         local overflow = absCanvasY > absViewY + 1
@@ -1554,6 +1560,7 @@ function FoxnameUI:CreateWindow(cfg)
         if not overflow then
             tabScrollIndicatorThumb.Position = UDim2.new(0, 0, 0, 0)
             tabScrollIndicatorThumb.Size = UDim2.new(1, 0, 1, 0)
+            updatingTabSidebarCanvas = false
             return
         end
         local ratio = math.clamp(absViewY / math.max(absCanvasY, 1), 0.12, 1)
@@ -1564,6 +1571,7 @@ function FoxnameUI:CreateWindow(cfg)
         local travel = math.max(maxTrackY - thumbH, 0)
         tabScrollIndicatorThumb.Size = UDim2.new(1, 0, 0, thumbH)
         tabScrollIndicatorThumb.Position = UDim2.new(0, 0, 0, scrollAlpha * travel)
+        updatingTabSidebarCanvas = false
     end
     btnList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateTabSidebarCanvas)
     tabButtons:GetPropertyChangedSignal("CanvasPosition"):Connect(updateTabSidebarCanvas)
