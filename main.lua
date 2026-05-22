@@ -998,6 +998,7 @@ function FoxnameUI:CreateWindow(cfg)
     })
     mk("UICorner", {Parent = hideBtn, CornerRadius = UDim.new(0, 8)})
     local hideHover = mk("Frame", {
+        Name = "FxHover",
         Parent = hideBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = hideBtn.ZIndex - 1,
     })
@@ -1010,12 +1011,13 @@ function FoxnameUI:CreateWindow(cfg)
     })
     mk("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0, 8)})
     local closeHover = mk("Frame", {
+        Name = "FxHover",
         Parent = closeBtn, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BackgroundTransparency = 0.92, BorderSizePixel = 0, ZIndex = closeBtn.ZIndex - 1,
     })
     mk("UICorner", {Parent = closeHover, CornerRadius = UDim.new(0, 8)})
     local function styleHeaderBtnHover(btn, textColor)
-        local hoverLayer = btn:FindFirstChildOfClass("Frame")
+        local hoverLayer = btn:FindFirstChild("FxHover")
         btn.MouseEnter:Connect(function()
             if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.78}) end
             tween(btn, 0.12, {TextColor3 = textColor})
@@ -1290,17 +1292,25 @@ function FoxnameUI:CreateWindow(cfg)
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = head, CornerRadius = UDim.new(0, 9)})
+        local headHover = mk("Frame", {
+            Parent = head, Name = "FxHover", Size = UDim2.fromScale(1, 1),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.93, BorderSizePixel = 0, ZIndex = 1,
+        })
+        mk("UICorner", {Parent = headHover, CornerRadius = UDim.new(0, 9)})
         mk("TextLabel", {
             Parent = head, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -30, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
-            Text = cfg.Title or "Section", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+            Text = cfg.Title or "Section", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13, ZIndex = 2,
         })
         attachIcon(head, cfg.Icon, cfg.IconColor or CurrentTheme.MutedText, 5, 34)
+        local hIcon = head:FindFirstChild("FxIcon")
+        if hIcon and hIcon:IsA("ImageLabel") then hIcon.ZIndex = 2 end
         local arrow = mk("TextLabel", {
             Parent = head, BackgroundTransparency = 1, Position = UDim2.new(1, -24, 0, 0), Size = UDim2.new(0, 22, 1, 0),
             Text = "v", TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.GothamBold, TextSize = 14,
             TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center,
             Rotation = opened and 180 or 0,
+            ZIndex = 2,
         })
         local body = mk("Frame", {
             Parent = row, Position = UDim2.new(0, 0, 0, 36), Size = UDim2.new(1, 0, 0, opened and 38 or 0),
@@ -1321,6 +1331,8 @@ function FoxnameUI:CreateWindow(cfg)
             end
         end
         list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() sync(false) end)
+        head.MouseEnter:Connect(function() tween(headHover, 0.12, {BackgroundTransparency = 0.84}) end)
+        head.MouseLeave:Connect(function() tween(headHover, 0.12, {BackgroundTransparency = 0.93}) end)
         head.MouseButton1Click:Connect(function() opened = not opened; sync(true) end)
         sync(false)
         local secObj = {
@@ -1354,12 +1366,19 @@ function FoxnameUI:CreateWindow(cfg)
             TextSize = 13, AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 9)})
+        local tabHover = mk("Frame", {
+            Parent = btn, Name = "FxHover", Size = UDim2.fromScale(1, 1),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.93, BorderSizePixel = 0, ZIndex = 1,
+        })
+        mk("UICorner", {Parent = tabHover, CornerRadius = UDim.new(0, 9)})
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            Text = name, TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+            Text = name, TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13, ZIndex = 2,
         })
         attachIcon(btn, icon, CurrentTheme.Text, 5, 36)
+        local tIcon = btn:FindFirstChild("FxIcon")
+        if tIcon and tIcon:IsA("ImageLabel") then tIcon.ZIndex = 2 end
         local lockedOverlay = mk("Frame", {
             Parent = btn, Name = "FxLockedOverlay", Visible = locked,
             Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -1406,6 +1425,8 @@ function FoxnameUI:CreateWindow(cfg)
             if locked then return end
             show(tab)
         end)
+        btn.MouseEnter:Connect(function() tween(tabHover, 0.12, {BackgroundTransparency = 0.84}) end)
+        btn.MouseLeave:Connect(function() tween(tabHover, 0.12, {BackgroundTransparency = 0.93}) end)
         table.insert(tabs, tab)
         local tabMeta = {
             Button = btn,

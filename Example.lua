@@ -49,7 +49,7 @@ local Main = MiscSection:Tab({ Title = "Main", Icon = "app-window-mac", Locked =
 Main:Section({ Title = "Main Features" })
 Main:Paragraph({
     Title = "Welcome",
-    Content = "New features: Colorpicker v2, Locked Tabs, Search box, Theme manager.",
+    Content = "Search now checks tab names + section names + feature texts.",
 })
 Main:Space({ Height = 4 })
 
@@ -132,9 +132,19 @@ Visual:Dropdown({
 })
 
 local Settings = MiscSection:Tab({ Title = "Settings", Icon = "settings", Locked = false })
-local Premium = MiscSection:Tab({ Title = "Premium", Icon = "lock", Locked = true })
+local Premium = MiscSection:Tab({
+    Title = "Premium",
+    Icon = "lock",
+    Locked = true,
+    LockedTitle = "Premium Required",
+})
 local uiVisible = true
 Settings:Section({ Title = "Window Controls" })
+
+Premium:Paragraph({
+    Title = "Locked Tab Demo",
+    Content = "This tab is locked. Overlay title uses LockedTitle.",
+})
 
 Settings:Colorpicker({
     Title = "Accent Preview",
