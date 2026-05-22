@@ -1263,6 +1263,7 @@ function FoxnameUI:CreateWindow(cfg)
     local sections = {}
     local currentTab
     local currentNavSection = nil
+    local updateTabSidebarCanvas
 
     local function show(tab)
         if not tab then return end
@@ -1322,18 +1323,31 @@ function FoxnameUI:CreateWindow(cfg)
         list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() sync(false) end)
         head.MouseButton1Click:Connect(function() opened = not opened; sync(true) end)
         sync(false)
-        local secObj = {Row = row, Header = head, Container = body, Label = head:FindFirstChild("FxLabel"), Icon = head:FindFirstChild("FxIcon"), Arrow = arrow}
+        local secObj = {
+            Row = row,
+            Header = head,
+            Container = body,
+            Label = head:FindFirstChild("FxLabel"),
+            Icon = head:FindFirstChild("FxIcon"),
+            Arrow = arrow,
+            Title = string.lower(tostring(cfg.Title or "Section")),
+            Tabs = {},
+            Opened = opened,
+            Sync = function(animState) sync(animState) end,
+        }
         table.insert(sections, secObj)
         return secObj
     end
 
     local defaultSection = createNavSection({Title = "Main", Opened = true, Icon = "list"})
     currentNavSection = defaultSection
-    local function createTab(parentContainer, nameOrCfg, iconArg)
+    local function createTab(parentContainer, nameOrCfg, iconArg, secRef)
         local cfg = type(nameOrCfg) == "table" and nameOrCfg or {Title = nameOrCfg, Icon = iconArg}
         local name = cfg.Title or "Tab"
         local icon = cfg.Icon
         local locked = cfg.Locked == true
+        local lockedTitle = tostring(cfg.LockedTitle or ""):gsub("^%s+", ""):gsub("%s+$", "")
+        if lockedTitle == "" then lockedTitle = "Locked" end
         local btn = mk("TextButton", {
             Parent = parentContainer, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = CurrentTheme.Surface2,
             BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold,
@@ -1343,9 +1357,22 @@ function FoxnameUI:CreateWindow(cfg)
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            Text = name, TextColor3 = locked and CurrentTheme.MutedText or CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+            Text = name, TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
         })
-        attachIcon(btn, icon, locked and CurrentTheme.MutedText or CurrentTheme.Text, 5, 36)
+        attachIcon(btn, icon, CurrentTheme.Text, 5, 36)
+        local lockedOverlay = mk("Frame", {
+            Parent = btn, Name = "FxLockedOverlay", Visible = locked,
+            Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+            BackgroundTransparency = 0.45, BorderSizePixel = 0, ZIndex = 5,
+        })
+        mk("UICorner", {Parent = lockedOverlay, CornerRadius = UDim.new(0, 9)})
+        mk("TextLabel", {
+            Parent = lockedOverlay, Name = "FxLockedTitle", BackgroundTransparency = 1,
+            Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 1, 0),
+            Text = lockedTitle, TextColor3 = Color3.fromRGB(255, 255, 255),
+            Font = Enum.Font.GothamBold, TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 6,
+        })
 
         local container = mk("ScrollingFrame", {
             Parent = contentArea, Size = UDim2.new(1, 0, 1, 0), CanvasSize = UDim2.new(0, 0, 0, 0),
@@ -1379,16 +1406,26 @@ function FoxnameUI:CreateWindow(cfg)
             if locked then return end
             show(tab)
         end)
-        if locked then
-            btn.BackgroundColor3 = CurrentTheme.Surface
-        end
         table.insert(tabs, tab)
-        table.insert(allTabs, {Button = btn, Title = string.lower(name), Locked = locked, Tab = tab})
+        local tabMeta = {
+            Button = btn,
+            Title = string.lower(name),
+            Locked = locked,
+            LockedTitle = string.lower(lockedTitle),
+            Tab = tab,
+            Section = secRef,
+            SectionTitle = secRef and secRef.Title or "",
+            SearchCache = "",
+        }
+        table.insert(allTabs, tabMeta)
+        if secRef then
+            table.insert(secRef.Tabs, tabMeta)
+        end
         if #tabs == 1 then show(tab) end
         return tab
     end
     function windowApi:Tab(nameOrCfg, icon)
-        return createTab(tabButtons, nameOrCfg, icon)
+        return createTab(defaultSection.Container, nameOrCfg, icon, defaultSection)
     end
 
     function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = openVisible end
@@ -1450,15 +1487,44 @@ function FoxnameUI:CreateWindow(cfg)
     function windowApi:Section(cfg)
         local sec = createNavSection(cfg or {})
         function sec:Tab(tabCfg)
-            return createTab(sec.Container, tabCfg)
+            return createTab(sec.Container, tabCfg, nil, sec)
         end
         return sec
+    end
+    local function buildTabSearchText(tabMeta)
+        local parts = {tabMeta.Title or "", tabMeta.SectionTitle or "", tabMeta.LockedTitle or ""}
+        if tabMeta.Tab and tabMeta.Tab.Container then
+            for _, inst in ipairs(tabMeta.Tab.Container:GetDescendants()) do
+                if (inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox")) and inst.Text and inst.Text ~= "" then
+                    table.insert(parts, string.lower(inst.Text))
+                end
+                if inst:IsA("TextBox") and inst.PlaceholderText and inst.PlaceholderText ~= "" then
+                    table.insert(parts, string.lower(inst.PlaceholderText))
+                end
+            end
+        end
+        return table.concat(parts, " ")
     end
     local function applySearchFilter()
         local q = string.lower((searchBox.Text or ""):gsub("^%s+", ""):gsub("%s+$", ""))
         for _, t in ipairs(allTabs) do
-            t.Button.Visible = (q == "") or string.find(t.Title, q, 1, true) ~= nil
+            t.SearchCache = buildTabSearchText(t)
+            local sectionHit = (q ~= "") and (t.SectionTitle ~= nil) and (string.find(t.SectionTitle, q, 1, true) ~= nil)
+            local visible = (q == "") or sectionHit or string.find(t.SearchCache, q, 1, true) ~= nil
+            t.Button.Visible = visible
         end
+        for _, sec in ipairs(sections) do
+            local anyVisible = false
+            for _, t in ipairs(sec.Tabs or {}) do
+                if t.Button and t.Button.Visible then
+                    anyVisible = true
+                    break
+                end
+            end
+            sec.Row.Visible = anyVisible or q == ""
+            if sec.Sync then sec.Sync(false) end
+        end
+        updateTabSidebarCanvas()
     end
     searchBox:GetPropertyChangedSignal("Text"):Connect(applySearchFilter)
 
@@ -1486,20 +1552,24 @@ function FoxnameUI:CreateWindow(cfg)
             if s.Arrow then s.Arrow.TextColor3 = CurrentTheme.MutedText end
         end
         for _, t in ipairs(allTabs) do
-            if t.Locked then
-                t.Button.BackgroundColor3 = CurrentTheme.Surface
-            elseif currentTab and currentTab.Button == t.Button then
+            if currentTab and currentTab.Button == t.Button then
                 t.Button.BackgroundColor3 = CurrentTheme.Accent
             else
                 t.Button.BackgroundColor3 = CurrentTheme.Surface2
             end
             local lb = t.Button:FindFirstChild("FxLabel")
             if lb and lb:IsA("TextLabel") then
-                lb.TextColor3 = t.Locked and CurrentTheme.MutedText or CurrentTheme.Text
+                lb.TextColor3 = CurrentTheme.Text
             end
             local ic = t.Button:FindFirstChild("FxIcon")
             if ic and ic:IsA("ImageLabel") then
-                ic.ImageColor3 = t.Locked and CurrentTheme.MutedText or CurrentTheme.Text
+                ic.ImageColor3 = CurrentTheme.Text
+            end
+            local ov = t.Button:FindFirstChild("FxLockedOverlay")
+            if ov and ov:IsA("Frame") then
+                ov.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                ov.BackgroundTransparency = 0.45
+                ov.Visible = t.Locked == true
             end
         end
         -- Hard refresh element colors immediately (no hover needed)
@@ -1547,7 +1617,7 @@ function FoxnameUI:CreateWindow(cfg)
         LastAppliedTheme = copyTable(CurrentTheme)
     end
     local updatingTabSidebarCanvas = false
-    local function updateTabSidebarCanvas()
+    updateTabSidebarCanvas = function()
         if updatingTabSidebarCanvas then return end
         updatingTabSidebarCanvas = true
         local targetCanvasY = btnList.AbsoluteContentSize.Y + 20
