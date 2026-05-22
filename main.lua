@@ -572,7 +572,7 @@ local function CreateElements(theme)
 
     function Elements:Button(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 66 or 40
+        local cardH = hasDesc and 74 or 54
         local b = mk("TextButton", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, cardH),
@@ -584,7 +584,7 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = b, CornerRadius = UDim.new(0, 10)})
         local stroke = mk("UIStroke", {Parent = b, Color = theme.Border, Thickness = 1, Transparency = 0.35})
 
-        local titleY = hasDesc and 10 or 0
+        local titleY = hasDesc and 12 or 0
         local titleH = hasDesc and 20 or cardH
         local label = mk("TextLabel", {
             Parent = b,
@@ -597,16 +597,16 @@ local function CreateElements(theme)
             Text = cfg.Title or "Button",
             TextColor3 = theme.Text,
             Font = Enum.Font.GothamBold,
-            TextSize = 30/2,
+            TextSize = 16,
         })
         -- Element-level icons disabled by design.
         if hasDesc then
             mk("TextLabel", {
                 Parent = b, BackgroundTransparency = 1,
-                Position = UDim2.new(0, 12, 0, 34),
+                Position = UDim2.new(0, 12, 0, 38),
                 Size = UDim2.new(1, -16, 0, 16),
                 TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
-                Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 24/2,
+                Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 13,
             })
         end
 
@@ -691,7 +691,7 @@ local function CreateElements(theme)
 
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 68 or 52
+        local cardH = hasDesc and 76 or 60
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -699,7 +699,7 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = holder, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = holder, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local hasIcon = false
-        local titleY = hasDesc and 8 or 6
+        local titleY = hasDesc and 9 or 7
         local titleH = 18
         mk("TextLabel", {
             Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
@@ -713,7 +713,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 48 or 28), Size = UDim2.new(1, -12, 0, 22),
+            Parent = holder, Position = UDim2.new(0, 8, 0, hasDesc and 52 or 32), Size = UDim2.new(1, -16, 0, 24),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -734,7 +734,7 @@ local function CreateElements(theme)
         local value = cfg.Default or min
 
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 64 or 50
+        local cardH = hasDesc and 74 or 60
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -742,7 +742,7 @@ local function CreateElements(theme)
         mk("UICorner", {Parent = holder, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = holder, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local hasIcon = false
-        local titleY = hasDesc and 8 or 6
+        local titleY = hasDesc and 9 or 7
         local titleH = 18
         local label = mk("TextLabel", {
             Parent = holder, Name = "FxLabel",
@@ -757,7 +757,7 @@ local function CreateElements(theme)
         addDesc(holder, cfg.Description, 28, hasIcon and 34 or 8)
 
         local bar = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 48 or 28), Size = UDim2.new(1, -12, 0, 14),
+            Parent = holder, Position = UDim2.new(0, 8, 0, hasDesc and 52 or 32), Size = UDim2.new(1, -16, 0, 16),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             ZIndex = 1,
         })
@@ -769,7 +769,7 @@ local function CreateElements(theme)
         })
         mk("UICorner", {Parent = fill, CornerRadius = UDim.new(0, 8)})
         local knob = mk("Frame", {
-            Parent = bar, Size = UDim2.new(0, 16, 0, 16), Position = UDim2.new(fill.Size.X.Scale, -8, 0.5, -8),
+            Parent = bar, Size = UDim2.new(0, 18, 0, 18), Position = UDim2.new(fill.Size.X.Scale, -9, 0.5, -9),
             BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0,
             ZIndex = 3,
         })
@@ -781,7 +781,7 @@ local function CreateElements(theme)
             local p = math.clamp((x - bar.AbsolutePosition.X) / math.max(bar.AbsoluteSize.X, 1), 0, 1)
             value = math.floor(min + (max - min) * p + 0.5)
             fill.Size = UDim2.new(p, 0, 1, 0)
-            knob.Position = UDim2.new(p, -8, 0.5, -8)
+            knob.Position = UDim2.new(p, -9, 0.5, -9)
             label.Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value))
             if cfg.Callback then cfg.Callback(value) end
         end
@@ -802,8 +802,8 @@ local function CreateElements(theme)
         local values = cfg.Values or {}
         local multi = cfg.Multi == true
         local selected = multi and {} or (cfg.Default or values[1] or "")
-        local rowHeight = 30
-        local headerHeight = 36
+        local rowHeight = 34
+        local headerHeight = 42
         local expanded = false
 
         local holder = mk("Frame", {
@@ -937,28 +937,41 @@ local function CreateElements(theme)
         local waiting = false
 
         local btn = mk("TextButton", {
-            Parent = parent, Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = theme.Surface2,
+            Parent = parent, Size = UDim2.new(1, 0, 0, 54), BackgroundColor3 = theme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 10)})
         local stroke = mk("UIStroke", {Parent = btn, Color = theme.Border, Thickness = 1, Transparency = 0.25})
         local label = mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
-            Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+            Size = UDim2.new(1, -86, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
             TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
         })
-        -- Element-level icons disabled by design.
+        local keyBox = mk("TextButton", {
+            Parent = btn, Position = UDim2.new(1, -64, 0.5, -16), Size = UDim2.fromOffset(52, 32),
+            BackgroundColor3 = theme.Surface3, BorderSizePixel = 0, Text = "", AutoButtonColor = false,
+        })
+        mk("UICorner", {Parent = keyBox, CornerRadius = UDim.new(0, 9)})
+        mk("UIStroke", {Parent = keyBox, Color = theme.Border, Thickness = 1, Transparency = 0.2})
+        local keyText = mk("TextLabel", {
+            Parent = keyBox, BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1),
+            Text = "", TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 14,
+            TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center,
+        })
 
         local function syncText()
-            label.Text = string.format("%s: [%s]", cfg.Title or "Keybind", waiting and "..." or key)
+            label.Text = cfg.Title or "Keybind"
+            keyText.Text = waiting and "..." or key
         end
         syncText()
 
-        btn.MouseButton1Click:Connect(function()
+        local function beginCapture()
             waiting = true
             activeKeybindCapture = true
             syncText()
-        end)
+        end
+        btn.MouseButton1Click:Connect(beginCapture)
+        keyBox.MouseButton1Click:Connect(beginCapture)
         btn.MouseEnter:Connect(function()
             tween(btn, 0.12, {BackgroundColor3 = theme.Surface3})
             tween(stroke, 0.12, {Transparency = 0.05})
@@ -1201,7 +1214,7 @@ function FoxnameUI:CreateWindow(cfg)
     local savedPos = main.Position
 
     local tabButtons = mk("ScrollingFrame", {
-        Parent = main, Size = UDim2.new(0, 168, 1, -58), Position = UDim2.new(0, 0, 0, 58),
+        Parent = main, Size = UDim2.new(0, 176, 1, -58), Position = UDim2.new(0, 0, 0, 58),
         BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0,
         ClipsDescendants = true, CanvasSize = UDim2.new(0, 0, 0, 0), ScrollBarThickness = 0, ScrollingDirection = Enum.ScrollingDirection.Y,
     })
@@ -1221,16 +1234,16 @@ function FoxnameUI:CreateWindow(cfg)
     })
     mk("UICorner", {Parent = tabScrollIndicatorThumb, CornerRadius = UDim.new(1, 0)})
     local searchBox = mk("TextBox", {
-        Parent = tabButtons, Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
+        Parent = tabButtons, Size = UDim2.new(1, 0, 0, 34), BackgroundColor3 = CurrentTheme.Surface2, BorderSizePixel = 0,
         Text = "", PlaceholderText = "Search tabs...", ClearTextOnFocus = false,
-        TextColor3 = CurrentTheme.Text, PlaceholderColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
+        TextColor3 = CurrentTheme.Text, PlaceholderColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
         TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = -1000,
     })
     mk("UICorner", {Parent = searchBox, CornerRadius = UDim.new(0, 8)})
     mk("UIPadding", {Parent = searchBox, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
 
     local contentArea = mk("Frame", {
-        Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
+        Parent = main, Position = UDim2.new(0, 176, 0, 58), Size = UDim2.new(1, -176, 1, -58), BackgroundTransparency = 1,
     })
     local contentPanel = mk("Frame", {
         Parent = contentArea, Position = UDim2.new(0, 10, 0, 10), Size = UDim2.new(1, -20, 1, -20),
@@ -1420,11 +1433,11 @@ function FoxnameUI:CreateWindow(cfg)
         cfg = cfg or {}
         local opened = cfg.Opened ~= false
         local row = mk("Frame", {
-            Parent = tabButtons, Size = UDim2.new(1, 0, 0, opened and 74 or 32),
+            Parent = tabButtons, Size = UDim2.new(1, 0, 0, opened and 82 or 38),
             BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
         })
         local head = mk("TextButton", {
-            Parent = row, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = CurrentTheme.Surface2,
+            Parent = row, Size = UDim2.new(1, 0, 0, 38), BackgroundColor3 = CurrentTheme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
         })
         mk("UICorner", {Parent = head, CornerRadius = UDim.new(0, 9)})
@@ -1449,13 +1462,13 @@ function FoxnameUI:CreateWindow(cfg)
             ZIndex = 2,
         })
         local body = mk("Frame", {
-            Parent = row, Position = UDim2.new(0, 0, 0, 36), Size = UDim2.new(1, 0, 0, opened and 38 or 0),
+            Parent = row, Position = UDim2.new(0, 0, 0, 42), Size = UDim2.new(1, 0, 0, opened and 40 or 0),
             BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
         })
         local list = mk("UIListLayout", {Parent = body, Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder})
         local function sync(anim)
             local bh = opened and list.AbsoluteContentSize.Y or 0
-            local rh = 32 + 4 + bh
+            local rh = 38 + 4 + bh
             if anim then
                 tween(body, 0.16, {Size = UDim2.new(1, 0, 0, bh)})
                 tween(row, 0.16, {Size = UDim2.new(1, 0, 0, rh)})
@@ -1497,9 +1510,9 @@ function FoxnameUI:CreateWindow(cfg)
         local lockedTitle = tostring(cfg.LockedTitle or ""):gsub("^%s+", ""):gsub("%s+$", "")
         if lockedTitle == "" then lockedTitle = "Locked" end
         local btn = mk("TextButton", {
-            Parent = parentContainer, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = CurrentTheme.Surface2,
+            Parent = parentContainer, Size = UDim2.new(1, 0, 0, 40), BackgroundColor3 = CurrentTheme.Surface2,
             BorderSizePixel = 0, Text = "", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold,
-            TextSize = 13, AutoButtonColor = false,
+            TextSize = 14, AutoButtonColor = false,
         })
         mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 9)})
         local tabHover = mk("Frame", {
@@ -1510,9 +1523,9 @@ function FoxnameUI:CreateWindow(cfg)
         mk("TextLabel", {
             Parent = btn, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            Text = name, TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13, ZIndex = 2,
+            Text = name, TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 14, ZIndex = 2,
         })
-        attachIcon(btn, icon, CurrentTheme.Text, 5, 36)
+        attachIcon(btn, icon, CurrentTheme.Text, 9, 38)
         local tIcon = btn:FindFirstChild("FxIcon")
         if tIcon and tIcon:IsA("ImageLabel") then tIcon.ZIndex = 2 end
         local lockedOverlay = mk("Frame", {
