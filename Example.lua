@@ -14,6 +14,21 @@ if not FoxnameUI then
     error("FoxnameUI nil dondu")
 end
 
+FoxnameUI:AddTheme({
+    Name = "CyberMint",
+    Accent = Color3.fromRGB(0, 220, 170),
+    Accent2 = Color3.fromRGB(90, 255, 210),
+    Background = Color3.fromRGB(10, 16, 18),
+    Surface = Color3.fromRGB(16, 26, 30),
+    Surface2 = Color3.fromRGB(24, 36, 40),
+    Surface3 = Color3.fromRGB(34, 48, 54),
+    Text = Color3.fromRGB(232, 255, 248),
+    MutedText = Color3.fromRGB(144, 186, 172),
+    Border = Color3.fromRGB(52, 92, 84),
+    Success = Color3.fromRGB(70, 225, 150),
+    Danger = Color3.fromRGB(240, 92, 110),
+})
+
 FoxnameUI:Notify({
     Title = "Foxname UI",
     Content = "Library loaded successfully",
@@ -269,6 +284,13 @@ Settings:Button({
 Settings:Button({
     Title = "Use Rose Theme",
     Callback = function()
-        Window:UseTheme("Rose")
+        Window:SetThemeByName("Rose")
+    end,
+})
+
+Settings:Button({
+    Title = "Use CyberMint Theme",
+    Callback = function()
+        Window:SetThemeByName("CyberMint")
     end,
 })

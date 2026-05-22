@@ -5,7 +5,7 @@ local UIS = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 
 local Theme = {
-    Name = "Foxname Ember",
+    Name = "Ember",
     Accent = Color3.fromRGB(255, 120, 40),
     Accent2 = Color3.fromRGB(255, 175, 90),
     Background = Color3.fromRGB(16, 18, 24),
@@ -31,6 +31,95 @@ local function copyTable(t)
     end
     return out
 end
+
+local function mergeTheme(baseTheme, overrideTheme)
+    local out = copyTable(baseTheme or {})
+    for k, v in pairs(overrideTheme or {}) do
+        out[k] = v
+    end
+    return out
+end
+
+local function buildBuiltinThemes()
+    return {
+        Ember = copyTable(Theme),
+        Ocean = {
+            Name = "Ocean",
+            Accent = Color3.fromRGB(40, 160, 255),
+            Accent2 = Color3.fromRGB(90, 200, 255),
+            Background = Color3.fromRGB(12, 18, 28),
+            Surface = Color3.fromRGB(18, 26, 40),
+            Surface2 = Color3.fromRGB(28, 38, 56),
+            Surface3 = Color3.fromRGB(42, 54, 76),
+            Text = Color3.fromRGB(238, 245, 255),
+            MutedText = Color3.fromRGB(160, 180, 210),
+            Border = Color3.fromRGB(68, 88, 120),
+            Success = Color3.fromRGB(88, 220, 170),
+            Danger = Color3.fromRGB(240, 90, 90),
+        },
+        Rose = {
+            Name = "Rose",
+            Accent = Color3.fromRGB(255, 90, 140),
+            Accent2 = Color3.fromRGB(255, 130, 170),
+            Background = Color3.fromRGB(24, 14, 22),
+            Surface = Color3.fromRGB(34, 20, 30),
+            Surface2 = Color3.fromRGB(48, 28, 42),
+            Surface3 = Color3.fromRGB(62, 36, 54),
+            Text = Color3.fromRGB(250, 238, 245),
+            MutedText = Color3.fromRGB(196, 160, 178),
+            Border = Color3.fromRGB(94, 58, 78),
+            Success = Color3.fromRGB(100, 220, 140),
+            Danger = Color3.fromRGB(255, 110, 120),
+        },
+        Forest = {
+            Name = "Forest",
+            Accent = Color3.fromRGB(70, 190, 120),
+            Accent2 = Color3.fromRGB(120, 220, 160),
+            Background = Color3.fromRGB(14, 22, 16),
+            Surface = Color3.fromRGB(22, 32, 24),
+            Surface2 = Color3.fromRGB(32, 46, 35),
+            Surface3 = Color3.fromRGB(44, 60, 46),
+            Text = Color3.fromRGB(236, 246, 236),
+            MutedText = Color3.fromRGB(156, 184, 162),
+            Border = Color3.fromRGB(64, 92, 70),
+            Success = Color3.fromRGB(94, 220, 140),
+            Danger = Color3.fromRGB(235, 105, 105),
+        },
+        Midnight = {
+            Name = "Midnight",
+            Accent = Color3.fromRGB(120, 110, 255),
+            Accent2 = Color3.fromRGB(160, 150, 255),
+            Background = Color3.fromRGB(8, 10, 16),
+            Surface = Color3.fromRGB(15, 18, 28),
+            Surface2 = Color3.fromRGB(24, 28, 42),
+            Surface3 = Color3.fromRGB(34, 40, 58),
+            Text = Color3.fromRGB(235, 240, 255),
+            MutedText = Color3.fromRGB(146, 156, 188),
+            Border = Color3.fromRGB(56, 66, 98),
+            Success = Color3.fromRGB(90, 210, 160),
+            Danger = Color3.fromRGB(240, 92, 108),
+        },
+        Carbon = {
+            Name = "Carbon",
+            Accent = Color3.fromRGB(180, 180, 190),
+            Accent2 = Color3.fromRGB(210, 210, 220),
+            Background = Color3.fromRGB(14, 14, 16),
+            Surface = Color3.fromRGB(22, 22, 24),
+            Surface2 = Color3.fromRGB(32, 32, 36),
+            Surface3 = Color3.fromRGB(44, 44, 50),
+            Text = Color3.fromRGB(236, 236, 240),
+            MutedText = Color3.fromRGB(150, 150, 160),
+            Border = Color3.fromRGB(66, 66, 74),
+            Success = Color3.fromRGB(90, 200, 140),
+            Danger = Color3.fromRGB(225, 98, 98),
+        },
+    }
+end
+
+FoxnameUI.Themes = buildBuiltinThemes()
+FoxnameUI.DefaultThemeName = "Ember"
+FoxnameUI.CurrentThemeName = "Ember"
+FoxnameUI.OnThemeChangeFunction = nil
 
 local function colorClose(a, b)
     if typeof(a) ~= "Color3" or typeof(b) ~= "Color3" then return false end
@@ -967,8 +1056,11 @@ end
 
 function FoxnameUI:CreateWindow(cfg)
     cfg = cfg or {}
-    local CurrentTheme = copyTable(Theme)
+    local startThemeName = tostring(cfg.Theme or FoxnameUI.DefaultThemeName or "Ember")
+    local startTheme = FoxnameUI.Themes[startThemeName] or FoxnameUI.Themes.Ember or Theme
+    local CurrentTheme = mergeTheme(Theme, startTheme)
     local LastAppliedTheme = copyTable(CurrentTheme)
+    local currentThemeName = startThemeName
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
     local gui = mk("ScreenGui", {Name = "FoxnameUI", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
 
@@ -1712,93 +1804,89 @@ function FoxnameUI:CreateWindow(cfg)
         updateTabSidebarCanvas()
     end)
     task.defer(updateTabSidebarCanvas)
-    windowApi.Themes = {
-        Ember = copyTable(Theme),
-        Ocean = {
-            Accent = Color3.fromRGB(40, 160, 255),
-            Accent2 = Color3.fromRGB(90, 200, 255),
-            Background = Color3.fromRGB(12, 18, 28),
-            Surface = Color3.fromRGB(18, 26, 40),
-            Surface2 = Color3.fromRGB(28, 38, 56),
-            Surface3 = Color3.fromRGB(42, 54, 76),
-            Text = Color3.fromRGB(238, 245, 255),
-            MutedText = Color3.fromRGB(160, 180, 210),
-            Border = Color3.fromRGB(68, 88, 120),
-            Success = Color3.fromRGB(88, 220, 170),
-            Danger = Color3.fromRGB(240, 90, 90),
-        },
-        Rose = {
-            Accent = Color3.fromRGB(255, 90, 140),
-            Accent2 = Color3.fromRGB(255, 130, 170),
-            Background = Color3.fromRGB(24, 14, 22),
-            Surface = Color3.fromRGB(34, 20, 30),
-            Surface2 = Color3.fromRGB(48, 28, 42),
-            Surface3 = Color3.fromRGB(62, 36, 54),
-            Text = Color3.fromRGB(250, 238, 245),
-            MutedText = Color3.fromRGB(196, 160, 178),
-            Border = Color3.fromRGB(94, 58, 78),
-            Success = Color3.fromRGB(100, 220, 140),
-            Danger = Color3.fromRGB(255, 110, 120),
-        },
-        Forest = {
-            Accent = Color3.fromRGB(70, 190, 120),
-            Accent2 = Color3.fromRGB(120, 220, 160),
-            Background = Color3.fromRGB(14, 22, 16),
-            Surface = Color3.fromRGB(22, 32, 24),
-            Surface2 = Color3.fromRGB(32, 46, 35),
-            Surface3 = Color3.fromRGB(44, 60, 46),
-            Text = Color3.fromRGB(236, 246, 236),
-            MutedText = Color3.fromRGB(156, 184, 162),
-            Border = Color3.fromRGB(64, 92, 70),
-            Success = Color3.fromRGB(94, 220, 140),
-            Danger = Color3.fromRGB(235, 105, 105),
-        },
-        Midnight = {
-            Accent = Color3.fromRGB(120, 110, 255),
-            Accent2 = Color3.fromRGB(160, 150, 255),
-            Background = Color3.fromRGB(8, 10, 16),
-            Surface = Color3.fromRGB(15, 18, 28),
-            Surface2 = Color3.fromRGB(24, 28, 42),
-            Surface3 = Color3.fromRGB(34, 40, 58),
-            Text = Color3.fromRGB(235, 240, 255),
-            MutedText = Color3.fromRGB(146, 156, 188),
-            Border = Color3.fromRGB(56, 66, 98),
-            Success = Color3.fromRGB(90, 210, 160),
-            Danger = Color3.fromRGB(240, 92, 108),
-        },
-        Carbon = {
-            Accent = Color3.fromRGB(180, 180, 190),
-            Accent2 = Color3.fromRGB(210, 210, 220),
-            Background = Color3.fromRGB(14, 14, 16),
-            Surface = Color3.fromRGB(22, 22, 24),
-            Surface2 = Color3.fromRGB(32, 32, 36),
-            Surface3 = Color3.fromRGB(44, 44, 50),
-            Text = Color3.fromRGB(236, 236, 240),
-            MutedText = Color3.fromRGB(150, 150, 160),
-            Border = Color3.fromRGB(66, 66, 74),
-            Success = Color3.fromRGB(90, 200, 140),
-            Danger = Color3.fromRGB(225, 98, 98),
-        },
-    }
-    function windowApi:SetTheme(themeTable)
-        for k, v in pairs(themeTable or {}) do
+    windowApi.Themes = FoxnameUI:GetThemes()
+    function windowApi:SetTheme(value)
+        if type(value) == "string" then
+            local t = self.Themes and self.Themes[value]
+            if not t then return nil end
+            CurrentTheme = mergeTheme(Theme, t)
+            currentThemeName = tostring(t.Name or value)
+            FoxnameUI.CurrentThemeName = currentThemeName
+            if FoxnameUI.OnThemeChangeFunction then
+                pcall(FoxnameUI.OnThemeChangeFunction, currentThemeName)
+            end
+            applyTheme()
+            return t
+        end
+        for k, v in pairs(value or {}) do
             CurrentTheme[k] = v
         end
+        currentThemeName = tostring((value and value.Name) or currentThemeName)
         applyTheme()
+        return CurrentTheme
     end
-    function windowApi:AddTheme(name, themeTable)
-        self.Themes[name] = copyTable(themeTable or {})
+    function windowApi:AddTheme(nameOrTheme, themeTable)
+        local added = FoxnameUI:AddTheme(nameOrTheme, themeTable)
+        self.Themes = FoxnameUI:GetThemes()
+        return added
     end
     function windowApi:UseTheme(name)
-        if self.Themes and self.Themes[name] then
-            self:SetTheme(self.Themes[name])
-            return true
-        end
-        return false
+        return self:SetTheme(name) ~= nil
+    end
+    function windowApi:SetThemeByName(name)
+        return self:SetTheme(name)
+    end
+    function windowApi:GetThemes()
+        return self.Themes
+    end
+    function windowApi:GetCurrentTheme()
+        return currentThemeName
     end
     applyTheme()
 
     return windowApi
+end
+
+function FoxnameUI:OnThemeChange(func)
+    self.OnThemeChangeFunction = func
+end
+
+function FoxnameUI:AddTheme(nameOrTheme, themeTable)
+    local themeName, themeData
+    if type(nameOrTheme) == "table" then
+        themeName = tostring(nameOrTheme.Name or "")
+        themeData = copyTable(nameOrTheme)
+    else
+        themeName = tostring(nameOrTheme or "")
+        themeData = copyTable(themeTable or {})
+        themeData.Name = themeName
+    end
+    themeName = themeName:gsub("^%s+", ""):gsub("%s+$", "")
+    if themeName == "" then return nil end
+    self.Themes[themeName] = mergeTheme(Theme, themeData)
+    self.Themes[themeName].Name = themeName
+    return self.Themes[themeName]
+end
+
+function FoxnameUI:SetTheme(name)
+    if type(name) ~= "string" then return nil end
+    if self.Themes[name] then
+        self.DefaultThemeName = name
+        self.CurrentThemeName = name
+        if self.OnThemeChangeFunction then
+            pcall(self.OnThemeChangeFunction, name)
+        end
+        return self.Themes[name]
+    end
+    return nil
+end
+
+function FoxnameUI:GetThemes()
+    return copyTable(self.Themes or {})
+end
+
+function FoxnameUI:GetCurrentTheme()
+    return self.CurrentThemeName
 end
 
 FoxnameUI.Theme = Theme
