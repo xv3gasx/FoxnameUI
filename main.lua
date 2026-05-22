@@ -1039,7 +1039,7 @@ function FoxnameUI:CreateWindow(cfg)
     local function styleHeaderBtnHover(btn, icon, iconColor)
         local hoverLayer = btn:FindFirstChild("FxHover")
         btn.MouseEnter:Connect(function()
-            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.2}, Enum.EasingStyle.Sine) end
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.7}, Enum.EasingStyle.Sine) end
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
         btn.MouseLeave:Connect(function()
@@ -1587,7 +1587,6 @@ function FoxnameUI:CreateWindow(cfg)
         searchBox.BackgroundColor3 = CurrentTheme.Surface2
         searchBox.TextColor3 = CurrentTheme.Text
         searchBox.PlaceholderColor3 = CurrentTheme.MutedText
-        openBtn.BackgroundColor3 = CurrentTheme.Accent
         dragBar.BackgroundColor3 = CurrentTheme.Surface3
         resizeGlyph.TextColor3 = CurrentTheme.Border
         tabScrollIndicatorTrack.BackgroundColor3 = CurrentTheme.Border
