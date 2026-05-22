@@ -898,6 +898,14 @@ end
 
 function FoxnameUI:Notify(cfg)
     cfg = cfg or {}
+    local notifyType = string.lower(tostring(cfg.Type or "info"))
+    local typeStyle = {
+        info = {Color = Theme.Accent, Icon = "info"},
+        success = {Color = Theme.Success, Icon = "check-circle-2"},
+        warning = {Color = Color3.fromRGB(250, 186, 56), Icon = "triangle-alert"},
+        error = {Color = Theme.Danger, Icon = "circle-x"},
+    }
+    local style = typeStyle[notifyType] or typeStyle.info
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
     local gui = NotifyHost
     if not gui or not gui.Parent then
@@ -921,13 +929,17 @@ function FoxnameUI:Notify(cfg)
     })
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+    mk("Frame", {
+        Parent = card, Size = UDim2.fromOffset(3, 70), BackgroundColor3 = style.Color, BorderSizePixel = 0,
+    })
+    attachIcon(card, style.Icon, style.Color, 8, 34)
     mk("TextLabel", {
-        Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 8), Size = UDim2.new(1, -24, 0, 20),
+        Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 34, 0, 8), Size = UDim2.new(1, -46, 0, 20),
         Text = cfg.Title or "Notification", Font = Enum.Font.GothamBold, TextSize = 13, TextColor3 = Theme.Text,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
     mk("TextLabel", {
-        Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 30), Size = UDim2.new(1, -24, 0, 32),
+        Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 34, 0, 30), Size = UDim2.new(1, -46, 0, 32),
         Text = cfg.Content or "...", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Theme.MutedText,
         TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true,
     })
@@ -937,7 +949,7 @@ function FoxnameUI:Notify(cfg)
     })
     mk("UICorner", {Parent = progressBg, CornerRadius = UDim.new(1, 0)})
     local progress = mk("Frame", {
-        Parent = progressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Theme.Accent, BorderSizePixel = 0,
+        Parent = progressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = style.Color, BorderSizePixel = 0,
     })
     mk("UICorner", {Parent = progress, CornerRadius = UDim.new(1, 0)})
     -- Entry: right -> left
@@ -1039,7 +1051,7 @@ function FoxnameUI:CreateWindow(cfg)
     local function styleHeaderBtnHover(btn, icon, iconColor)
         local hoverLayer = btn:FindFirstChild("FxHover")
         btn.MouseEnter:Connect(function()
-            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.7}, Enum.EasingStyle.Sine) end
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.8}, Enum.EasingStyle.Sine) end
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
         btn.MouseLeave:Connect(function()
@@ -1377,6 +1389,7 @@ function FoxnameUI:CreateWindow(cfg)
         local cfg = type(nameOrCfg) == "table" and nameOrCfg or {Title = nameOrCfg, Icon = iconArg}
         local name = cfg.Title or "Tab"
         local icon = cfg.Icon
+        local initialBadge = cfg.Badge
         local locked = cfg.Locked == true
         local lockedTitle = tostring(cfg.LockedTitle or ""):gsub("^%s+", ""):gsub("%s+$", "")
         if lockedTitle == "" then lockedTitle = "Locked" end
@@ -1399,6 +1412,13 @@ function FoxnameUI:CreateWindow(cfg)
         attachIcon(btn, icon, CurrentTheme.Text, 5, 36)
         local tIcon = btn:FindFirstChild("FxIcon")
         if tIcon and tIcon:IsA("ImageLabel") then tIcon.ZIndex = 2 end
+        local badge = mk("TextLabel", {
+            Parent = btn, Name = "FxBadge", BackgroundColor3 = CurrentTheme.Accent, BackgroundTransparency = 0.06,
+            Position = UDim2.new(1, -28, 0.5, -8), Size = UDim2.fromOffset(18, 16), Visible = false,
+            Text = "", TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 11,
+            TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 4,
+        })
+        mk("UICorner", {Parent = badge, CornerRadius = UDim.new(1, 0)})
         local lockedOverlay = mk("Frame", {
             Parent = btn, Name = "FxLockedOverlay", Visible = locked,
             Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -1440,6 +1460,18 @@ function FoxnameUI:CreateWindow(cfg)
         function tab:Paragraph(c) return elements:Paragraph(container, c or {}) end
         function tab:Space(c) return elements:Space(container, c or {}) end
         function tab:Colorpicker(c) return elements:Colorpicker(container, c or {}) end
+        function tab:SetBadge(v)
+            local txt = tostring(v or ""):gsub("^%s+", ""):gsub("%s+$", "")
+            badge.Visible = txt ~= ""
+            badge.Text = txt
+            local w = math.max(18, 10 + (#txt * 7))
+            badge.Size = UDim2.fromOffset(w, 16)
+            badge.Position = UDim2.new(1, -(w + 10), 0.5, -8)
+        end
+        function tab:ClearBadge()
+            badge.Visible = false
+            badge.Text = ""
+        end
 
         btn.MouseButton1Click:Connect(function()
             if locked then return end
@@ -1461,6 +1493,9 @@ function FoxnameUI:CreateWindow(cfg)
         table.insert(allTabs, tabMeta)
         if secRef then
             table.insert(secRef.Tabs, tabMeta)
+        end
+        if initialBadge ~= nil then
+            tab:SetBadge(initialBadge)
         end
         if #tabs == 1 then show(tab) end
         return tab

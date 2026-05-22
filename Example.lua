@@ -97,7 +97,7 @@ Main:Button({
 
 Main:Divider()
 
-local Visual = MiscSection:Tab({ Title = "Visual", Icon = "eye", Locked = false })
+local Visual = MiscSection:Tab({ Title = "Visual", Icon = "eye", Locked = false, Badge = "3" })
 Visual:Section({ Title = "ESP" })
 
 Visual:Toggle({
@@ -228,6 +228,24 @@ Settings:Button({
         FoxnameUI:Notify({
             Title = "Test",
             Content = "This is a test notification",
+            Duration = 3,
+        })
+        FoxnameUI:Notify({
+            Type = "success",
+            Title = "Success",
+            Content = "Theme applied successfully",
+            Duration = 3,
+        })
+        FoxnameUI:Notify({
+            Type = "warning",
+            Title = "Warning",
+            Content = "This is a warning notification",
+            Duration = 3,
+        })
+        FoxnameUI:Notify({
+            Type = "error",
+            Title = "Error",
+            Content = "Something went wrong",
             Duration = 3,
         })
     end,
