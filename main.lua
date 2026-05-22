@@ -930,9 +930,9 @@ function FoxnameUI:Notify(cfg)
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
     local typeStrip = mk("Frame", {
-        Parent = card, Position = UDim2.fromOffset(0, 0), Size = UDim2.fromOffset(4, 70), BackgroundColor3 = style.Color, BorderSizePixel = 0,
+        Parent = card, Position = UDim2.fromOffset(6, 6), Size = UDim2.new(0, 4, 1, -12), BackgroundColor3 = style.Color, BorderSizePixel = 0,
     })
-    mk("UICorner", {Parent = typeStrip, CornerRadius = UDim.new(0, 12)})
+    mk("UICorner", {Parent = typeStrip, CornerRadius = UDim.new(1, 0)})
     attachIcon(card, style.Icon, style.Color, 8, 34)
     mk("TextLabel", {
         Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 34, 0, 8), Size = UDim2.new(1, -46, 0, 20),
@@ -1052,7 +1052,7 @@ function FoxnameUI:CreateWindow(cfg)
     local function styleHeaderBtnHover(btn, icon, iconColor)
         local hoverLayer = btn:FindFirstChild("FxHover")
         btn.MouseEnter:Connect(function()
-            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.8}, Enum.EasingStyle.Sine) end
+            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.85}, Enum.EasingStyle.Sine) end
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
         btn.MouseLeave:Connect(function()
