@@ -1004,7 +1004,7 @@ function FoxnameUI:Notify(cfg)
         gui = mk("ScreenGui", {Name = "FoxnameNotify", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
         NotifyHost = gui
         local stack = mk("Frame", {
-            Parent = gui, Name = "Stack", AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 16, 1, -16),
+            Parent = gui, Name = "Stack", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -16, 1, -16),
             Size = UDim2.new(0, 300, 1, -32), BackgroundTransparency = 1,
         })
         local layout = mk("UIListLayout", {Parent = stack, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
@@ -1016,7 +1016,7 @@ function FoxnameUI:Notify(cfg)
         Size = UDim2.fromOffset(280, 70), LayoutOrder = os.clock() * 1000,
     })
     local card = mk("Frame", {
-        Parent = wrap, AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, -360, 1, 0),
+        Parent = wrap, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 360, 1, 0),
         Size = UDim2.fromOffset(280, 70), BackgroundColor3 = Theme.Surface, BorderSizePixel = 0, ClipsDescendants = true,
     })
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
@@ -1045,13 +1045,13 @@ function FoxnameUI:Notify(cfg)
         Parent = progressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = style.Color, BorderSizePixel = 0,
     })
     mk("UICorner", {Parent = progress, CornerRadius = UDim.new(1, 0)})
-    -- Entry: left -> right
-    tween(card, 0.48, {Position = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Quart)
+    -- Entry: right -> left
+    tween(card, 0.48, {Position = UDim2.new(1, 0, 1, 0)}, Enum.EasingStyle.Quart)
     local duration = cfg.Duration or 3
     tween(progress, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear)
     task.delay(duration, function()
-        -- Exit: right -> left
-        tween(card, 0.48, {Position = UDim2.new(0, -360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quart)
+        -- Exit: left -> right
+        tween(card, 0.48, {Position = UDim2.new(1, 360, 1, 0), BackgroundTransparency = 0.2}, Enum.EasingStyle.Quart)
         task.wait(0.5)
         if wrap and wrap.Parent then wrap:Destroy() end
     end)
@@ -1231,6 +1231,14 @@ function FoxnameUI:CreateWindow(cfg)
 
     local contentArea = mk("Frame", {
         Parent = main, Position = UDim2.new(0, 168, 0, 58), Size = UDim2.new(1, -168, 1, -58), BackgroundTransparency = 1,
+    })
+    local contentPanel = mk("Frame", {
+        Parent = contentArea, Position = UDim2.new(0, 10, 0, 10), Size = UDim2.new(1, -20, 1, -20),
+        BackgroundColor3 = CurrentTheme.Surface2, BackgroundTransparency = 0.2, BorderSizePixel = 0, ClipsDescendants = true,
+    })
+    mk("UICorner", {Parent = contentPanel, CornerRadius = UDim.new(0, 12)})
+    local contentPanelStroke = mk("UIStroke", {
+        Parent = contentPanel, Color = CurrentTheme.Border, Thickness = 1, Transparency = 0.5,
     })
     local resizeHandle = mk("Frame", {
         Parent = main, Name = "ResizeHandle", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, 9, 1, 9),
@@ -1522,7 +1530,7 @@ function FoxnameUI:CreateWindow(cfg)
         })
 
         local container = mk("ScrollingFrame", {
-            Parent = contentArea, Size = UDim2.new(1, 0, 1, 0), CanvasSize = UDim2.new(0, 0, 0, 0),
+            Parent = contentPanel, Size = UDim2.new(1, 0, 1, 0), CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollBarThickness = 4, BackgroundTransparency = 1, BorderSizePixel = 0, Visible = false,
         })
         local layout = mk("UIListLayout", {Parent = container, Padding = UDim.new(0, 8)})
@@ -1692,6 +1700,8 @@ function FoxnameUI:CreateWindow(cfg)
             closeTopIcon.ImageColor3 = CurrentTheme.Danger
         end
         tabButtons.BackgroundColor3 = CurrentTheme.Surface
+        contentPanel.BackgroundColor3 = CurrentTheme.Surface2
+        contentPanelStroke.Color = CurrentTheme.Border
         searchBox.BackgroundColor3 = CurrentTheme.Surface2
         searchBox.TextColor3 = CurrentTheme.Text
         searchBox.PlaceholderColor3 = CurrentTheme.MutedText
