@@ -999,7 +999,7 @@ function FoxnameUI:CreateWindow(cfg)
             icon = mk("ImageLabel", {
                 Parent = btn, Name = "FxBtnIcon", BackgroundTransparency = 1,
                 AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-                Size = UDim2.fromOffset(14, 14), ZIndex = 3,
+                Size = UDim2.fromOffset(12, 12), ZIndex = 3,
             })
         end
         icon.Image = img
@@ -1038,12 +1038,26 @@ function FoxnameUI:CreateWindow(cfg)
     local closeIcon = setTopbarLucideIcon(closeBtn, "x", CurrentTheme.Danger)
     local function styleHeaderBtnHover(btn, icon, iconColor)
         local hoverLayer = btn:FindFirstChild("FxHover")
+        local hovering = false
+        local pulseId = 0
         btn.MouseEnter:Connect(function()
-            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.78}) end
+            hovering = true
+            pulseId = pulseId + 1
+            local myId = pulseId
+            task.spawn(function()
+                local low = true
+                while hovering and myId == pulseId and hoverLayer and hoverLayer.Parent do
+                    tween(hoverLayer, 0.24, {BackgroundTransparency = low and 0.80 or 0.88}, Enum.EasingStyle.Sine)
+                    low = not low
+                    task.wait(0.24)
+                end
+            end)
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
         btn.MouseLeave:Connect(function()
-            if hoverLayer then tween(hoverLayer, 0.12, {BackgroundTransparency = 0.92}) end
+            hovering = false
+            pulseId = pulseId + 1
+            if hoverLayer then tween(hoverLayer, 0.14, {BackgroundTransparency = 0.92}, Enum.EasingStyle.Sine) end
             if icon then tween(icon, 0.12, {ImageColor3 = iconColor}) end
         end)
     end
@@ -1051,8 +1065,8 @@ function FoxnameUI:CreateWindow(cfg)
     styleHeaderBtnHover(closeBtn, closeIcon, CurrentTheme.Danger)
     top:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
         local h = top.AbsoluteSize.Y
-        local bh = math.clamp(math.floor(h * 0.42), 22, 26)
-        local bw = math.clamp(math.floor(h * 0.48), 26, 32)
+        local bh = math.clamp(math.floor(h * 0.46), 24, 30)
+        local bw = math.clamp(math.floor(h * 0.54), 30, 38)
         hideBtn.Size = UDim2.fromOffset(bw, bh)
         closeBtn.Size = UDim2.fromOffset(bw, bh)
         hideBtn.Position = UDim2.new(1, -(bw * 2 + 10), 0.5, -math.floor(bh / 2))
