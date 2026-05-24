@@ -233,7 +233,7 @@ local function attachIcon(target, iconName, color, iconPosY, labelX)
     return icon ~= nil
 end
 
-local function CreateElements(theme)
+local function CreateElements(theme, colorpickerRegistry)
     local Elements = {}
     local activeKeybindCapture = nil
     local function addBadge(parent, text)
@@ -539,6 +539,9 @@ local function CreateElements(theme)
         })
         mk("UICorner", {Parent = box, CornerRadius = UDim.new(0, 7)})
         mk("UIPadding", {Parent = box, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
+        local titleBlob = string.lower((tostring(cfg.Title or "") .. " " .. tostring(cfg.Description or "")))
+        local themeLinked = (titleBlob:find("accent", 1, true) ~= nil) or (titleBlob:find("preview", 1, true) ~= nil) or (titleBlob:find("theme", 1, true) ~= nil)
+        local syncingTheme = false
 
         local function applyColor(fromCallback)
             current = Color3.fromHSV(hue, sat, val)
@@ -551,6 +554,19 @@ local function CreateElements(theme)
                 ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
             })
             if fromCallback and cfg.Callback then cfg.Callback(current) end
+        end
+
+        local function syncToTheme(themeData)
+            if not themeLinked or syncingTheme then return end
+            local accent = themeData and themeData.Accent
+            if typeof(accent) ~= "Color3" then return end
+            syncingTheme = true
+            hue, sat, val = Color3.toHSV(accent)
+            applyColor(false)
+            syncingTheme = false
+        end
+        if type(colorpickerRegistry) == "table" then
+            table.insert(colorpickerRegistry, syncToTheme)
         end
 
         local draggingSV, draggingHue = false, false
@@ -609,6 +625,7 @@ local function CreateElements(theme)
                 end
             end,
             GetValue = function() return current end,
+            SyncTheme = syncToTheme,
         }
     end
 
@@ -1407,6 +1424,7 @@ function FoxnameUI:CreateWindow(cfg)
     local defaultSize = cfg.DefaultSize or cfg.Size or UDim2.fromOffset(680, 460)
     local minSize = cfg.MinSize or UDim2.fromOffset(520, 340)
     local maxSize = cfg.MaxSize or UDim2.fromOffset(980, 700)
+    local colorpickerRegistry = {}
     local main = mk("Frame", {
         Parent = gui, Size = defaultSize, Position = UDim2.fromScale(0.5, 0.5),
         AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = CurrentTheme.Background, BorderSizePixel = 0,
@@ -1746,7 +1764,7 @@ function FoxnameUI:CreateWindow(cfg)
         end)
     end)
 
-    local elements = CreateElements(CurrentTheme)
+    local elements = CreateElements(CurrentTheme, colorpickerRegistry)
     local tabs = {}
     local allTabs = {}
     local sections = {}
@@ -2197,6 +2215,9 @@ function FoxnameUI:CreateWindow(cfg)
                 local nc = remapColor(inst.Color)
                 if nc then inst.Color = nc end
             end
+        end
+        for _, syncTheme in ipairs(colorpickerRegistry) do
+            pcall(syncTheme, CurrentTheme)
         end
         LastAppliedTheme = copyTable(CurrentTheme)
     end

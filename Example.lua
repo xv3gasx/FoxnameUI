@@ -215,7 +215,7 @@ Premium:Paragraph({
     Content = "This tab is locked. Overlay title uses LockedTitle.",
 })
 
-Settings:Colorpicker({
+local AccentPreview = Settings:Colorpicker({
     Title = "Accent Preview",
     Description = "Drag on palette or hue bar, or type hex.",
     Default = Color3.fromRGB(255, 120, 40),
@@ -233,6 +233,7 @@ table.sort(themeNames, function(a, b)
 end)
 
 local selectedTheme = Window:GetCurrentTheme() or themeNames[1]
+
 Settings:Dropdown({
     Title = "Theme",
     Values = themeNames,
