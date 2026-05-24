@@ -39,8 +39,8 @@ local Window = FoxnameUI:CreateWindow({
     Title = "Foxname - Murder Mystery 2",
     Icon = "app-window",
     Author = "discord.gg/v8ZPq4y2nD",
-    DefaultSize = UDim2.fromOffset(700, 600),
-    MinSize = UDim2.fromOffset(740, 520),
+    DefaultSize = UDim2.fromOffset(840, 620),
+    MinSize = UDim2.fromOffset(720, 500),
     MaxSize = UDim2.fromOffset(1280, 900),
     OpenButton = {
         Title = "Fox",
@@ -60,7 +60,13 @@ local MiscSection = Window:Section({
     IconColor = Color3.fromRGB(170, 170, 170),
 })
 
-local Main = MiscSection:Tab({ Title = "Main", Icon = "app-window-mac", Locked = false })
+local Main = MiscSection:Tab({
+    Title = "Main",
+    Icon = "app-window-mac",
+    Locked = false,
+    Badge = "NEW",
+    Tooltip = "Main farming controls",
+})
 Main:Section({ Title = "Main Features" })
 Main:Paragraph({
     Title = "Welcome",
@@ -71,6 +77,7 @@ Main:Space({ Height = 4 })
 Main:Toggle({
     Title = "Auto Farm",
     Value = false,
+    Tooltip = "Starts the farm routine",
     Callback = function(v)
         print("Auto Farm:", v)
     end,
@@ -89,6 +96,7 @@ Main:Slider({
 Main:Input({
     Title = "Player Name",
     Placeholder = "Type player...",
+    Badge = "OPT",
     Callback = function(text, enter)
         print("Input:", text, "Enter:", enter)
     end,
@@ -111,6 +119,27 @@ Main:Button({
 })
 
 Main:Divider()
+
+local quickGroup = Main:Group({
+    Title = "Quick Actions",
+    Opened = true,
+})
+
+quickGroup:Button({
+    Title = "Teleport Spawn",
+    Tooltip = "Example grouped action button",
+    Callback = function()
+        print("Teleport spawn clicked")
+    end,
+})
+
+quickGroup:Toggle({
+    Title = "Auto Vote",
+    Value = false,
+    Callback = function(v)
+        print("Auto Vote:", v)
+    end,
+})
 
 local Visual = MiscSection:Tab({ Title = "Visual", Icon = "eye", Locked = false })
 Visual:Section({ Title = "ESP" })
@@ -146,7 +175,12 @@ Visual:Dropdown({
     end,
 })
 
-local Settings = MiscSection:Tab({ Title = "Settings", Icon = "settings", Locked = false })
+local Settings = MiscSection:Tab({
+    Title = "Settings",
+    Icon = "settings",
+    Locked = false,
+    Tooltip = "Theme, keybind and window settings",
+})
 local Premium = MiscSection:Tab({
     Title = "Premium",
     Icon = "lock",

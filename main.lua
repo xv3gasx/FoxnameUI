@@ -19,6 +19,7 @@ local Theme = {
     Danger = Color3.fromRGB(240, 90, 90),
 }
 local NotifyHost = nil
+local TooltipHost = nil
 
 local function copyTable(t)
     local out = {}
@@ -144,6 +145,22 @@ local function tween(obj, t, props, style, dir)
     return nil
 end
 
+local function ensureTooltipHost()
+    local parent = (gethui and gethui()) or game:GetService("CoreGui")
+    if TooltipHost and TooltipHost.Parent then
+        return TooltipHost
+    end
+    TooltipHost = mk("ScreenGui", {
+        Name = "FoxnameTooltipHost",
+        Parent = parent,
+        ResetOnSpawn = false,
+        IgnoreGuiInset = true,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        DisplayOrder = 2147483000,
+    })
+    return TooltipHost
+end
+
 -- WindUI-like icon provider (lucide names)
 local IconsProvider = nil
 local ICONS_URL = "https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"
@@ -208,6 +225,90 @@ end
 local function CreateElements(theme)
     local Elements = {}
     local activeKeybindCapture = nil
+    local function addBadge(parent, text)
+        if type(text) ~= "string" or text == "" then return nil end
+        local badge = mk("Frame", {
+            Parent = parent,
+            Name = "FxBadge",
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -10, 0.5, 0),
+            Size = UDim2.new(0, 0, 0, 18),
+            AutomaticSize = Enum.AutomaticSize.X,
+            BackgroundColor3 = theme.Accent,
+            BorderSizePixel = 0,
+        })
+        mk("UICorner", {Parent = badge, CornerRadius = UDim.new(1, 0)})
+        mk("UIPadding", {
+            Parent = badge,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        })
+        mk("TextLabel", {
+            Parent = badge,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, 0, 1, 0),
+            AutomaticSize = Enum.AutomaticSize.X,
+            Text = text,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            Font = Enum.Font.GothamBold,
+            TextSize = 11,
+            TextXAlignment = Enum.TextXAlignment.Center,
+            TextYAlignment = Enum.TextYAlignment.Center,
+        })
+        return badge
+    end
+    local function bindTooltip(control, text)
+        if not control or type(text) ~= "string" or text == "" then return end
+        local host = ensureTooltipHost()
+        local tip = mk("TextLabel", {
+            Parent = host,
+            Name = "FxTip",
+            Visible = false,
+            BackgroundColor3 = theme.Surface,
+            BorderSizePixel = 0,
+            Text = text,
+            TextColor3 = theme.Text,
+            Font = Enum.Font.GothamMedium,
+            TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
+            AutomaticSize = Enum.AutomaticSize.XY,
+            Position = UDim2.fromOffset(0, 0),
+            ZIndex = 9990,
+        })
+        mk("UICorner", {Parent = tip, CornerRadius = UDim.new(0, 8)})
+        mk("UIStroke", {Parent = tip, Color = theme.Border, Thickness = 1, Transparency = 0.2})
+        mk("UIPadding", {
+            Parent = tip,
+            PaddingLeft = UDim.new(0, 8),
+            PaddingRight = UDim.new(0, 8),
+            PaddingTop = UDim.new(0, 5),
+            PaddingBottom = UDim.new(0, 5),
+        })
+        local moveConn
+        local function placeTip()
+            local m = UIS:GetMouseLocation()
+            tip.Position = UDim2.fromOffset(m.X + 14, m.Y + 16)
+        end
+        control.MouseEnter:Connect(function()
+            tip.Visible = true
+            placeTip()
+            if moveConn then moveConn:Disconnect() end
+            moveConn = UIS.InputChanged:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseMovement then
+                    placeTip()
+                end
+            end)
+        end)
+        control.MouseLeave:Connect(function()
+            tip.Visible = false
+            if moveConn then moveConn:Disconnect(); moveConn = nil end
+        end)
+        control.Destroying:Connect(function()
+            if moveConn then moveConn:Disconnect(); moveConn = nil end
+            if tip and tip.Parent then tip:Destroy() end
+        end)
+    end
     local function addDesc(parent, text, top, iconOffset)
         if type(text) ~= "string" or text == "" then return 0 end
         local y = top or 28
@@ -609,6 +710,8 @@ local function CreateElements(theme)
                 Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 12,
             })
         end
+        addBadge(b, cfg.Badge)
+        bindTooltip(b, cfg.Tooltip)
 
         b.MouseEnter:Connect(function()
             tween(b, 0.12, {BackgroundColor3 = theme.Surface3})
@@ -654,6 +757,8 @@ local function CreateElements(theme)
                 Text = cfg.Description, TextColor3 = theme.MutedText, Font = Enum.Font.GothamMedium, TextSize = 24/2,
             })
         end
+        addBadge(btn, cfg.Badge)
+        bindTooltip(btn, cfg.Tooltip)
 
         local rail = mk("Frame", {
             Parent = btn, Size = UDim2.new(0, 46, 0, 24), Position = UDim2.new(1, -58, 0.5, -12), BorderSizePixel = 0,
@@ -725,6 +830,8 @@ local function CreateElements(theme)
         box.FocusLost:Connect(function(enterPressed)
             if cfg.Callback then cfg.Callback(box.Text, enterPressed) end
         end)
+        addBadge(holder, cfg.Badge)
+        bindTooltip(holder, cfg.Tooltip)
         return {SetValue = function(v) box.Text = tostring(v or "") end, Object = box}
     end
 
@@ -795,6 +902,8 @@ local function CreateElements(theme)
         UIS.InputChanged:Connect(function(i)
             if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then setFromX(i.Position.X) end
         end)
+        addBadge(holder, cfg.Badge)
+        bindTooltip(holder, cfg.Tooltip)
         return holder
     end
 
@@ -918,6 +1027,8 @@ local function CreateElements(theme)
             expanded = not expanded
             applyExpandState(true)
         end)
+        addBadge(btn, cfg.Badge)
+        bindTooltip(btn, cfg.Tooltip)
 
         return {
             Refresh = function(newValues)
@@ -995,6 +1106,8 @@ local function CreateElements(theme)
                 if cfg.Pressed then cfg.Pressed() end
             end
         end)
+        addBadge(btn, cfg.Badge)
+        bindTooltip(btn, cfg.Tooltip)
         return btn
     end
 
@@ -1526,6 +1639,21 @@ function FoxnameUI:CreateWindow(cfg)
             Size = UDim2.new(1, -20, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
             Text = name, TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 13, ZIndex = 2,
         })
+        if type(cfg.Badge) == "string" and cfg.Badge ~= "" then
+            local badge = mk("Frame", {
+                Parent = btn, Name = "FxBadge", AnchorPoint = Vector2.new(1, 0.5),
+                Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.new(0, 0, 0, 18),
+                AutomaticSize = Enum.AutomaticSize.X, BackgroundColor3 = CurrentTheme.Accent,
+                BorderSizePixel = 0, ZIndex = 4,
+            })
+            mk("UICorner", {Parent = badge, CornerRadius = UDim.new(1, 0)})
+            mk("UIPadding", {Parent = badge, PaddingLeft = UDim.new(0, 7), PaddingRight = UDim.new(0, 7)})
+            mk("TextLabel", {
+                Parent = badge, BackgroundTransparency = 1, Size = UDim2.new(0, 0, 1, 0),
+                AutomaticSize = Enum.AutomaticSize.X, Text = cfg.Badge, TextColor3 = Color3.fromRGB(255, 255, 255),
+                Font = Enum.Font.GothamBold, TextSize = 11, TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 5,
+            })
+        end
         attachIcon(btn, icon, CurrentTheme.Text, 9, 38)
         local tIcon = btn:FindFirstChild("FxIcon")
         if tIcon and tIcon:IsA("ImageLabel") then tIcon.ZIndex = 2 end
@@ -1566,6 +1694,7 @@ function FoxnameUI:CreateWindow(cfg)
         function tab:Dropdown(c) return elements:Dropdown(container, c) end
         function tab:Keybind(c) return elements:Keybind(container, c) end
         function tab:Section(c) return elements:Section(container, c or {}) end
+        function tab:Group(c) return elements:WindowSection(container, c or {}) end
         function tab:Divider() return elements:Divider(container) end
         function tab:Paragraph(c) return elements:Paragraph(container, c or {}) end
         function tab:Space(c) return elements:Space(container, c or {}) end
@@ -1575,6 +1704,39 @@ function FoxnameUI:CreateWindow(cfg)
             if locked then return end
             show(tab)
         end)
+        if type(cfg.Tooltip) == "string" and cfg.Tooltip ~= "" then
+            local tip = mk("TextLabel", {
+                Parent = ensureTooltipHost(), Name = "FxTabTip", Visible = false,
+                BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0,
+                Text = cfg.Tooltip, TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamMedium, TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
+                AutomaticSize = Enum.AutomaticSize.XY, ZIndex = 9990,
+            })
+            mk("UICorner", {Parent = tip, CornerRadius = UDim.new(0, 8)})
+            mk("UIStroke", {Parent = tip, Color = CurrentTheme.Border, Thickness = 1, Transparency = 0.2})
+            mk("UIPadding", {Parent = tip, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)})
+            local moveConn
+            local function place()
+                local m = UIS:GetMouseLocation()
+                tip.Position = UDim2.fromOffset(m.X + 14, m.Y + 16)
+            end
+            btn.MouseEnter:Connect(function()
+                tip.Visible = true
+                place()
+                if moveConn then moveConn:Disconnect() end
+                moveConn = UIS.InputChanged:Connect(function(i)
+                    if i.UserInputType == Enum.UserInputType.MouseMovement then place() end
+                end)
+            end)
+            btn.MouseLeave:Connect(function()
+                tip.Visible = false
+                if moveConn then moveConn:Disconnect(); moveConn = nil end
+            end)
+            btn.Destroying:Connect(function()
+                if moveConn then moveConn:Disconnect(); moveConn = nil end
+                if tip and tip.Parent then tip:Destroy() end
+            end)
+        end
         btn.MouseEnter:Connect(function() tween(tabHover, 0.12, {BackgroundTransparency = 0.84}) end)
         btn.MouseLeave:Connect(function() tween(tabHover, 0.12, {BackgroundTransparency = 0.93}) end)
         table.insert(tabs, tab)
