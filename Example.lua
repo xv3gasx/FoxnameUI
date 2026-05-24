@@ -42,6 +42,7 @@ local Window = FoxnameUI:CreateWindow({
     DefaultSize = UDim2.fromOffset(840, 620),
     MinSize = UDim2.fromOffset(720, 500),
     MaxSize = UDim2.fromOffset(1280, 900),
+    ToggleKey = "RightControl",
     OpenButton = {
         Title = "Fox",
         Shape = "Pill", -- Circle | Pill | Square
@@ -67,7 +68,11 @@ local Main = MiscSection:Tab({
     Badge = "NEW",
     Tooltip = "Main farming controls",
 })
-Main:Section({ Title = "Main Features" })
+Main:Section({
+    Title = "Main Features",
+    TextXAlignment = "Center",
+    TextSize = 14,
+})
 Main:Paragraph({
     Title = "Welcome",
     Content = "Search now checks tab names + section names + feature texts.",
@@ -88,6 +93,7 @@ Main:Slider({
     Min = 16,
     Max = 120,
     Default = 24,
+    Step = 2,
     Callback = function(v)
         print("WalkSpeed:", v)
     end,
@@ -117,6 +123,7 @@ Main:Dropdown({
     Title = "Farm Mode",
     Values = {"Normal", "Fast", "Safe"},
     Default = "Normal",
+    Searchable = true,
     Callback = function(v)
         print("Farm Mode:", v)
     end,
@@ -168,6 +175,7 @@ Visual:Slider({
     Min = 50,
     Max = 3000,
     Default = 700,
+    Step = 50,
     Callback = function(v)
         print("ESP Distance:", v)
     end,
@@ -178,6 +186,7 @@ Visual:Dropdown({
     Values = {"Players", "NPC", "Items"},
     Multi = true,
     Default = {"Players"},
+    Searchable = true,
     Callback = function(map)
         print("ESP Targets changed")
         for k, val in pairs(map) do
@@ -228,8 +237,10 @@ Settings:Dropdown({
     Title = "Theme",
     Values = themeNames,
     Default = selectedTheme,
+    Searchable = true,
     Callback = function(v)
         selectedTheme = v
+        Window:SetThemeByName(v)
     end,
 })
 
@@ -253,14 +264,7 @@ Settings:Keybind({
     Default = "RightControl",
     Callback = function(newKey)
         print("New keybind:", newKey)
-    end,
-    Pressed = function()
-        uiVisible = not uiVisible
-        if uiVisible then
-            Window:Show()
-        else
-            Window:Hide()
-        end
+        Window:SetToggleKey(newKey)
     end,
 })
 
@@ -305,6 +309,32 @@ Settings:Button({
             Title = "Error",
             Content = "Something went wrong",
             Duration = 3,
+        })
+    end,
+})
+
+Settings:Button({
+    Title = "Test Popup",
+    Callback = function()
+        FoxnameUI:Popup({
+            Title = "Popup Test",
+            Content = "This is a global popup with configurable actions.",
+            Icon = "message-square",
+            Buttons = {
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        print("Popup cancelled")
+                    end,
+                },
+                {
+                    Title = "Confirm",
+                    Primary = true,
+                    Callback = function()
+                        print("Popup confirmed")
+                    end,
+                },
+            },
         })
     end,
 })

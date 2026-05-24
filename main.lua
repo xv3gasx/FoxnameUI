@@ -145,6 +145,17 @@ local function tween(obj, t, props, style, dir)
     return nil
 end
 
+local function parseTextAlignment(value, fallback)
+    if typeof(value) == "EnumItem" then return value end
+    local v = string.lower(tostring(value or ""))
+    if v == "center" or v == "middle" then
+        return Enum.TextXAlignment.Center
+    elseif v == "right" then
+        return Enum.TextXAlignment.Right
+    end
+    return fallback or Enum.TextXAlignment.Left
+end
+
 local function ensureTooltipHost()
     local parent = (gethui and gethui()) or game:GetService("CoreGui")
     if TooltipHost and TooltipHost.Parent then
@@ -327,15 +338,17 @@ local function CreateElements(theme)
     end
 
     function Elements:Section(parent, cfg)
+        cfg = cfg or {}
         local label = mk("TextLabel", {
             Parent = parent,
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 22),
-            TextXAlignment = Enum.TextXAlignment.Left,
+            Size = UDim2.new(1, 0, 0, cfg.Height or 24),
+            TextXAlignment = parseTextAlignment(cfg.TextXAlignment, Enum.TextXAlignment.Left),
+            TextYAlignment = cfg.TextYAlignment or Enum.TextYAlignment.Center,
             Text = cfg.Title or "Section",
             TextColor3 = theme.MutedText,
             Font = Enum.Font.GothamBold,
-            TextSize = 12,
+            TextSize = cfg.TextSize or 12,
         })
         return label
     end
@@ -364,25 +377,41 @@ local function CreateElements(theme)
         cfg = cfg or {}
         local hasDesc = (cfg.Content and cfg.Content ~= "") or (cfg.Description and cfg.Description ~= "")
         local text = cfg.Content or cfg.Description or ""
-        local h = hasDesc and 44 or 24
+        local h = cfg.Height or (hasDesc and 58 or 34)
+        local standingPos = string.lower(tostring(cfg.StandingPos or "left"))
+        local widthScale = math.clamp(tonumber(cfg.WidthScale) or 1, 0.35, 1)
+
         local holder = mk("Frame", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, h),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
         })
+        local bodyXScale = 0
+        if standingPos == "middle" then
+            bodyXScale = (1 - widthScale) * 0.5
+        elseif standingPos == "right" then
+            bodyXScale = 1 - widthScale
+        end
+        local body = mk("Frame", {
+            Parent = holder,
+            Position = UDim2.new(bodyXScale, 0, 0, 0),
+            Size = UDim2.new(widthScale, 0, 1, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+        })
         mk("TextLabel", {
-            Parent = holder, Name = "FxLabel", BackgroundTransparency = 1,
-            Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 20),
+            Parent = body, Name = "FxLabel", BackgroundTransparency = 1,
+            Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, hasDesc and 24 or h),
             TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
-            Text = cfg.Title or "Paragraph", TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+            Text = cfg.Title or "Paragraph", TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 15,
         })
         if hasDesc then
             mk("TextLabel", {
-                Parent = holder, BackgroundTransparency = 1,
-                Position = UDim2.new(0, 0, 0, 20), Size = UDim2.new(1, 0, 0, 20),
+                Parent = body, BackgroundTransparency = 1,
+                Position = UDim2.new(0, 0, 0, 26), Size = UDim2.new(1, 0, 0, h - 26),
                 TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top,
-                Text = text, TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
+                Text = text, TextWrapped = true, TextColor3 = theme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
             })
         end
         return holder
@@ -611,8 +640,8 @@ local function CreateElements(theme)
         end
         mk("TextLabel", {
             Parent = header, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
-            Size = UDim2.new(1, -36, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = Enum.TextYAlignment.Center, Text = title, TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 13,
+            Size = UDim2.new(1, -36, 1, 0), TextXAlignment = parseTextAlignment(cfg.TextXAlignment, Enum.TextXAlignment.Left),
+            TextYAlignment = cfg.TextYAlignment or Enum.TextYAlignment.Center, Text = title, TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = cfg.TextSize or 13,
         })
         local arrow = mk("TextLabel", {
             Parent = header, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 1, 0), Position = UDim2.new(1, -24, 0, 0),
@@ -864,9 +893,22 @@ local function CreateElements(theme)
     end
 
     function Elements:Slider(parent, cfg)
-        local min = cfg.Min or 0
-        local max = cfg.Max or 100
-        local value = cfg.Default or min
+        cfg = cfg or {}
+        local valueCfg = type(cfg.Value) == "table" and cfg.Value or {}
+        local min = cfg.Min or valueCfg.Min or 0
+        local max = cfg.Max or valueCfg.Max or 100
+        local step = tonumber(cfg.Step or valueCfg.Step) or 1
+        if step <= 0 then step = 1 end
+        local value = cfg.Default or valueCfg.Default or min
+        local function roundToStep(raw)
+            local stepped = min + math.floor(((raw - min) / step) + 0.5) * step
+            stepped = math.clamp(stepped, min, max)
+            if math.abs(stepped - math.floor(stepped + 0.5)) < 0.0001 then
+                return math.floor(stepped + 0.5)
+            end
+            return tonumber(string.format("%.3f", stepped))
+        end
+        value = roundToStep(value)
 
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local cardH = hasDesc and 68 or 52
@@ -914,9 +956,10 @@ local function CreateElements(theme)
         local dragging = false
         local function setFromX(x)
             local p = math.clamp((x - bar.AbsolutePosition.X) / math.max(bar.AbsoluteSize.X, 1), 0, 1)
-            value = math.floor(min + (max - min) * p + 0.5)
-            fill.Size = UDim2.new(p, 0, 1, 0)
-            knob.Position = UDim2.new(p, -8, 0.5, -8)
+            value = roundToStep(min + (max - min) * p)
+            local valueAlpha = math.clamp((value - min) / math.max(max - min, 1), 0, 1)
+            fill.Size = UDim2.new(valueAlpha, 0, 1, 0)
+            knob.Position = UDim2.new(valueAlpha, -8, 0.5, -8)
             label.Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value))
             if cfg.Callback then cfg.Callback(value) end
         end
@@ -932,15 +975,31 @@ local function CreateElements(theme)
         end)
         addBadge(holder, cfg.Badge)
         bindTooltip(holder, cfg.Tooltip)
-        return holder
+        return {
+            Object = holder,
+            SetValue = function(v)
+                value = roundToStep(tonumber(v) or min)
+                local valueAlpha = math.clamp((value - min) / math.max(max - min, 1), 0, 1)
+                fill.Size = UDim2.new(valueAlpha, 0, 1, 0)
+                knob.Position = UDim2.new(valueAlpha, -8, 0.5, -8)
+                label.Text = string.format("%s: %s", cfg.Title or "Slider", tostring(value))
+            end,
+            GetValue = function() return value end,
+        }
     end
 
     function Elements:Dropdown(parent, cfg)
+        cfg = cfg or {}
         local values = cfg.Values or {}
         local multi = cfg.Multi == true
-        local selected = multi and {} or (cfg.Default or values[1] or "")
+        local defaultValue = cfg.Default
+        if defaultValue == nil then defaultValue = cfg.Value end
+        local selected = multi and {} or (defaultValue or values[1] or "")
+        local searchable = cfg.Searchable == true
+        local searchQuery = ""
         local rowHeight = 32
         local headerHeight = 38
+        local searchHeight = searchable and 30 or 0
         local expanded = false
 
         local holder = mk("Frame", {
@@ -979,6 +1038,18 @@ local function CreateElements(theme)
         mk("UIPadding", {Parent = panel, PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6), PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6)})
 
         local optionButtons = {}
+        local searchInput
+        if searchable then
+            searchInput = mk("TextBox", {
+                Parent = panel, Size = UDim2.new(1, 0, 0, searchHeight), BackgroundColor3 = theme.Surface3,
+                BorderSizePixel = 0, Text = "", PlaceholderText = cfg.SearchPlaceholder or "Search...",
+                ClearTextOnFocus = false, TextColor3 = theme.Text, PlaceholderColor3 = theme.MutedText,
+                Font = Enum.Font.Gotham, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = -100,
+            })
+            mk("UICorner", {Parent = searchInput, CornerRadius = UDim.new(0, 8)})
+            mk("UIPadding", {Parent = searchInput, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
+        end
 
         local function updateLabel()
             if multi then
@@ -1000,8 +1071,12 @@ local function CreateElements(theme)
         end
 
         local function applyExpandState(animated)
-            local count = #values
-            local panelHeight = expanded and (count * rowHeight + math.max(count - 1, 0) * 4 + 12) or 0
+            local count = 0
+            for _, entry in ipairs(optionButtons) do
+                if entry.Button and entry.Button.Visible then count = count + 1 end
+            end
+            local visibleItems = count + (searchable and 1 or 0)
+            local panelHeight = expanded and (count * rowHeight + searchHeight + math.max(visibleItems - 1, 0) * 4 + 12) or 0
             local holderHeight = headerHeight + (expanded and (6 + panelHeight) or 0)
             if animated then
                 tween(panel, 0.16, {Size = UDim2.new(1, 0, 0, panelHeight)})
@@ -1013,8 +1088,17 @@ local function CreateElements(theme)
             arrow.Text = expanded and "^" or "v"
         end
 
+        local function applyOptionFilter()
+            local q = string.lower(searchQuery:gsub("^%s+", ""):gsub("%s+$", ""))
+            for _, entry in ipairs(optionButtons) do
+                entry.Button.Visible = q == "" or string.find(entry.SearchText, q, 1, true) ~= nil
+            end
+            applyExpandState(false)
+        end
+
         local function rebuildOptions()
-            for _, b in ipairs(optionButtons) do
+            for _, entry in ipairs(optionButtons) do
+                local b = entry.Button
                 if b and b.Parent then b:Destroy() end
             end
             optionButtons = {}
@@ -1025,7 +1109,11 @@ local function CreateElements(theme)
                     Text = tostring(v), TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 13, AutoButtonColor = false,
                 })
                 mk("UICorner", {Parent = opt, CornerRadius = UDim.new(0, 8)})
-                table.insert(optionButtons, opt)
+                table.insert(optionButtons, {
+                    Button = opt,
+                    Value = v,
+                    SearchText = string.lower(tostring(v)),
+                })
 
                 opt.MouseButton1Click:Connect(function()
                     if multi then
@@ -1040,10 +1128,11 @@ local function CreateElements(theme)
                     applyExpandState(true)
                 end)
             end
+            applyOptionFilter()
         end
 
-        if multi and type(cfg.Default) == "table" then
-            for _, v in ipairs(cfg.Default) do selected[v] = true end
+        if multi and type(defaultValue) == "table" then
+            for _, v in ipairs(defaultValue) do selected[v] = true end
         end
 
         updateLabel()
@@ -1054,7 +1143,16 @@ local function CreateElements(theme)
             if #values == 0 then return end
             expanded = not expanded
             applyExpandState(true)
+            if expanded and searchInput then
+                searchInput:CaptureFocus()
+            end
         end)
+        if searchInput then
+            searchInput:GetPropertyChangedSignal("Text"):Connect(function()
+                searchQuery = searchInput.Text or ""
+                applyOptionFilter()
+            end)
+        end
         addBadge(btn, cfg.Badge)
         bindTooltip(btn, cfg.Tooltip)
 
@@ -1064,11 +1162,23 @@ local function CreateElements(theme)
                 if not multi then
                     selected = values[1] or ""
                 end
+                searchQuery = ""
+                if searchInput then searchInput.Text = "" end
                 rebuildOptions()
                 updateLabel()
                 expanded = false
                 applyExpandState(false)
-            end
+            end,
+            SetValue = function(v)
+                if multi and type(v) == "table" then
+                    selected = {}
+                    for _, item in ipairs(v) do selected[item] = true end
+                elseif not multi then
+                    selected = v
+                end
+                updateLabel()
+            end,
+            GetValue = function() return selected end,
         }
     end
     function Elements:Keybind(parent, cfg)
@@ -1214,6 +1324,76 @@ function FoxnameUI:Notify(cfg)
     end)
 end
 
+function FoxnameUI:Popup(cfg)
+    cfg = cfg or {}
+    local parent = (gethui and gethui()) or game:GetService("CoreGui")
+    local gui = mk("ScreenGui", {Name = "FoxnamePopup", Parent = parent, ResetOnSpawn = false, IgnoreGuiInset = true})
+    local overlay = mk("Frame", {
+        Parent = gui, Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1300,
+    })
+    local popup = mk("Frame", {
+        Parent = overlay, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(cfg.Width or 360, cfg.Height or 170), BackgroundColor3 = Theme.Surface,
+        BorderSizePixel = 0, ZIndex = 1301,
+    })
+    mk("UICorner", {Parent = popup, CornerRadius = UDim.new(0, 12)})
+    mk("UIStroke", {Parent = popup, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
+    local scale = mk("UIScale", {Parent = popup, Scale = 0.9})
+    attachIcon(popup, cfg.Icon or "info", cfg.IconColor or Theme.Accent, 14, 44)
+    mk("TextLabel", {
+        Parent = popup, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 44, 0, 12),
+        Size = UDim2.new(1, -58, 0, 24), Text = cfg.Title or "Popup", TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamBold, TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 1302,
+    })
+    mk("TextLabel", {
+        Parent = popup, BackgroundTransparency = 1, Position = UDim2.new(0, 16, 0, 46),
+        Size = UDim2.new(1, -32, 1, -98), Text = cfg.Content or "", TextWrapped = true,
+        TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
+        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 1302,
+    })
+    local buttonRow = mk("Frame", {
+        Parent = popup, Position = UDim2.new(0, 16, 1, -42), Size = UDim2.new(1, -32, 0, 28),
+        BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1302,
+    })
+    local layout = mk("UIListLayout", {Parent = buttonRow, FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+
+    local function close()
+        tween(scale, 0.1, {Scale = 0.92})
+        tween(overlay, 0.1, {BackgroundTransparency = 1})
+        task.wait(0.1)
+        if gui and gui.Parent then gui:Destroy() end
+    end
+
+    local buttons = cfg.Buttons
+    if type(buttons) ~= "table" or #buttons == 0 then
+        buttons = {
+            {Title = cfg.CancelText or "Cancel", Callback = cfg.OnCancel},
+            {Title = cfg.ConfirmText or "Confirm", Callback = cfg.OnConfirm, Primary = true},
+        }
+    end
+    for index, buttonCfg in ipairs(buttons) do
+        local primary = buttonCfg.Primary == true or buttonCfg.Variant == "Primary"
+        local action = mk("TextButton", {
+            Parent = buttonRow, LayoutOrder = index, Size = UDim2.fromOffset(buttonCfg.Width or 104, 28),
+            BackgroundColor3 = primary and Theme.Accent or Theme.Surface3, BorderSizePixel = 0,
+            Text = buttonCfg.Title or buttonCfg.Text or "Action",
+            TextColor3 = primary and Color3.fromRGB(255, 255, 255) or Theme.Text,
+            Font = Enum.Font.GothamBold, TextSize = 12, AutoButtonColor = false, ZIndex = 1303,
+        })
+        mk("UICorner", {Parent = action, CornerRadius = UDim.new(0, 8)})
+        action.MouseButton1Click:Connect(function()
+            close()
+            if buttonCfg.Callback then buttonCfg.Callback() end
+        end)
+    end
+    tween(overlay, 0.12, {BackgroundTransparency = 0.45})
+    tween(scale, 0.16, {Scale = 1}, Enum.EasingStyle.Back)
+    return gui
+end
+
 function FoxnameUI:CreateWindow(cfg)
     cfg = cfg or {}
     local startThemeName = tostring(cfg.Theme or FoxnameUI.DefaultThemeName or "Ember")
@@ -1356,6 +1536,18 @@ function FoxnameUI:CreateWindow(cfg)
     end
     local savedSize = defaultSize
     local savedPos = main.Position
+    local windowVisible = true
+    local toggleKey = nil
+    local function normalizeKeyCode(value)
+        if typeof(value) == "EnumItem" then return value end
+        if type(value) == "string" then
+            local ok, keyCode = pcall(function()
+                return Enum.KeyCode[value]
+            end)
+            if ok then return keyCode end
+        end
+        return nil
+    end
 
     local tabButtons = mk("ScrollingFrame", {
         Parent = main, Size = UDim2.new(0, 164, 1, -58), Position = UDim2.new(0, 0, 0, 58),
@@ -1470,6 +1662,7 @@ function FoxnameUI:CreateWindow(cfg)
         task.wait(0.18)
         main.Visible = false
         openBtn.Visible = openVisible
+        windowVisible = false
     end)
 
     openBtn.MouseButton1Click:Connect(function()
@@ -1479,6 +1672,7 @@ function FoxnameUI:CreateWindow(cfg)
         main.BackgroundTransparency = 0.15
         main.Visible = true
         openBtn.Visible = false
+        windowVisible = true
         tween(main, 0.22, {Size = savedSize, Position = savedPos, BackgroundTransparency = 0}, Enum.EasingStyle.Back)
     end)
     if openCfg.Draggable ~= false then
@@ -1592,8 +1786,8 @@ function FoxnameUI:CreateWindow(cfg)
         mk("UICorner", {Parent = headHover, CornerRadius = UDim.new(0, 9)})
         mk("TextLabel", {
             Parent = head, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0),
-            Size = UDim2.new(1, -30, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
-            Text = cfg.Title or "Section", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 2,
+            Size = UDim2.new(1, -30, 1, 0), TextXAlignment = parseTextAlignment(cfg.TextXAlignment, Enum.TextXAlignment.Left), TextYAlignment = cfg.TextYAlignment or Enum.TextYAlignment.Center,
+            Text = cfg.Title or "Section", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = cfg.TextSize or 12, ZIndex = 2,
         })
         attachIcon(head, cfg.Icon, cfg.IconColor or CurrentTheme.MutedText, 5, 34)
         local hIcon = head:FindFirstChild("FxIcon")
@@ -1791,8 +1985,25 @@ function FoxnameUI:CreateWindow(cfg)
         return createTab(defaultSection.Container, nameOrCfg, icon, defaultSection)
     end
 
-    function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = openVisible end
-    function windowApi:Show() main.Position = savedPos; main.Size = savedSize; main.Visible = true; openBtn.Visible = false end
+    function windowApi:Hide() savedSize = main.Size; savedPos = main.Position; main.Visible = false; openBtn.Visible = openVisible; windowVisible = false end
+    function windowApi:Show() main.Position = savedPos; main.Size = savedSize; main.Visible = true; openBtn.Visible = false; windowVisible = true end
+    function windowApi:SetToggleKey(value)
+        toggleKey = normalizeKeyCode(value)
+        return toggleKey
+    end
+    function windowApi:GetToggleKey()
+        return toggleKey
+    end
+    UIS.InputBegan:Connect(function(input, gp)
+        if gp or not toggleKey or UIS:GetFocusedTextBox() then return end
+        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == toggleKey then
+            if windowVisible then
+                windowApi:Hide()
+            else
+                windowApi:Show()
+            end
+        end
+    end)
     function windowApi:Destroy() gui:Destroy() end
     function windowApi:Dialog(cfg)
         cfg = cfg or {}
@@ -1846,6 +2057,9 @@ function FoxnameUI:CreateWindow(cfg)
             close()
             if cfg.OnConfirm then cfg.OnConfirm() end
         end)
+    end
+    function windowApi:Popup(cfg)
+        return self:Dialog(cfg or {})
     end
     function windowApi:Section(cfg)
         local sec = createNavSection(cfg or {})
@@ -2066,6 +2280,9 @@ function FoxnameUI:CreateWindow(cfg)
     end
     function windowApi:GetCurrentTheme()
         return currentThemeName
+    end
+    if cfg.ToggleKey then
+        windowApi:SetToggleKey(cfg.ToggleKey)
     end
     applyTheme()
 
