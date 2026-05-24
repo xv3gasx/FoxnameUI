@@ -641,8 +641,8 @@ local function CreateElements(theme)
             local holderH = 38 + bodyH
             arrow.Text = opened and "^" or "v"
             if animated then
-                tween(body, 0.16, {Size = UDim2.new(1, 0, 0, bodyH)})
-                tween(holder, 0.16, {Size = UDim2.new(1, 0, 0, holderH)})
+                tween(body, 0.2, {Size = UDim2.new(1, 0, 0, bodyH)}, Enum.EasingStyle.Sine)
+                tween(holder, 0.2, {Size = UDim2.new(1, 0, 0, holderH)}, Enum.EasingStyle.Sine)
             else
                 body.Size = UDim2.new(1, 0, 0, bodyH)
                 holder.Size = UDim2.new(1, 0, 0, holderH)
@@ -827,7 +827,35 @@ local function CreateElements(theme)
         })
         mk("UICorner", {Parent = box, CornerRadius = UDim.new(0, 9)})
         mk("UIPadding", {Parent = box, PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
+        local numbersOnly = cfg.NumbersOnly == true
+        local maxLength = tonumber(cfg.MaxLength)
+        local function sanitizeInputText(raw)
+            local s = tostring(raw or "")
+            if numbersOnly then
+                s = s:gsub("[^%d%.%-]", "")
+                local hasLeadingMinus = s:sub(1, 1) == "-"
+                s = s:gsub("%-", "")
+                if hasLeadingMinus then
+                    s = "-" .. s
+                end
+                local firstDot = s:find("%.", 1, true)
+                if firstDot then
+                    s = s:sub(1, firstDot) .. s:sub(firstDot + 1):gsub("%.", "")
+                end
+            end
+            if maxLength and maxLength > 0 and #s > maxLength then
+                s = s:sub(1, maxLength)
+            end
+            return s
+        end
+        box:GetPropertyChangedSignal("Text"):Connect(function()
+            local sanitized = sanitizeInputText(box.Text)
+            if sanitized ~= box.Text then
+                box.Text = sanitized
+            end
+        end)
         box.FocusLost:Connect(function(enterPressed)
+            box.Text = sanitizeInputText(box.Text)
             if cfg.Callback then cfg.Callback(box.Text, enterPressed) end
         end)
         addBadge(holder, cfg.Badge)
@@ -1148,10 +1176,12 @@ function FoxnameUI:Notify(cfg)
     mk("UICorner", {Parent = card, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = card, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
     local cardCorner = 12
-    local stripInsetY = cardCorner
+    -- Keep the strip close to rounded edges without clipping awkwardly.
+    local stripInsetY = math.max(3, math.floor(cardCorner * 0.35))
     local typeStrip = mk("Frame", {
-        Parent = card, Position = UDim2.fromOffset(0, stripInsetY), Size = UDim2.new(0, 4, 1, -(stripInsetY * 2)), BackgroundColor3 = style.Color, BorderSizePixel = 0,
+        Parent = card, Position = UDim2.fromOffset(0, stripInsetY), Size = UDim2.new(0, 5, 1, -(stripInsetY * 2)), BackgroundColor3 = style.Color, BorderSizePixel = 0,
     })
+    mk("UICorner", {Parent = typeStrip, CornerRadius = UDim.new(1, 0)})
     attachIcon(card, style.Icon, style.Color, 8, 34)
     mk("TextLabel", {
         Parent = card, BackgroundTransparency = 1, Position = UDim2.new(0, 34, 0, 8), Size = UDim2.new(1, -46, 0, 20),
@@ -1534,12 +1564,12 @@ function FoxnameUI:CreateWindow(cfg)
         if not tab then return end
         if currentTab then
             currentTab.Container.Visible = false
-            tween(currentTab.Button, 0.12, {BackgroundColor3 = CurrentTheme.Surface2})
+            tween(currentTab.Button, 0.15, {BackgroundColor3 = CurrentTheme.Surface2}, Enum.EasingStyle.Sine)
         end
         currentTab = tab
         tab.Container.Visible = true
         tab.Container.CanvasPosition = Vector2.new(0, 0)
-        tween(tab.Button, 0.12, {BackgroundColor3 = CurrentTheme.Accent})
+        tween(tab.Button, 0.15, {BackgroundColor3 = CurrentTheme.Accent}, Enum.EasingStyle.Sine)
     end
 
     local windowApi = {}
@@ -1584,9 +1614,9 @@ function FoxnameUI:CreateWindow(cfg)
             local bh = opened and list.AbsoluteContentSize.Y or 0
             local rh = 36 + 4 + bh
             if anim then
-                tween(body, 0.16, {Size = UDim2.new(1, 0, 0, bh)})
-                tween(row, 0.16, {Size = UDim2.new(1, 0, 0, rh)})
-                tween(arrow, 0.16, {Rotation = opened and 180 or 0}, Enum.EasingStyle.Quad)
+                tween(body, 0.2, {Size = UDim2.new(1, 0, 0, bh)}, Enum.EasingStyle.Sine)
+                tween(row, 0.2, {Size = UDim2.new(1, 0, 0, rh)}, Enum.EasingStyle.Sine)
+                tween(arrow, 0.2, {Rotation = opened and 180 or 0}, Enum.EasingStyle.Sine)
             else
                 body.Size = UDim2.new(1, 0, 0, bh)
                 row.Size = UDim2.new(1, 0, 0, rh)

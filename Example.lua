@@ -97,8 +97,19 @@ Main:Input({
     Title = "Player Name",
     Placeholder = "Type player...",
     Badge = "OPT",
+    MaxLength = 20,
     Callback = function(text, enter)
         print("Input:", text, "Enter:", enter)
+    end,
+})
+
+Main:Input({
+    Title = "Custom WalkSpeed",
+    Placeholder = "Only numbers...",
+    NumbersOnly = true,
+    MaxLength = 3,
+    Callback = function(text)
+        print("Custom WalkSpeed Input:", text)
     end,
 })
 
