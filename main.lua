@@ -1514,6 +1514,7 @@ function FoxnameUI:CreateWindow(cfg)
         TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
         TextTruncate = Enum.TextTruncate.AtEnd,
         TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
+        LayoutOrder = 1,
     })
     local authorText = mk("TextLabel", {
         Parent = top, BackgroundTransparency = 1, Position = UDim2.new(0, 38, 0, 37),
@@ -1522,10 +1523,11 @@ function FoxnameUI:CreateWindow(cfg)
         TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 12,
     })
     authorText.Visible = (type(cfg.Author) == "string" and cfg.Author ~= "")
-    attachIcon(top, (cfg.Icon or "zap"), CurrentTheme.Text, 14, 38)
-    local topIcon = top:FindFirstChild("FxIcon")
+    attachIcon(titleRow, (cfg.Icon or "zap"), CurrentTheme.Text, 3, 28)
+    local topIcon = titleRow:FindFirstChild("FxIcon")
     if topIcon and topIcon:IsA("ImageLabel") then
         topIcon.Size = UDim2.new(0, 20, 0, 20)
+        topIcon.LayoutOrder = 0
     end
 
     local windowTag
@@ -1608,6 +1610,7 @@ function FoxnameUI:CreateWindow(cfg)
             Parent = titleRow, Name = "FxTag", BackgroundColor3 = color, BorderSizePixel = 0,
             Size = UDim2.fromOffset(0, 20), AutomaticSize = Enum.AutomaticSize.X, ClipsDescendants = true,
             ZIndex = 4,
+            LayoutOrder = 2,
         })
         mk("UICorner", {Parent = windowTag, CornerRadius = UDim.new(1, 0)})
         mk("UIPadding", {Parent = windowTag, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
