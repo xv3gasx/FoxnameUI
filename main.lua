@@ -3,6 +3,7 @@
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
+local TextService = game:GetService("TextService")
 
 local Theme = {
     Name = "Ember",
@@ -1493,9 +1494,25 @@ function FoxnameUI:CreateWindow(cfg)
     local top = mk("Frame", {Parent = main, Size = UDim2.new(1, 0, 0, 58), BackgroundColor3 = CurrentTheme.Surface, BorderSizePixel = 0})
     mk("UICorner", {Parent = top, CornerRadius = UDim.new(0, 14)})
 
+    local titleRow = mk("Frame", {
+        Parent = top,
+        Name = "FxTitleRow",
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 14, 0, 10),
+        Size = UDim2.new(1, -180, 0, 26),
+    })
+    local titleLayout = mk("UIListLayout", {
+        Parent = titleRow,
+        FillDirection = Enum.FillDirection.Horizontal,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = UDim.new(0, 10),
+    })
     local titleLabel = mk("TextLabel", {
-        Parent = top, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 12),
-        Size = UDim2.new(1, -120, 0, 24), TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
+        Parent = titleRow, Name = "FxLabel", BackgroundTransparency = 1,
+        Size = UDim2.new(0, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.X,
+        TextXAlignment = Enum.TextXAlignment.Left, Text = cfg.Title or "Foxname UI",
+        TextTruncate = Enum.TextTruncate.AtEnd,
         TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 18,
     })
     local authorText = mk("TextLabel", {
@@ -1513,15 +1530,9 @@ function FoxnameUI:CreateWindow(cfg)
 
     local windowTag
     local function syncTopLayout()
-        local tagWidth = 0
-        if windowTag and windowTag.Parent then
-            tagWidth = windowTag.AbsoluteSize.X + 10
-        end
-        titleLabel.Size = UDim2.new(1, -(120 + tagWidth), 0, 24)
-        authorText.Size = UDim2.new(1, -(130 + tagWidth), 0, 16)
-        if windowTag and windowTag.Parent then
-            windowTag.Position = UDim2.new(1, -(104 + tagWidth), 0, 12)
-        end
+        local rightGutter = 118
+        titleRow.Size = UDim2.new(1, -(rightGutter + 64), 0, 26)
+        authorText.Size = UDim2.new(1, -130, 0, 16)
     end
 
     local function setTopbarLucideIcon(btn, iconName, color)
@@ -1594,7 +1605,7 @@ function FoxnameUI:CreateWindow(cfg)
         end
         local color = tagCfg.Color or CurrentTheme.Accent
         windowTag = mk("Frame", {
-            Parent = top, Name = "FxTag", BackgroundColor3 = color, BorderSizePixel = 0,
+            Parent = titleRow, Name = "FxTag", BackgroundColor3 = color, BorderSizePixel = 0,
             Size = UDim2.fromOffset(0, 20), AutomaticSize = Enum.AutomaticSize.X, ClipsDescendants = true,
             ZIndex = 4,
         })
@@ -1637,6 +1648,7 @@ function FoxnameUI:CreateWindow(cfg)
         }
     end
     syncTopLayout()
+    titleRow:GetPropertyChangedSignal("AbsoluteSize"):Connect(syncTopLayout)
     top:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
         local h = top.AbsoluteSize.Y
         local bh = math.clamp(math.floor(h * 0.46), 24, 30)
