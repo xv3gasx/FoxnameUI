@@ -185,23 +185,21 @@ local function ensureIconsProviderLoaded()
         return
     end
     IconsProviderLoading = true
-    task.spawn(function()
-        local ok, mod = pcall(function()
-            local src = game.HttpGetAsync and game:HttpGetAsync(ICONS_URL) or HttpService:GetAsync(ICONS_URL)
-            src = src:gsub("^\239\187\191", "")
-            local fn = loadstring(src)
-            return fn and fn()
-        end)
-        if ok and mod then
-            IconsProvider = mod
-            pcall(function() IconsProvider.SetIconsType("lucide") end)
-            FoxnameUI.IconProvider = IconsProvider
-            if refreshPendingIcons then
-                pcall(refreshPendingIcons)
-            end
-        end
-        IconsProviderLoading = false
+    local ok, mod = pcall(function()
+        local src = game.HttpGetAsync and game:HttpGetAsync(ICONS_URL) or HttpService:GetAsync(ICONS_URL)
+        src = src:gsub("^\239\187\191", "")
+        local fn = loadstring(src)
+        return fn and fn()
     end)
+    if ok and mod then
+        IconsProvider = mod
+        pcall(function() IconsProvider.SetIconsType("lucide") end)
+        FoxnameUI.IconProvider = IconsProvider
+        if refreshPendingIcons then
+            pcall(refreshPendingIcons)
+        end
+    end
+    IconsProviderLoading = false
 end
 
 local function normalizeLucideName(icon)
@@ -2488,4 +2486,6 @@ end
 
 FoxnameUI.Theme = Theme
 FoxnameUI.IconProvider = IconsProvider
+FoxnameUI.PreloadIcons = ensureIconsProviderLoaded
+ensureIconsProviderLoaded()
 return FoxnameUI
