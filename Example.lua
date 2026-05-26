@@ -74,7 +74,6 @@ local Main = MiscSection:Tab({
 Main:Section({
     Title = "Main Features",
     TextXAlignment = "Center",
-    TextSize = 14,
 })
 Main:Paragraph({
     Title = "Welcome",
@@ -357,4 +356,3 @@ Settings:Button({
         })
     end,
 })
-
