@@ -174,19 +174,34 @@ end
 
 -- WindUI-like icon provider (lucide names)
 local IconsProvider = nil
+local IconsProviderLoading = false
 local ICONS_URL = "https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"
+local pendingIconRequests = {}
+local refreshPendingIcons
+setmetatable(pendingIconRequests, { __mode = "k" })
 
-do
-    local ok, mod = pcall(function()
-        local src = game.HttpGetAsync and game:HttpGetAsync(ICONS_URL) or HttpService:GetAsync(ICONS_URL)
-        src = src:gsub("^\239\187\191", "")
-        local fn = loadstring(src)
-        return fn and fn()
-    end)
-    if ok and mod then
-        IconsProvider = mod
-        pcall(function() IconsProvider.SetIconsType("lucide") end)
+local function ensureIconsProviderLoaded()
+    if IconsProvider or IconsProviderLoading then
+        return
     end
+    IconsProviderLoading = true
+    task.spawn(function()
+        local ok, mod = pcall(function()
+            local src = game.HttpGetAsync and game:HttpGetAsync(ICONS_URL) or HttpService:GetAsync(ICONS_URL)
+            src = src:gsub("^\239\187\191", "")
+            local fn = loadstring(src)
+            return fn and fn()
+        end)
+        if ok and mod then
+            IconsProvider = mod
+            pcall(function() IconsProvider.SetIconsType("lucide") end)
+            FoxnameUI.IconProvider = IconsProvider
+            if refreshPendingIcons then
+                pcall(refreshPendingIcons)
+            end
+        end
+        IconsProviderLoading = false
+    end)
 end
 
 local function normalizeLucideName(icon)
@@ -198,7 +213,10 @@ local function normalizeLucideName(icon)
 end
 
 local function getIconSprite(iconName)
-    if not IconsProvider then return nil end
+    if not IconsProvider then
+        ensureIconsProviderLoaded()
+        return nil
+    end
     local key = normalizeLucideName(iconName)
     if not key or key == "" then return nil end
     local ok, iconData = pcall(function()
@@ -210,27 +228,68 @@ local function getIconSprite(iconName)
     return nil
 end
 
-local function attachIcon(target, iconName, color, iconPosY, labelX)
+local function applyIconToTarget(target, iconName, color, iconPosY, labelX)
+    if not target or not target.Parent then return false end
     local img, meta = getIconSprite(iconName)
     if not img then return false end
 
-    local icon = mk("ImageLabel", {
-        Parent = target,
-        Name = "FxIcon",
-        BackgroundTransparency = 1,
-        Size = UDim2.new(0, 22, 0, 22),
-        Position = UDim2.new(0, 10, 0, iconPosY or 10),
-        Image = img,
-        ImageRectSize = meta.ImageRectSize,
-        ImageRectOffset = meta.ImageRectPosition,
-        ImageColor3 = color or Theme.Text,
-    })
+    local icon = target:FindFirstChild("FxIcon")
+    if not icon then
+        icon = mk("ImageLabel", {
+            Parent = target,
+            Name = "FxIcon",
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, 22, 0, 22),
+            Position = UDim2.new(0, 10, 0, iconPosY or 10),
+            ImageColor3 = color or Theme.Text,
+        })
+    else
+        icon.Position = UDim2.new(0, 10, 0, iconPosY or 10)
+        icon.Visible = true
+    end
+
+    icon.Image = img
+    icon.ImageRectSize = meta.ImageRectSize
+    icon.ImageRectOffset = meta.ImageRectPosition
+    icon.ImageColor3 = color or Theme.Text
 
     local label = target:FindFirstChild("FxLabel")
     if label and label:IsA("TextLabel") then
         label.Position = UDim2.new(0, labelX or 32, label.Position.Y.Scale, label.Position.Y.Offset)
     end
-    return icon ~= nil
+    return true
+end
+
+local function attachIcon(target, iconName, color, iconPosY, labelX)
+    if applyIconToTarget(target, iconName, color, iconPosY, labelX) then
+        return true
+    end
+    if target then
+        pendingIconRequests[target] = {
+            iconName = iconName,
+            color = color,
+            iconPosY = iconPosY,
+            labelX = labelX,
+        }
+        target.Destroying:Connect(function()
+            pendingIconRequests[target] = nil
+        end)
+    end
+    ensureIconsProviderLoaded()
+    return false
+end
+
+refreshPendingIcons = function()
+    if not IconsProvider then return end
+    for target, req in pairs(pendingIconRequests) do
+        if target and target.Parent and req then
+            if applyIconToTarget(target, req.iconName, req.color, req.iconPosY, req.labelX) then
+                pendingIconRequests[target] = nil
+            end
+        else
+            pendingIconRequests[target] = nil
+        end
+    end
 end
 
 local function CreateElements(theme, colorpickerRegistry)
