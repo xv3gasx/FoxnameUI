@@ -899,7 +899,7 @@ local function CreateElements(theme, colorpickerRegistry)
 
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 56 or 42
+        local cardH = hasDesc and 60 or 46
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -918,10 +918,10 @@ local function CreateElements(theme, colorpickerRegistry)
             TextColor3 = theme.Text, Font = Enum.Font.GothamBold, TextSize = 17,
         })
         -- Element-level icons disabled by design.
-        addDesc(holder, cfg.Description, 26, hasIcon and 34 or 8)
+        addDesc(holder, cfg.Description, 24, hasIcon and 34 or 8)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 38 or 24), Size = UDim2.new(1, -12, 0, 18),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 30), Size = UDim2.new(1, -12, 0, 18),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
@@ -1936,13 +1936,27 @@ function FoxnameUI:CreateWindow(cfg)
         attachIcon(head, cfg.Icon, cfg.IconColor or CurrentTheme.MutedText, 5, 34)
         local hIcon = head:FindFirstChild("FxIcon")
         if hIcon and hIcon:IsA("ImageLabel") then hIcon.ZIndex = 2 end
-        local arrow = mk("TextLabel", {
-            Parent = head, BackgroundTransparency = 1, Position = UDim2.new(1, -24, 0, 0), Size = UDim2.new(0, 22, 1, 0),
-            Text = "v", TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.GothamBold, TextSize = 14,
-            TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Center,
-            Rotation = opened and 180 or 0,
+        local arrow = mk("ImageLabel", {
+            Parent = head,
+            Name = "FxArrow",
+            BackgroundTransparency = 1,
+            Position = UDim2.new(1, -24, 0.5, 0),
+            Size = UDim2.new(0, 14, 0, 14),
+            AnchorPoint = Vector2.new(0.5, 0.5),
             ZIndex = 2,
+            Rotation = opened and 180 or 0,
+            ImageColor3 = CurrentTheme.MutedText,
         })
+        do
+            local img, meta = getIconSprite("chevron-up")
+            if img then
+                arrow.Image = img
+                arrow.ImageRectSize = meta.ImageRectSize
+                arrow.ImageRectOffset = meta.ImageRectPosition
+            else
+                arrow.Image = ""
+            end
+        end
         local body = mk("Frame", {
             Parent = row, Position = UDim2.new(0, 0, 0, 40), Size = UDim2.new(1, 0, 0, opened and 38 or 0),
             BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true,
@@ -2280,7 +2294,7 @@ function FoxnameUI:CreateWindow(cfg)
             s.Header.BackgroundColor3 = CurrentTheme.Surface2
             if s.Label then s.Label.TextColor3 = CurrentTheme.Text end
             if s.Icon then s.Icon.ImageColor3 = CurrentTheme.MutedText end
-            if s.Arrow then s.Arrow.TextColor3 = CurrentTheme.MutedText end
+            if s.Arrow then s.Arrow.ImageColor3 = CurrentTheme.MutedText end
         end
         for _, t in ipairs(allTabs) do
             if currentTab and currentTab.Button == t.Button then
