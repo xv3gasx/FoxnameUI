@@ -899,7 +899,7 @@ local function CreateElements(theme, colorpickerRegistry)
 
     function Elements:Input(parent, cfg)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
-        local cardH = hasDesc and 60 or 46
+        local cardH = hasDesc and 66 or 52
         local holder = mk("Frame", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -921,7 +921,7 @@ local function CreateElements(theme, colorpickerRegistry)
         addDesc(holder, cfg.Description, 24, hasIcon and 34 or 8)
 
         local box = mk("TextBox", {
-            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 44 or 30), Size = UDim2.new(1, -12, 0, 18),
+            Parent = holder, Position = UDim2.new(0, 6, 0, hasDesc and 42 or 28), Size = UDim2.new(1, -12, 0, 18),
             BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
             PlaceholderText = cfg.Placeholder or "Type here...",
             Text = cfg.Default or "", ClearTextOnFocus = false,
