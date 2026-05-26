@@ -1454,6 +1454,19 @@ function FoxnameUI:CreateWindow(cfg)
         topIcon.Size = UDim2.new(0, 20, 0, 20)
     end
 
+    local windowTag
+    local function syncTopLayout()
+        local tagWidth = 0
+        if windowTag and windowTag.Parent then
+            tagWidth = windowTag.AbsoluteSize.X + 10
+        end
+        titleLabel.Size = UDim2.new(1, -(120 + tagWidth), 0, 24)
+        authorText.Size = UDim2.new(1, -(130 + tagWidth), 0, 16)
+        if windowTag and windowTag.Parent then
+            windowTag.Position = UDim2.new(1, -(104 + tagWidth), 0, 12)
+        end
+    end
+
     local function setTopbarLucideIcon(btn, iconName, color)
         local img, meta = getIconSprite(iconName)
         if not img then return nil end
@@ -1512,6 +1525,61 @@ function FoxnameUI:CreateWindow(cfg)
     end
     styleHeaderBtnHover(hideBtn, hideIcon, CurrentTheme.Text)
     styleHeaderBtnHover(closeBtn, closeIcon, CurrentTheme.Danger)
+    local function createWindowTag(tagCfg)
+        tagCfg = tagCfg or {}
+        if windowTag and windowTag.Parent then
+            windowTag:Destroy()
+            windowTag = nil
+        end
+        if type(tagCfg.Title) ~= "string" or tagCfg.Title == "" then
+            syncTopLayout()
+            return nil
+        end
+        local color = tagCfg.Color or CurrentTheme.Accent
+        windowTag = mk("Frame", {
+            Parent = top, Name = "FxTag", BackgroundColor3 = color, BorderSizePixel = 0,
+            Size = UDim2.fromOffset(0, 20), AutomaticSize = Enum.AutomaticSize.X, ClipsDescendants = true,
+            ZIndex = 4,
+        })
+        mk("UICorner", {Parent = windowTag, CornerRadius = UDim.new(1, 0)})
+        mk("UIPadding", {Parent = windowTag, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
+        local tagLabel = mk("TextLabel", {
+            Parent = windowTag, BackgroundTransparency = 1, Size = UDim2.new(0, 0, 1, 0),
+            AutomaticSize = Enum.AutomaticSize.X, Text = tagCfg.Title,
+            TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 11,
+            TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 5,
+        })
+        if type(tagCfg.Icon) == "string" and tagCfg.Icon ~= "" then
+            local tagIconImg, tagIconMeta = getIconSprite(tagCfg.Icon)
+            if tagIconImg then
+                local tagIcon = mk("ImageLabel", {
+                    Parent = windowTag, BackgroundTransparency = 1, Size = UDim2.fromOffset(12, 12),
+                    Position = UDim2.fromOffset(8, 4), Image = tagIconImg,
+                    ImageRectSize = tagIconMeta.ImageRectSize, ImageRectOffset = tagIconMeta.ImageRectPosition,
+                    ImageColor3 = Color3.fromRGB(255, 255, 255), ZIndex = 5,
+                })
+                tagLabel.Position = UDim2.fromOffset(24, 0)
+            end
+        end
+        syncTopLayout()
+        return {
+            Object = windowTag,
+            SetValue = function(_, v)
+                if type(v) == "string" then
+                    tagLabel.Text = v
+                    syncTopLayout()
+                end
+            end,
+            Destroy = function()
+                if windowTag and windowTag.Parent then
+                    windowTag:Destroy()
+                end
+                windowTag = nil
+                syncTopLayout()
+            end,
+        }
+    end
+    syncTopLayout()
     top:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
         local h = top.AbsoluteSize.Y
         local bh = math.clamp(math.floor(h * 0.46), 24, 30)
@@ -1520,13 +1588,14 @@ function FoxnameUI:CreateWindow(cfg)
         closeBtn.Size = UDim2.fromOffset(bw, bh)
         hideBtn.Position = UDim2.new(1, -(bw * 2 + 10), 0.5, -math.floor(bh / 2))
         closeBtn.Position = UDim2.new(1, -(bw + 4), 0.5, -math.floor(bh / 2))
+        syncTopLayout()
     end)
 
     local openCfg = cfg.OpenButton or {}
     local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
     local openVisible = not (openCfg.OnlyMobile == true and not isMobile)
-    local openDefault = openCfg.DefaultSize or UDim2.fromOffset(44, 44)
-    local openMin = openCfg.MinSize or UDim2.fromOffset(36, 30)
+    local openDefault = openCfg.DefaultSize or UDim2.fromOffset(86, 34)
+    local openMin = openCfg.MinSize or UDim2.fromOffset(60, 30)
     local openMax = openCfg.MaxSize or UDim2.fromOffset(140, 60)
     local openW = math.clamp(openDefault.X.Offset, openMin.X.Offset, openMax.X.Offset)
     local openH = math.clamp(openDefault.Y.Offset, openMin.Y.Offset, openMax.Y.Offset)
@@ -1536,7 +1605,7 @@ function FoxnameUI:CreateWindow(cfg)
         Font = Enum.Font.GothamBold, TextSize = 18, Visible = false, BorderSizePixel = 0, AutoButtonColor = false,
     })
     openBtn.Text = openCfg.Title or "Open"
-    openBtn.Visible = false and openVisible
+    openBtn.Visible = openVisible
     local shape = tostring(openCfg.Shape or "Circle")
     local corner = mk("UICorner", {Parent = openBtn, CornerRadius = UDim.new(1, 0)})
     if shape == "Pill" then
@@ -2079,6 +2148,9 @@ function FoxnameUI:CreateWindow(cfg)
     function windowApi:Popup(cfg)
         return self:Dialog(cfg or {})
     end
+    function windowApi:Tag(cfg)
+        return createWindowTag(cfg or {})
+    end
     function windowApi:Section(cfg)
         local sec = createNavSection(cfg or {})
         function sec:Tab(tabCfg)
@@ -2301,6 +2373,9 @@ function FoxnameUI:CreateWindow(cfg)
     end
     function windowApi:GetCurrentTheme()
         return currentThemeName
+    end
+    if cfg.Tag then
+        windowApi:Tag(cfg.Tag)
     end
     if cfg.ToggleKey then
         windowApi:SetToggleKey(cfg.ToggleKey)

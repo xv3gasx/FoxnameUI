@@ -48,10 +48,13 @@ local Window = FoxnameUI:CreateWindow({
         Shape = "Pill", -- Circle | Pill | Square
         OnlyMobile = false,
         Draggable = true,
-        DefaultSize = UDim2.fromOffset(86, 34),
-        MinSize = UDim2.fromOffset(60, 30),
-        MaxSize = UDim2.fromOffset(140, 56),
     }
+})
+
+Window:Tag({
+    Title = "Release",
+    Icon = "rocket",
+    Color = Color3.fromRGB(255, 13, 49),
 })
 
 local MiscSection = Window:Section({
