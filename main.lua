@@ -21,6 +21,7 @@ local Theme = {
 }
 local NotifyHost = nil
 local TooltipHost = nil
+local LastWindowApi = nil
 
 local function copyTable(t)
     local out = {}
@@ -1106,7 +1107,8 @@ local function CreateElements(theme, colorpickerRegistry)
         local searchQuery = ""
         local rowHeight = 36
         local headerHeight = 36
-        local searchHeight = searchable and 39 or 0
+        local searchHeight = searchable and 36 or 0
+        local maxVisibleItems = tonumber(cfg.MaxVisibleItems) or 6
         local expanded = false
 
         local holder = mk("Frame", {
@@ -1141,8 +1143,19 @@ local function CreateElements(theme, colorpickerRegistry)
         })
         mk("UICorner", {Parent = panel, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = panel, Color = theme.Border, Thickness = 1, Transparency = 0.25})
-        mk("UIListLayout", {Parent = panel, Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder})
         mk("UIPadding", {Parent = panel, PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6), PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6)})
+
+        local list = mk("ScrollingFrame", {
+            Parent = panel,
+            Position = UDim2.new(0, 0, 0, searchable and (searchHeight + 4) or 0),
+            Size = UDim2.new(1, 0, 1, -(searchable and (searchHeight + 4) or 0)),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 3,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            ScrollingDirection = Enum.ScrollingDirection.Y,
+        })
+        local listLayout = mk("UIListLayout", {Parent = list, Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder})
 
         local optionButtons = {}
         local searchInput
@@ -1151,24 +1164,37 @@ local function CreateElements(theme, colorpickerRegistry)
                 Parent = panel, Size = UDim2.new(1, 0, 0, searchHeight), BackgroundColor3 = theme.Surface3,
                 BorderSizePixel = 0, Text = "", PlaceholderText = cfg.SearchPlaceholder or "Search...",
                 ClearTextOnFocus = false, TextColor3 = theme.Text, PlaceholderColor3 = theme.MutedText,
-                Font = Enum.Font.Gotham, TextSize = 17, TextXAlignment = Enum.TextXAlignment.Left,
-                LayoutOrder = -100,
+                Font = Enum.Font.Gotham, TextSize = 15, TextXAlignment = Enum.TextXAlignment.Left,
             })
             mk("UICorner", {Parent = searchInput, CornerRadius = UDim.new(0, 8)})
             mk("UIPadding", {Parent = searchInput, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
         end
 
+        local function isSelected(value)
+            if multi then return selected[value] == true end
+            return tostring(selected) == tostring(value)
+        end
+
+        local function syncOptionVisual(entry)
+            local active = isSelected(entry.Value)
+            entry.Check.Text = active and "✓" or ""
+            entry.Button.BackgroundColor3 = active and theme.Surface or theme.Surface3
+            entry.Check.BackgroundColor3 = active and theme.Accent or theme.Surface2
+            entry.Check.TextColor3 = active and Color3.fromRGB(255, 255, 255) or theme.MutedText
+        end
+
         local function updateLabel()
             if multi then
-                local count = 0
-                local first = nil
+                local picked = {}
                 for k, v in pairs(selected) do
-                    if v then count = count + 1; first = first or k end
+                    if v then table.insert(picked, tostring(k)) end
                 end
+                table.sort(picked)
+                local count = #picked
                 if count == 0 then
                     label.Text = string.format("%s: None", cfg.Title or "Dropdown")
-                elseif count == 1 then
-                    label.Text = string.format("%s: %s", cfg.Title or "Dropdown", first)
+                elseif count <= 2 then
+                    label.Text = string.format("%s: %s", cfg.Title or "Dropdown", table.concat(picked, ", "))
                 else
                     label.Text = string.format("%s: %d selected", cfg.Title or "Dropdown", count)
                 end
@@ -1182,9 +1208,11 @@ local function CreateElements(theme, colorpickerRegistry)
             for _, entry in ipairs(optionButtons) do
                 if entry.Button and entry.Button.Visible then count = count + 1 end
             end
-            local visibleItems = count + (searchable and 1 or 0)
-            local panelHeight = expanded and (count * rowHeight + searchHeight + math.max(visibleItems - 1, 0) * 4 + 12) or 0
+            local visibleItems = math.min(count, maxVisibleItems)
+            local listHeight = (visibleItems * rowHeight) + (math.max(visibleItems - 1, 0) * 4)
+            local panelHeight = expanded and (listHeight + searchHeight + (searchable and 4 or 0) + 12) or 0
             local holderHeight = headerHeight + (expanded and (6 + panelHeight) or 0)
+            list.CanvasSize = UDim2.new(0, 0, 0, count * rowHeight + math.max(count - 1, 0) * 4)
             if animated then
                 tween(panel, 0.16, {Size = UDim2.new(1, 0, 0, panelHeight)})
                 tween(holder, 0.16, {Size = UDim2.new(1, 0, 0, holderHeight)})
@@ -1212,12 +1240,25 @@ local function CreateElements(theme, colorpickerRegistry)
 
             for _, v in ipairs(values) do
                 local opt = mk("TextButton", {
-                    Parent = panel, Size = UDim2.new(1, 0, 0, rowHeight), BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
-                    Text = tostring(v), TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15, AutoButtonColor = false,
+                    Parent = list, Size = UDim2.new(1, 0, 0, rowHeight), BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
+                    Text = "", AutoButtonColor = false,
                 })
                 mk("UICorner", {Parent = opt, CornerRadius = UDim.new(0, 8)})
+                local optText = mk("TextLabel", {
+                    Parent = opt, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -46, 1, 0),
+                    Text = tostring(v), TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
+                    TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
+                })
+                local check = mk("TextLabel", {
+                    Parent = opt, Size = UDim2.fromOffset(22, 22), Position = UDim2.new(1, -28, 0.5, -11),
+                    BackgroundColor3 = theme.Surface2, BorderSizePixel = 0, Text = "", TextSize = 14,
+                    Font = Enum.Font.GothamBold, TextColor3 = theme.MutedText,
+                })
+                mk("UICorner", {Parent = check, CornerRadius = UDim.new(0, 6)})
                 table.insert(optionButtons, {
                     Button = opt,
+                    Text = optText,
+                    Check = check,
                     Value = v,
                     SearchText = string.lower(tostring(v)),
                 })
@@ -1231,9 +1272,15 @@ local function CreateElements(theme, colorpickerRegistry)
                         if cfg.Callback then cfg.Callback(selected) end
                         expanded = false
                     end
+                    for _, it in ipairs(optionButtons) do
+                        syncOptionVisual(it)
+                    end
                     updateLabel()
                     applyExpandState(true)
                 end)
+            end
+            for _, it in ipairs(optionButtons) do
+                syncOptionVisual(it)
             end
             applyOptionFilter()
         end
@@ -1276,12 +1323,27 @@ local function CreateElements(theme, colorpickerRegistry)
                 expanded = false
                 applyExpandState(false)
             end,
+            SetValues = function(newValues)
+                values = newValues or {}
+                rebuildOptions()
+                updateLabel()
+                applyExpandState(false)
+            end,
+            Update = function(newValues)
+                values = newValues or {}
+                rebuildOptions()
+                updateLabel()
+                applyExpandState(false)
+            end,
             SetValue = function(v)
                 if multi and type(v) == "table" then
                     selected = {}
                     for _, item in ipairs(v) do selected[item] = true end
                 elseif not multi then
                     selected = v
+                end
+                for _, it in ipairs(optionButtons) do
+                    syncOptionVisual(it)
                 end
                 updateLabel()
             end,
@@ -2228,23 +2290,46 @@ function FoxnameUI:CreateWindow(cfg)
             Text = cfg.Title or "Dialog", TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 16,
             TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 1202,
         })
+        if type(cfg.Icon) == "string" and cfg.Icon ~= "" then
+            attachIcon(dlg, cfg.Icon, CurrentTheme.Text, 16, 12)
+            local dlgIcon = dlg:FindFirstChild("FxIcon")
+            if dlgIcon and dlgIcon:IsA("ImageLabel") then
+                dlgIcon.Position = UDim2.fromOffset(14, 13)
+                dlgIcon.Size = UDim2.fromOffset(16, 16)
+                dlgIcon.ZIndex = 1203
+            end
+        end
         mk("TextLabel", {
-            Parent = dlg, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 40), Size = UDim2.new(1, -28, 0, 56),
+            Parent = dlg, BackgroundTransparency = 1, Position = UDim2.new(0, 14, 0, 40), Size = UDim2.new(1, -28, 0, 60),
             Text = cfg.Content or "", TextWrapped = true, TextColor3 = CurrentTheme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
             TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 1202,
         })
-        local okBtn = mk("TextButton", {
-            Parent = dlg, Position = UDim2.new(0, 14, 1, -42), Size = UDim2.new(0.5, -20, 0, 28),
-            BackgroundColor3 = CurrentTheme.Accent, BorderSizePixel = 0, Text = cfg.ConfirmText or "Confirm",
-            TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1202,
+        local buttonRow = mk("Frame", {
+            Parent = dlg, Position = UDim2.new(0, 14, 1, -42), Size = UDim2.new(1, -28, 0, 28),
+            BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1202,
         })
-        mk("UICorner", {Parent = okBtn, CornerRadius = UDim.new(0, 8)})
-        local cancelBtn = mk("TextButton", {
-            Parent = dlg, Position = UDim2.new(0.5, 6, 1, -42), Size = UDim2.new(0.5, -20, 0, 28),
-            BackgroundColor3 = CurrentTheme.Surface3, BorderSizePixel = 0, Text = cfg.CancelText or "Cancel",
-            TextColor3 = CurrentTheme.Text, Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1202,
+        mk("UIListLayout", {
+            Parent = buttonRow, FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Right,
+            VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 8),
         })
-        mk("UICorner", {Parent = cancelBtn, CornerRadius = UDim.new(0, 8)})
+        local buttons = {}
+        if type(cfg.Buttons) == "table" and #cfg.Buttons > 0 then
+            for i, btnCfg in ipairs(cfg.Buttons) do
+                if type(btnCfg) == "table" then
+                    buttons[#buttons + 1] = {
+                        Title = btnCfg.Title or ("Button " .. tostring(i)),
+                        Primary = btnCfg.Primary == true,
+                        Callback = btnCfg.Callback,
+                    }
+                end
+            end
+        end
+        if #buttons == 0 then
+            buttons = {
+                {Title = cfg.CancelText or "Cancel", Primary = false, Callback = cfg.OnCancel},
+                {Title = cfg.ConfirmText or "Confirm", Primary = true, Callback = cfg.OnConfirm},
+            }
+        end
         tween(overlay, 0.12, {BackgroundTransparency = 0.45})
         tween(scale, 0.16, {Scale = 1}, Enum.EasingStyle.Back)
 
@@ -2254,14 +2339,22 @@ function FoxnameUI:CreateWindow(cfg)
             task.wait(0.1)
             if overlay and overlay.Parent then overlay:Destroy() end
         end
-        cancelBtn.MouseButton1Click:Connect(function()
-            close()
-            if cfg.OnCancel then cfg.OnCancel() end
-        end)
-        okBtn.MouseButton1Click:Connect(function()
-            close()
-            if cfg.OnConfirm then cfg.OnConfirm() end
-        end)
+        for _, btnCfg in ipairs(buttons) do
+            local btn = mk("TextButton", {
+                Parent = buttonRow, Size = UDim2.fromOffset(132, 28),
+                BackgroundColor3 = btnCfg.Primary and CurrentTheme.Accent or CurrentTheme.Surface3,
+                BorderSizePixel = 0, Text = tostring(btnCfg.Title or "Button"),
+                TextColor3 = btnCfg.Primary and Color3.fromRGB(255, 255, 255) or CurrentTheme.Text,
+                Font = Enum.Font.GothamBold, TextSize = 12, ZIndex = 1202,
+            })
+            mk("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 8)})
+            btn.MouseButton1Click:Connect(function()
+                close()
+                if type(btnCfg.Callback) == "function" then
+                    btnCfg.Callback()
+                end
+            end)
+        end
     end
     function windowApi:Popup(cfg)
         return self:Dialog(cfg or {})
@@ -2499,6 +2592,7 @@ function FoxnameUI:CreateWindow(cfg)
         windowApi:SetToggleKey(cfg.ToggleKey)
     end
     applyTheme()
+    LastWindowApi = windowApi
 
     return windowApi
 end
