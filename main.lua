@@ -22,6 +22,7 @@ local Theme = {
 local NotifyHost = nil
 local TooltipHost = nil
 local LastWindowApi = nil
+local DropdownHost = nil
 
 local function copyTable(t)
     local out = {}
@@ -172,6 +173,22 @@ local function ensureTooltipHost()
         DisplayOrder = 2147483000,
     })
     return TooltipHost
+end
+
+local function ensureDropdownHost()
+    local parent = (gethui and gethui()) or game:GetService("CoreGui")
+    if DropdownHost and DropdownHost.Parent then
+        return DropdownHost
+    end
+    DropdownHost = mk("ScreenGui", {
+        Name = "FoxnameDropdownHost",
+        Parent = parent,
+        ResetOnSpawn = false,
+        IgnoreGuiInset = true,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        DisplayOrder = 2147482500,
+    })
+    return DropdownHost
 end
 
 -- WindUI-like icon provider (lucide names)
@@ -1108,14 +1125,16 @@ local function CreateElements(theme, colorpickerRegistry)
         local rowHeight = 36
         local headerHeight = 36
         local searchHeight = searchable and 36 or 0
-        local maxVisibleItems = tonumber(cfg.MaxVisibleItems) or 6
+        local menuPadding = 6
+        local menuWidth = tonumber(cfg.MenuWidth) or 240
         local expanded = false
+        local outsideConn
 
         local holder = mk("Frame", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, headerHeight),
             BackgroundTransparency = 1,
-            ClipsDescendants = true,
+            ClipsDescendants = false,
         })
         local btn = mk("TextButton", {
             Parent = holder, Size = UDim2.new(1, 0, 0, headerHeight), BackgroundColor3 = theme.Surface2, BorderSizePixel = 0,
@@ -1137,13 +1156,24 @@ local function CreateElements(theme, colorpickerRegistry)
             TextYAlignment = Enum.TextYAlignment.Center,
         })
 
+        local menuCanvas = mk("Frame", {
+            Parent = ensureDropdownHost(),
+            AnchorPoint = Vector2.new(1, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.fromOffset(menuWidth, 0),
+            BackgroundTransparency = 1,
+            Visible = false,
+            Active = false,
+            ZIndex = 9500,
+        })
         local panel = mk("Frame", {
-            Parent = holder, Position = UDim2.new(0, 0, 0, headerHeight + 6), Size = UDim2.new(1, 0, 0, 0),
+            Parent = menuCanvas, Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 0),
             BackgroundColor3 = theme.Surface2, BorderSizePixel = 0, ClipsDescendants = true,
+            ZIndex = 9501,
         })
         mk("UICorner", {Parent = panel, CornerRadius = UDim.new(0, 10)})
         mk("UIStroke", {Parent = panel, Color = theme.Border, Thickness = 1, Transparency = 0.25})
-        mk("UIPadding", {Parent = panel, PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6), PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6)})
+        mk("UIPadding", {Parent = panel, PaddingTop = UDim.new(0, menuPadding), PaddingBottom = UDim.new(0, menuPadding), PaddingLeft = UDim.new(0, menuPadding), PaddingRight = UDim.new(0, menuPadding)})
 
         local list = mk("ScrollingFrame", {
             Parent = panel,
@@ -1154,6 +1184,7 @@ local function CreateElements(theme, colorpickerRegistry)
             ScrollBarThickness = 3,
             CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollingDirection = Enum.ScrollingDirection.Y,
+            ZIndex = 9502,
         })
         local listLayout = mk("UIListLayout", {Parent = list, Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder})
 
@@ -1165,6 +1196,7 @@ local function CreateElements(theme, colorpickerRegistry)
                 BorderSizePixel = 0, Text = "", PlaceholderText = cfg.SearchPlaceholder or "Search...",
                 ClearTextOnFocus = false, TextColor3 = theme.Text, PlaceholderColor3 = theme.MutedText,
                 Font = Enum.Font.Gotham, TextSize = 15, TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 9502,
             })
             mk("UICorner", {Parent = searchInput, CornerRadius = UDim.new(0, 8)})
             mk("UIPadding", {Parent = searchInput, PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
@@ -1199,8 +1231,25 @@ local function CreateElements(theme, colorpickerRegistry)
                     label.Text = string.format("%s: %d selected", cfg.Title or "Dropdown", count)
                 end
             else
-                label.Text = string.format("%s: %s", cfg.Title or "Dropdown", tostring(selected))
+                local text = tostring(selected or "")
+                label.Text = string.format("%s: %s", cfg.Title or "Dropdown", text == "" and "--" or text)
             end
+        end
+
+        local function updatePosition()
+            if not btn or not btn.Parent then return end
+            local camera = workspace.CurrentCamera
+            local viewport = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+            local bx, by = btn.AbsolutePosition.X, btn.AbsolutePosition.Y
+            local bw, bh = btn.AbsoluteSize.X, btn.AbsoluteSize.Y
+            local menuH = menuCanvas.AbsoluteSize.Y
+            local spaceBelow = viewport.Y - (by + bh) - menuPadding - 54
+            local required = menuH + menuPadding
+            local offset = -54
+            if spaceBelow < required then
+                offset = required - spaceBelow - 54
+            end
+            menuCanvas.Position = UDim2.new(0, bx + bw, 0, by + bh - offset + (menuPadding * 2))
         end
 
         local function applyExpandState(animated)
@@ -1208,19 +1257,35 @@ local function CreateElements(theme, colorpickerRegistry)
             for _, entry in ipairs(optionButtons) do
                 if entry.Button and entry.Button.Visible then count = count + 1 end
             end
-            local visibleItems = math.min(count, maxVisibleItems)
-            local listHeight = (visibleItems * rowHeight) + (math.max(visibleItems - 1, 0) * 4)
-            local panelHeight = expanded and (listHeight + searchHeight + (searchable and 4 or 0) + 12) or 0
-            local holderHeight = headerHeight + (expanded and (6 + panelHeight) or 0)
+            local maxHeight = ((workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize.Y) or 900) * 0.6
+            local fullListHeight = (count * rowHeight) + (math.max(count - 1, 0) * 4)
+            local contentHeight = fullListHeight + searchHeight + (searchable and 4 or 0) + (menuPadding * 2)
+            local panelHeight = expanded and math.min(contentHeight, maxHeight) or 0
+            local listAvailable = math.max(panelHeight - (menuPadding * 2) - searchHeight - (searchable and 4 or 0), 0)
+            list.Size = UDim2.new(1, 0, 0, listAvailable)
             list.CanvasSize = UDim2.new(0, 0, 0, count * rowHeight + math.max(count - 1, 0) * 4)
+            holder.Size = UDim2.new(1, 0, 0, headerHeight)
+            if expanded then
+                menuCanvas.Visible = true
+                menuCanvas.Active = true
+            end
             if animated then
                 tween(panel, 0.16, {Size = UDim2.new(1, 0, 0, panelHeight)})
-                tween(holder, 0.16, {Size = UDim2.new(1, 0, 0, holderHeight)})
+                tween(menuCanvas, 0.16, {Size = UDim2.fromOffset(menuWidth, panelHeight)})
             else
                 panel.Size = UDim2.new(1, 0, 0, panelHeight)
-                holder.Size = UDim2.new(1, 0, 0, holderHeight)
+                menuCanvas.Size = UDim2.fromOffset(menuWidth, panelHeight)
             end
             arrow.Text = expanded and "^" or "v"
+            updatePosition()
+            if not expanded then
+                task.delay(0.16, function()
+                    if not expanded and menuCanvas and menuCanvas.Parent then
+                        menuCanvas.Visible = false
+                        menuCanvas.Active = false
+                    end
+                end)
+            end
         end
 
         local function applyOptionFilter()
@@ -1241,18 +1306,18 @@ local function CreateElements(theme, colorpickerRegistry)
             for _, v in ipairs(values) do
                 local opt = mk("TextButton", {
                     Parent = list, Size = UDim2.new(1, 0, 0, rowHeight), BackgroundColor3 = theme.Surface3, BorderSizePixel = 0,
-                    Text = "", AutoButtonColor = false,
+                    Text = "", AutoButtonColor = false, ZIndex = 9503,
                 })
                 mk("UICorner", {Parent = opt, CornerRadius = UDim.new(0, 8)})
                 local optText = mk("TextLabel", {
                     Parent = opt, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -46, 1, 0),
                     Text = tostring(v), TextColor3 = theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 15,
-                    TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
+                    TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 9504,
                 })
                 local check = mk("TextLabel", {
                     Parent = opt, Size = UDim2.fromOffset(22, 22), Position = UDim2.new(1, -28, 0.5, -11),
                     BackgroundColor3 = theme.Surface2, BorderSizePixel = 0, Text = "", TextSize = 14,
-                    Font = Enum.Font.GothamBold, TextColor3 = theme.MutedText,
+                    Font = Enum.Font.GothamBold, TextColor3 = theme.MutedText, ZIndex = 9504,
                 })
                 mk("UICorner", {Parent = check, CornerRadius = UDim.new(0, 6)})
                 table.insert(optionButtons, {
@@ -1295,10 +1360,29 @@ local function CreateElements(theme, colorpickerRegistry)
 
         btn.MouseButton1Click:Connect(function()
             if #values == 0 then return end
-            expanded = not expanded
-            applyExpandState(true)
+            if expanded then
+                expanded = false
+                applyExpandState(true)
+            else
+                expanded = true
+                applyExpandState(true)
+            end
             if expanded and searchInput then
                 searchInput:CaptureFocus()
+            end
+        end)
+        outsideConn = UIS.InputBegan:Connect(function(input, gp)
+            if gp then return end
+            if not expanded then return end
+            if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
+            local mx, my = UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y
+            local bPos, bSize = btn.AbsolutePosition, btn.AbsoluteSize
+            local mPos, mSize = menuCanvas.AbsolutePosition, menuCanvas.AbsoluteSize
+            local onButton = mx >= bPos.X and mx <= (bPos.X + bSize.X) and my >= bPos.Y and my <= (bPos.Y + bSize.Y)
+            local onMenu = mx >= mPos.X and mx <= (mPos.X + mSize.X) and my >= mPos.Y and my <= (mPos.Y + mSize.Y)
+            if not onButton and not onMenu then
+                expanded = false
+                applyExpandState(true)
             end
         end)
         if searchInput then
@@ -1503,30 +1587,64 @@ function FoxnameUI:Popup(cfg)
     })
     local popup = mk("Frame", {
         Parent = overlay, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-        Size = UDim2.fromOffset(cfg.Width or 360, cfg.Height or 170), BackgroundColor3 = Theme.Surface,
+        Size = UDim2.fromOffset(cfg.Width or 430, cfg.Height or 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundColor3 = Theme.Surface,
         BorderSizePixel = 0, ZIndex = 1301,
     })
     mk("UICorner", {Parent = popup, CornerRadius = UDim.new(0, 12)})
     mk("UIStroke", {Parent = popup, Color = Theme.Border, Thickness = 1, Transparency = 0.2})
     local scale = mk("UIScale", {Parent = popup, Scale = 0.9})
-    attachIcon(popup, cfg.Icon or "info", cfg.IconColor or Theme.Accent, 14, 44)
-    mk("TextLabel", {
-        Parent = popup, Name = "FxLabel", BackgroundTransparency = 1, Position = UDim2.new(0, 44, 0, 12),
-        Size = UDim2.new(1, -58, 0, 24), Text = cfg.Title or "Popup", TextColor3 = Theme.Text,
-        Font = Enum.Font.GothamBold, TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 1302,
+    local body = mk("Frame", {
+        Parent = popup, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 1302,
     })
-    mk("TextLabel", {
-        Parent = popup, BackgroundTransparency = 1, Position = UDim2.new(0, 16, 0, 46),
-        Size = UDim2.new(1, -32, 1, -98), Text = cfg.Content or "", TextWrapped = true,
-        TextColor3 = Theme.MutedText, Font = Enum.Font.Gotham, TextSize = 13,
-        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 1302,
+    mk("UIPadding", {Parent = body, PaddingTop = UDim.new(0, 16), PaddingBottom = UDim.new(0, 16), PaddingLeft = UDim.new(0, 16), PaddingRight = UDim.new(0, 16)})
+    mk("UIListLayout", {Parent = body, FillDirection = Enum.FillDirection.Vertical, Padding = UDim.new(0, 12), SortOrder = Enum.SortOrder.LayoutOrder})
+
+    local titleRow = mk("Frame", {
+        Parent = body, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 1303,
     })
+    local titleLayout = mk("UIListLayout", {Parent = titleRow, FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 12)})
+    titleLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+
+    local hasIcon = type(cfg.Icon) == "string" and cfg.Icon ~= ""
+    if hasIcon then
+        local iconWrap = mk("Frame", {Parent = titleRow, BackgroundTransparency = 1, Size = UDim2.fromOffset(22, 22), ZIndex = 1304})
+        attachIcon(iconWrap, cfg.Icon, cfg.IconColor or Theme.Accent, 0, 0)
+    end
+    mk("TextLabel", {
+        Parent = titleRow, BackgroundTransparency = 1, Size = UDim2.new(1, hasIcon and -34 or 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+        Text = cfg.Title or "Popup", TextWrapped = true, TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamSemibold, TextSize = 20, TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 1304,
+    })
+
+    if cfg.Content and tostring(cfg.Content) ~= "" then
+        mk("TextLabel", {
+            Parent = body, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+            Text = tostring(cfg.Content), TextWrapped = true, RichText = true, TextColor3 = Theme.MutedText,
+            Font = Enum.Font.GothamMedium, TextSize = 18, TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 1303,
+        })
+    end
+
+    if type(cfg.Thumbnail) == "table" and type(cfg.Thumbnail.Image) == "string" and cfg.Thumbnail.Image ~= "" then
+        local thumb = mk("ImageLabel", {
+            Parent = body, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 150),
+            Image = cfg.Thumbnail.Image, ScaleType = Enum.ScaleType.Crop, ZIndex = 1303,
+        })
+        mk("UICorner", {Parent = thumb, CornerRadius = UDim.new(0, 8)})
+        if cfg.Thumbnail.Title then
+            mk("TextLabel", {
+                Parent = thumb, BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(0.5, 0, 0.5, 0), AutomaticSize = Enum.AutomaticSize.XY,
+                Text = tostring(cfg.Thumbnail.Title), TextColor3 = Theme.Text, Font = Enum.Font.GothamMedium, TextSize = 18, ZIndex = 1304,
+            })
+        end
+    end
+
     local buttonRow = mk("Frame", {
-        Parent = popup, Position = UDim2.new(0, 16, 1, -42), Size = UDim2.new(1, -32, 0, 28),
-        BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1302,
+        Parent = body, Size = UDim2.new(1, 0, 0, 42), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1303,
     })
-    local layout = mk("UIListLayout", {Parent = buttonRow, FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
+    local layout = mk("UIListLayout", {Parent = buttonRow, FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 9), SortOrder = Enum.SortOrder.LayoutOrder})
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 
     local function close()
@@ -1539,12 +1657,13 @@ function FoxnameUI:Popup(cfg)
     local buttons = cfg.Buttons
     if type(buttons) ~= "table" or #buttons == 0 then
         buttons = {
-            {Title = cfg.CancelText or "Cancel", Callback = cfg.OnCancel},
-            {Title = cfg.ConfirmText or "Confirm", Callback = cfg.OnConfirm, Primary = true},
+            {Title = cfg.CancelText or "Cancel", Callback = cfg.OnCancel, Variant = "Secondary"},
+            {Title = cfg.ConfirmText or "Confirm", Callback = cfg.OnConfirm, Variant = "Primary"},
         }
     end
     for index, buttonCfg in ipairs(buttons) do
-        local primary = buttonCfg.Primary == true or buttonCfg.Variant == "Primary"
+        local variant = tostring(buttonCfg.Variant or (buttonCfg.Primary and "Primary" or "Secondary"))
+        local primary = variant == "Primary"
         local action = mk("TextButton", {
             Parent = buttonRow, LayoutOrder = index, Size = UDim2.fromOffset(buttonCfg.Width or 104, 28),
             BackgroundColor3 = primary and Theme.Accent or Theme.Surface3, BorderSizePixel = 0,
@@ -1553,6 +1672,9 @@ function FoxnameUI:Popup(cfg)
             Font = Enum.Font.GothamBold, TextSize = 12, AutoButtonColor = false, ZIndex = 1303,
         })
         mk("UICorner", {Parent = action, CornerRadius = UDim.new(0, 8)})
+        if type(buttonCfg.Icon) == "string" and buttonCfg.Icon ~= "" then
+            attachIcon(action, buttonCfg.Icon, primary and Color3.fromRGB(255, 255, 255) or Theme.Text, 6, 28)
+        end
         action.MouseButton1Click:Connect(function()
             close()
             if buttonCfg.Callback then buttonCfg.Callback() end
