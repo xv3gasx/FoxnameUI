@@ -835,6 +835,7 @@ local function CreateElements(theme, colorpickerRegistry)
         local hasDesc = (cfg.Description and cfg.Description ~= "")
         local cardH = hasDesc and 56 or 42
         local state = cfg.Value == true
+        local toggleType = string.lower(tostring(cfg.Type or "toggle"))
         local btn = mk("TextButton", {
             Parent = parent, Size = UDim2.new(1, 0, 0, cardH), BackgroundColor3 = theme.Surface2,
             BorderSizePixel = 0, Text = "", AutoButtonColor = false,
@@ -864,27 +865,58 @@ local function CreateElements(theme, colorpickerRegistry)
         addBadge(btn, cfg.Badge)
         bindTooltip(btn, cfg.Tooltip)
 
-        local rail = mk("Frame", {
-            Parent = btn, Size = UDim2.new(0, 38, 0, 20), Position = UDim2.new(1, -50, 0.5, -10), BorderSizePixel = 0,
-            BackgroundColor3 = state and theme.Accent or theme.Border,
-        })
-        mk("UICorner", {Parent = rail, CornerRadius = UDim.new(1, 0)})
-        local knob = mk("Frame", {
-            Parent = rail, Size = UDim2.new(0, 16, 0, 16),
-            Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
-            BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        })
-        mk("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
+        local rail
+        local knob
+        local check
+        if toggleType == "checkbox" then
+            check = mk("TextLabel", {
+                Parent = btn,
+                Size = UDim2.new(0, 22, 0, 22),
+                Position = UDim2.new(1, -42, 0.5, -11),
+                BackgroundColor3 = state and theme.Accent or theme.Border,
+                BorderSizePixel = 0,
+                Text = state and "X" or "",
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                Font = Enum.Font.GothamBold,
+                TextSize = 16,
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center,
+            })
+            mk("UICorner", {Parent = check, CornerRadius = UDim.new(0, 6)})
+        else
+            rail = mk("Frame", {
+                Parent = btn, Size = UDim2.new(0, 38, 0, 20), Position = UDim2.new(1, -50, 0.5, -10), BorderSizePixel = 0,
+                BackgroundColor3 = state and theme.Accent or theme.Border,
+            })
+            mk("UICorner", {Parent = rail, CornerRadius = UDim.new(1, 0)})
+            knob = mk("Frame", {
+                Parent = rail, Size = UDim2.new(0, 16, 0, 16),
+                Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
+                BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            })
+            mk("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
+        end
 
         local function sync(animated)
-            local kPos = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-            local rCol = state and theme.Accent or theme.Border
-            if animated then
-                tween(knob, 0.16, {Position = kPos}, Enum.EasingStyle.Back)
-                tween(rail, 0.16, {BackgroundColor3 = rCol})
+            if toggleType == "checkbox" then
+                local bg = state and theme.Accent or theme.Border
+                local text = state and "X" or ""
+                if animated then
+                    tween(check, 0.14, {BackgroundColor3 = bg})
+                else
+                    check.BackgroundColor3 = bg
+                end
+                check.Text = text
             else
-                knob.Position = kPos
-                rail.BackgroundColor3 = rCol
+                local kPos = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+                local rCol = state and theme.Accent or theme.Border
+                if animated then
+                    tween(knob, 0.16, {Position = kPos}, Enum.EasingStyle.Back)
+                    tween(rail, 0.16, {BackgroundColor3 = rCol})
+                else
+                    knob.Position = kPos
+                    rail.BackgroundColor3 = rCol
+                end
             end
         end
 

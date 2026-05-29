@@ -24,6 +24,7 @@ local function CreateElements(ctx)
 
     function Elements:Toggle(parent, cfg)
         local state = cfg.Value == true
+        local toggleType = string.lower(tostring(cfg.Type or "toggle"))
         local btn = mk("TextButton", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, 32),
@@ -43,15 +44,39 @@ local function CreateElements(ctx)
             Font = Enum.Font.GothamSemibold,
             TextSize = 13,
         })
-        local pill = mk("Frame", {
-            Parent = btn,
-            Size = UDim2.new(0, 28, 0, 16),
-            Position = UDim2.new(1, -34, 0.5, -8),
-            BorderSizePixel = 0,
-            BackgroundColor3 = state and theme.Accent or theme.Border,
-        })
+        local rightControl
+
+        if toggleType == "checkbox" then
+            rightControl = mk("TextLabel", {
+                Parent = btn,
+                Size = UDim2.new(0, 18, 0, 18),
+                Position = UDim2.new(1, -28, 0.5, -9),
+                BackgroundColor3 = state and theme.Accent or theme.Border,
+                BorderSizePixel = 0,
+                Text = state and "X" or "",
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                Font = Enum.Font.GothamBold,
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center,
+            })
+        else
+            rightControl = mk("Frame", {
+                Parent = btn,
+                Size = UDim2.new(0, 28, 0, 16),
+                Position = UDim2.new(1, -34, 0.5, -8),
+                BorderSizePixel = 0,
+                BackgroundColor3 = state and theme.Accent or theme.Border,
+            })
+        end
+
         local function sync()
-            pill.BackgroundColor3 = state and theme.Accent or theme.Border
+            if toggleType == "checkbox" then
+                rightControl.BackgroundColor3 = state and theme.Accent or theme.Border
+                rightControl.Text = state and "X" or ""
+            else
+                rightControl.BackgroundColor3 = state and theme.Accent or theme.Border
+            end
         end
         btn.MouseButton1Click:Connect(function()
             state = not state

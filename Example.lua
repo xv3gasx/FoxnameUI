@@ -90,6 +90,16 @@ Main:Toggle({
     end,
 })
 
+Main:Toggle({
+    Title = "Checkbox Mode Demo",
+    Description = "WindUI style checkbox toggle",
+    Type = "Checkbox",
+    Value = true,
+    Callback = function(v)
+        print("Checkbox Mode Demo:", v)
+    end,
+})
+
 Main:Slider({
     Title = "WalkSpeed",
     Min = 16,
@@ -169,6 +179,15 @@ Visual:Toggle({
     Value = true,
     Callback = function(v)
         print("ESP:", v)
+    end,
+})
+
+Visual:Toggle({
+    Title = "Show Team ESP (Checkbox)",
+    Type = "Checkbox",
+    Value = false,
+    Callback = function(v)
+        print("Show Team ESP (Checkbox):", v)
     end,
 })
 
